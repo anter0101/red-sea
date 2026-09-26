@@ -1,0 +1,15 @@
+{
+  "status": {
+    "DELEGATION_ISSUED": "Delegation issued",
+    "POLICY_COLLECTED": "Policy collected",
+    "INVOICE_ISSUED": "Invoice issued"
+  },
+  "history": {
+    "title": "Status history",
+    "from": "From",
+    "to": "To",
+    "changedBy": "By",
+    "changedAt": "Date",
+    "empty": "No status history"
+  }
+}

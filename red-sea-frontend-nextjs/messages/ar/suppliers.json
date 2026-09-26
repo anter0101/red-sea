@@ -1,0 +1,88 @@
+{
+  "title": "الموردين",
+  "create": "إضافة مورد",
+  "no-suppliers-found": "لا يوجد موردين",
+  "detail": {
+    "not-found": "المورد غير موجود"
+  },
+  "sections": {
+    "basic-info": "المعلومات الأساسية",
+    "location": "معلومات الموقع",
+    "legal-documents": "المستندات القانونية"
+  },
+  "info-section": {
+    "title": "معلومات المورد",
+    "legal-documents": "المستندات القانونية",
+    "metadata": "بيانات إضافية"
+  },
+  "table": {
+    "headers": {
+      "code": "الكود",
+      "name": "اسم المورد",
+      "type": "النوع",
+      "governorate": "المحافظة",
+      "city": "المدينة",
+      "phone": "رقم الهاتف",
+      "actions": "الإجراءات"
+    }
+  },
+  "fields": {
+    "code": "الكود",
+    "name": "اسم المورد",
+    "type": "نوع المورد",
+    "governorate": "المحافظة",
+    "city": "المدينة",
+    "phone": "رقم الهاتف",
+    "commercial-register": "السجل التجاري",
+    "tax-card": "البطاقة الضريبية",
+    "tax-registration-number": "رقم التسجيل الضريبي",
+    "created-by": "أضيف بواسطة",
+    "created-at": "تاريخ الإضافة",
+    "updated-by": "عدل بواسطة",
+    "updated-at": "تاريخ التعديل"
+  },
+  "placeholders": {
+    "name": "أدخل اسم المورد",
+    "type": "اختر نوع المورد",
+    "governorate": "أدخل المحافظة",
+    "city": "أدخل المدينة",
+    "phone": "01XXXXXXXXX",
+    "commercial-register": "أدخل السجل التجاري",
+    "tax-card": "أدخل البطاقة الضريبية",
+    "tax-registration-number": "أدخل رقم التسجيل الضريبي"
+  },
+  "validation": {
+    "name-min": "اسم المورد يجب أن يكون على الأقل 3 أحرف",
+    "name-max": "اسم المورد طويل جدًا (الحد الأقصى 255 حرف)",
+    "type-required": "يجب اختيار نوع المورد",
+    "governorate-required": "المحافظة مطلوبة",
+    "governorate-max": "اسم المحافظة طويل جدًا (الحد الأقصى 100 حرف)",
+    "city-required": "المدينة مطلوبة",
+    "city-max": "اسم المدينة طويل جدًا (الحد الأقصى 100 حرف)",
+    "phone-invalid": "رقم الهاتف غير صحيح (يجب أن يبدأ بـ 010، 011، 012، أو 015)",
+    "commercial-register-required": "السجل التجاري مطلوب",
+    "commercial-register-max": "السجل التجاري طويل جدًا (الحد الأقصى 50 حرف)",
+    "tax-card-required": "البطاقة الضريبية مطلوبة",
+    "tax-card-max": "البطاقة الضريبية طويلة جدًا (الحد الأقصى 50 حرف)",
+    "tax-registration-required": "رقم التسجيل الضريبي مطلوب",
+    "tax-registration-max": "رقم التسجيل الضريبي طويل جدًا (الحد الأقصى 50 حرف)"
+  },
+  "types": {
+    "GOODS": "بضائع",
+    "SERVICES": "خدمات",
+    "TRANSPORTATION": "نقل"
+  },
+  "buttons": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "delete": "حذف"
+  },
+  "delete-dialog": {
+    "title": "حذف المورد",
+    "description": "هل أنت متأكد من حذف هذا المورد؟ هذا الإجراء لا يمكن التراجع عنه.",
+    "cancel": "إلغاء",
+    "confirm": "حذف",
+    "deleting": "جاري الحذف..."
+  }
+}

@@ -1,0 +1,695 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Default module",
+    "description": "Postman collection for the Red Sea backend API (NestJS).",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/api/custodies": {
+      "get": {
+        "summary": "Get All",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "1",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "10",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "ASC",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "employeeId",
+            "in": "query",
+            "description": "Optional filter by employee ID",
+            "required": true,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "description": "Optional filter by account ID",
+            "required": true,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "journeyId",
+            "in": "query",
+            "description": "Optional filter by journey ID",
+            "required": true,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "driverId",
+            "in": "query",
+            "description": "Optional filter by driver ID",
+            "required": true,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Optional: ACTIVE | INACTIVE | CLOSED",
+            "required": true,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "Bearer {{token}}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "summary": "Create",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "Bearer {{token}}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "employeeId": {
+                    "type": "integer"
+                  },
+                  "accountId": {
+                    "type": "integer"
+                  },
+                  "journeyId": {
+                    "type": "integer"
+                  },
+                  "driverId": {
+                    "type": "integer"
+                  },
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": ["employeeId", "accountId", "journeyId", "driverId", "status"]
+              },
+              "example": {
+                "employeeId": 1,
+                "accountId": 1,
+                "journeyId": 1,
+                "driverId": 1,
+                "status": "ACTIVE"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/custodies/1": {
+      "get": {
+        "summary": "Get One",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "Bearer {{token}}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "put": {
+        "summary": "Update",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "Bearer {{token}}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "employeeId": {
+                    "type": "integer"
+                  },
+                  "accountId": {
+                    "type": "integer"
+                  },
+                  "journeyId": {
+                    "type": "integer"
+                  },
+                  "driverId": {
+                    "type": "integer"
+                  },
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": ["employeeId", "accountId", "journeyId", "driverId", "status"]
+              },
+              "example": {
+                "employeeId": 1,
+                "accountId": 1,
+                "journeyId": 2,
+                "driverId": 2,
+                "status": "CLOSED"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "delete": {
+        "summary": "Delete",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "Bearer {{token}}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/journeys/office": {
+      "post": {
+        "summary": "NOLON_CAR — inline create (driver/car/trailer.create)",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "Bearer {{token}}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "vehicleMode": {
+                    "type": "string"
+                  },
+                  "clientId": {
+                    "type": "integer"
+                  },
+                  "direction": {
+                    "type": "string"
+                  },
+                  "packingType": {
+                    "type": "string"
+                  },
+                  "quantity": {
+                    "type": "integer"
+                  },
+                  "custodyAmount": {
+                    "type": "integer"
+                  },
+                  "driver": {
+                    "type": "object",
+                    "properties": {
+                      "create": {
+                        "type": "object",
+                        "properties": {
+                          "licenseNumber": {
+                            "type": "string"
+                          },
+                          "licenseExpiryDate": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "lastName": {
+                                "type": "string"
+                              },
+                              "email": {
+                                "type": "string"
+                              },
+                              "password": {
+                                "type": "string"
+                              },
+                              "role": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "firstName",
+                              "lastName",
+                              "email",
+                              "password",
+                              "role",
+                              "status"
+                            ]
+                          }
+                        },
+                        "required": ["licenseNumber", "licenseExpiryDate", "user"]
+                      }
+                    },
+                    "required": ["create"]
+                  },
+                  "car": {
+                    "type": "object",
+                    "properties": {
+                      "create": {
+                        "type": "object",
+                        "properties": {
+                          "manufacturer": {
+                            "type": "string"
+                          },
+                          "model": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "manufactureYear": {
+                            "type": "integer"
+                          },
+                          "color": {
+                            "type": "string"
+                          },
+                          "cylinders": {
+                            "type": "integer"
+                          },
+                          "horsepower": {
+                            "type": "integer"
+                          },
+                          "axleCount": {
+                            "type": "integer"
+                          },
+                          "maxWeight": {
+                            "type": "integer"
+                          },
+                          "plateNumber": {
+                            "type": "string"
+                          },
+                          "plateLetters": {
+                            "type": "string"
+                          },
+                          "chassisNumber": {
+                            "type": "string"
+                          },
+                          "licenseNumber": {
+                            "type": "string"
+                          },
+                          "licenseExpiryDate": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "manufacturer",
+                          "model",
+                          "status",
+                          "manufactureYear",
+                          "color",
+                          "cylinders",
+                          "horsepower",
+                          "axleCount",
+                          "maxWeight",
+                          "plateNumber",
+                          "plateLetters",
+                          "chassisNumber",
+                          "licenseNumber",
+                          "licenseExpiryDate"
+                        ]
+                      }
+                    },
+                    "required": ["create"]
+                  },
+                  "trailer": {
+                    "type": "object",
+                    "properties": {
+                      "create": {
+                        "type": "object",
+                        "properties": {
+                          "chaseType": {
+                            "type": "string"
+                          },
+                          "manufacturer": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "model": {
+                            "type": "string"
+                          },
+                          "manufactureYear": {
+                            "type": "integer"
+                          },
+                          "color": {
+                            "type": "string"
+                          },
+                          "maxWeight": {
+                            "type": "integer"
+                          },
+                          "plateNumber": {
+                            "type": "string"
+                          },
+                          "plateLetters": {
+                            "type": "string"
+                          },
+                          "chassisNumber": {
+                            "type": "string"
+                          },
+                          "licenseNumber": {
+                            "type": "string"
+                          },
+                          "licenseExpiryDate": {
+                            "type": "string"
+                          },
+                          "axles": {
+                            "type": "array",
+                            "items": {}
+                          }
+                        },
+                        "required": [
+                          "chaseType",
+                          "manufacturer",
+                          "status",
+                          "model",
+                          "manufactureYear",
+                          "color",
+                          "maxWeight",
+                          "plateNumber",
+                          "plateLetters",
+                          "chassisNumber",
+                          "licenseNumber",
+                          "licenseExpiryDate",
+                          "axles"
+                        ]
+                      }
+                    },
+                    "required": ["create"]
+                  },
+                  "receivedCompany": {
+                    "type": "string"
+                  },
+                  "sellingOrderNo": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "vehicleMode",
+                  "clientId",
+                  "direction",
+                  "packingType",
+                  "quantity",
+                  "custodyAmount",
+                  "driver",
+                  "car",
+                  "trailer",
+                  "receivedCompany",
+                  "sellingOrderNo"
+                ]
+              },
+              "example": {
+                "vehicleMode": "NOLON_CAR",
+                "clientId": 1,
+                "direction": "Giza",
+                "packingType": "BAGGED",
+                "quantity": 50,
+                "custodyAmount": 3000,
+                "driver": {
+                  "create": {
+                    "licenseNumber": "LIC-NOLON-POSTMAN-001",
+                    "licenseExpiryDate": "2027-12-31",
+                    "user": {
+                      "firstName": "Nolon",
+                      "lastName": "Driver",
+                      "email": "nolon-driver-postman@example.com",
+                      "password": "secret123",
+                      "role": "DRIVER",
+                      "status": "AVAILABLE"
+                    }
+                  }
+                },
+                "car": {
+                  "create": {
+                    "manufacturer": "Volvo",
+                    "model": "FH",
+                    "status": "AVAILABLE",
+                    "manufactureYear": 2020,
+                    "color": "White",
+                    "cylinders": 6,
+                    "horsepower": 400,
+                    "axleCount": 3,
+                    "maxWeight": 40000,
+                    "plateNumber": "9901",
+                    "plateLetters": "ن ل ن",
+                    "chassisNumber": "CHASSIS-NOLON-POSTMAN-CAR-001",
+                    "licenseNumber": "LIC-NOLON-CAR-001",
+                    "licenseExpiryDate": "2027-01-01"
+                  }
+                },
+                "trailer": {
+                  "create": {
+                    "chaseType": "Semi",
+                    "manufacturer": "Schmitz",
+                    "status": "AVAILABLE",
+                    "model": "S.KO",
+                    "manufactureYear": 2019,
+                    "color": "Silver",
+                    "maxWeight": 25000,
+                    "plateNumber": "9902",
+                    "plateLetters": "م ق ط",
+                    "chassisNumber": "CHASSIS-NOLON-POSTMAN-TRL-001",
+                    "licenseNumber": "LIC-NOLON-TRL-001",
+                    "licenseExpiryDate": "2027-06-01",
+                    "axles": []
+                  }
+                },
+                "receivedCompany": "Rental Client",
+                "sellingOrderNo": "SO-003-INLINE"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {},
+    "responses": {},
+    "securitySchemes": {}
+  },
+  "servers": [],
+  "security": []
+}

@@ -1,0 +1,102 @@
+{
+  "title": "الموظفين",
+  "add-employee": "إضافة موظف",
+  "edit-employee": "تعديل موظف",
+  "fields": {
+    "first-name": "الاسم الأول",
+    "last-name": "الاسم الثاني والثالث",
+    "phone": "رقم الهاتف",
+    "personal-id": "رقم البطاقة الشخصية",
+    "personal-id-expiry-date": "تاريخ انتهاء البطاقة الشخصية",
+    "role": "الوظيفة",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "new-password": "كلمة المرور الجديدة",
+    "confirm-password": "تأكيد كلمة المرور",
+    "branch": "الفرع",
+    "custody": "العهدة",
+    "join-date": "تاريخ الانضمام",
+    "salary": "الراتب",
+    "salary-type": "نوع الراتب",
+    "status": "الحالة",
+    "last-seen": "آخر ظهور"
+  },
+  "placeholders": {
+    "first-name": "أدخل الاسم الأول",
+    "last-name": "أدخل الاسم الثاني والثالث",
+    "phone": "+2 (01) 000-0000-00",
+    "personal-id": "أدخل رقم البطاقة الشخصية",
+    "custody": "أدخل مبلغ العهدة",
+    "salary": "أدخل الراتب",
+    "email": "أدخل البريد الإلكتروني",
+    "password": "أدخل كلمة المرور",
+    "confirm-password": "أعد إدخال كلمة المرور",
+    "pick-date": "اختر التاريخ"
+  },
+  "validation": {
+    "first-name-required": "الاسم الأول مطلوب",
+    "last-name-required": "الاسم الثاني مطلوب",
+    "email-required": "البريد الإلكتروني مطلوب",
+    "email-invalid": "البريد الإلكتروني غير صالح",
+    "password-required": "كلمة المرور مطلوبة",
+    "password-min-length": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+    "password-complexity": "يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير ورقم ورمز خاص واحد على الأقل",
+    "confirm-password-required": "تأكيد كلمة المرور مطلوب",
+    "passwords-must-match": "كلمتا المرور غير متطابقتين"
+  },
+  "buttons": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "suspend": "إيقاف الحساب"
+  },
+  "show-password": "إظهار كلمة المرور",
+  "hide-password": "إخفاء كلمة المرور",
+  "roles": {
+    "DATA_ENTRY": "مدخل بيانات"
+  },
+  "salary-types": {
+    "MONTHLY": "شهري",
+    "DAILY": "يومي",
+    "HOURLY": "بالساعة",
+    "FIXED": "ثابت"
+  },
+  "statuses": {
+    "AVAILABLE": "متاح",
+    "UNAVAILABLE": "موقوف"
+  },
+  "tabs": {
+    "info": "المعلومات",
+    "performance": "الأداء",
+    "accounts": "الحسابات"
+  },
+  "messages": {
+    "no-employees": "لا يوجد موظفين",
+    "loading": "جاري التحميل...",
+    "loading-error": "حدث خطأ أثناء تحميل بيانات الموظف",
+    "not-found": "لم يتم العثور على الموظف",
+    "delete-confirmation": "هل أنت متأكد من حذف هذا الموظف؟",
+    "delete-warning": "هذا الإجراء لا يمكن التراجع عنه. سيتم حذف الموظف وجميع البيانات المرتبطة به نهائياً."
+  },
+  "detail-page": {
+    "personal-info": "المعلومات الشخصية",
+    "name": "الاسم"
+  },
+  "table": {
+    "employee": "الموظف",
+    "role": "الوظيفة",
+    "custody": "العهدة",
+    "last-seen": "آخر ظهور",
+    "status": "الحالة",
+    "salary": "الراتب",
+    "salary-type": "نوع الراتب",
+    "join-date": "تاريخ الانضمام",
+    "actions": "الإجراءات"
+  },
+  "delete-dialog": {
+    "title": "هل أنت متأكد من حذف هذا الموظف؟",
+    "description": "هذا الإجراء لا يمكن التراجع عنه. سيتم حذف الموظف وجميع البيانات المرتبطة به نهائياً.",
+    "deleting": "جاري الحذف..."
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "title": "Custodies",
+  "table": {
+    "employee": "Employee",
+    "account": "Account",
+    "custodyAmount": "Custody Amount",
+    "journey": "Journey",
+    "driver": "Driver",
+    "driverLicense": "Driver License",
+    "driverAssistant": "Driver Assistant",
+    "car": "Car",
+    "trailer": "Trailer",
+    "status": "Status",
+    "createdAt": "Created",
+    "actions": "Actions",
+    "noData": "No data"
+  },
+  "statuses": { "ACTIVE": "Active", "INACTIVE": "Inactive", "CLOSED": "Closed" },
+  "stats": {
+    "myCustodyAmount": "My Current Custody Balance"
+  },
+  "form": {
+    "createTitle": "Add Custody",
+    "editTitle": "Edit Custody",
+    "employee": "Employee",
+    "account": "Account",
+    "status": "Status",
+    "journey": "Journey",
+    "driver": "Driver",
+    "selectPlaceholder": "Select",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "actions": {
+    "created": "Custody created",
+    "updated": "Custody updated",
+    "deleted": "Custody deleted",
+    "confirmDelete": "Are you sure you want to delete this custody?"
+  },
+  "print": {
+    "delegation": "Print Delegation",
+    "marked": "Delegation marked as printed",
+    "alreadyPrinted": "Delegation has already been printed",
+    "error": "Failed to update print status"
+  },
+  "loading": "Loading..."
+}

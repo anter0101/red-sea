@@ -1,0 +1,15 @@
+{
+  "status": {
+    "DELEGATION_ISSUED": "تم اصدار التفويض",
+    "POLICY_COLLECTED": "تم تحصيل البوليصه",
+    "INVOICE_ISSUED": "تم اصدار فاتوره"
+  },
+  "history": {
+    "title": "سجل الحالة",
+    "from": "من",
+    "to": "إلى",
+    "changedBy": "بواسطة",
+    "changedAt": "التاريخ",
+    "empty": "لا يوجد سجل حالة"
+  }
+}

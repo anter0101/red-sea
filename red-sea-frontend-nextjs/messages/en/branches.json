@@ -1,0 +1,20 @@
+{
+  "no-branches": "No branches found",
+  "tabs": {
+    "employees": "Employees",
+    "trips": "Trips",
+    "accounts": "Accounts"
+  },
+  "stats": {
+    "total-expenses": "Total Expenses",
+    "total-revenue": "Total Revenue",
+    "total-net": "Total Net"
+  },
+  "sections": {
+    "employees": "Employees"
+  },
+  "actions": {
+    "add-employee": "Add Employee",
+    "export-data": "Export Data"
+  }
+}

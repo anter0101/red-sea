@@ -1,0 +1,123 @@
+{
+  "name": "منصة البحر الأحمر",
+  "logout": "تسجيل الخروج",
+  "forms": {
+    "upload": "ارفع",
+    "file": "ملف",
+    "files": "ملفات",
+    "drag-and-drop": "اسحب وأفلت أو اضغط للتحميل",
+    "max-file-num": "ملف واحد كحد أقصى"
+  },
+  "message": {
+    "on-success": "لقد تم التنفيذ بنجاح",
+    "on-error": "لقد فشل التنفيذ",
+    "driver-deleted-successfully": "لقد تم مسح السواق بنجاح",
+    "employee-deleted-successfully": "تم حذف الموظف بنجاح"
+  },
+  "actions": {
+    "grid-updated-successfully": "تم تحديث الجدول بنجاح",
+    "user-created-successfully": "تم إنشاء المستخدم بنجاح",
+    "user-updated-successfully": "تم تحديث المستخدم بنجاح",
+    "user-deleted-successfully": "تم حذف المستخدم بنجاح",
+    "contact-created-successfully": "تم إنشاء جهة الاتصال بنجاح",
+    "contacts-created-successfully": "تم إنشاء جهات الاتصال بنجاح",
+    "contact-updated-successfully": "تم تحديث جهة الاتصال بنجاح",
+    "failed-to-create-contacts": "فشل في إنشاء جهات الاتصال",
+    "salary-created-successfully": "تم إنشاء الراتب بنجاح",
+    "salary-updated-successfully": "تم تحديث الراتب بنجاح",
+    "failed-to-create-salary": "فشل في إنشاء الراتب",
+    "driver-created-successfully": "تم إنشاء السائق بنجاح",
+    "driver-updated-successfully": "تم تحديث السائق بنجاح",
+    "car-created-successfully": "تم إنشاء السيارة بنجاح",
+    "car-updated-successfully": "تم تحديث السيارة بنجاح",
+    "axles-created-successfully": "تم إنشاء المحاور بنجاح",
+    "axle-updated-successfully": "تم تحديث المحور بنجاح",
+    "trailer-created-successfully": "تم إنشاء المقطورة بنجاح",
+    "trailer-updated-successfully": "تم تحديث المقطورة بنجاح",
+    "owner-created-successfully": "تم إنشاء المالك بنجاح",
+    "owners-assigned-successfully": "تم تعيين الملاك بنجاح",
+    "employee-created-successfully": "تم إنشاء الموظف بنجاح",
+    "employee-updated-successfully": "تم تحديث الموظف بنجاح",
+    "manufacturer-created-successfully": "تم إنشاء المصنع بنجاح",
+    "manufacturer-deleted-successfully": "تم حذف المصنع بنجاح",
+    "car-manufacturer-deleted-successfully": "تم حذف نوع السيارة بنجاح",
+    "trailer-manufacturer-deleted-successfully": "تم حذف نوع المقطورة بنجاح",
+    "model-created-successfully": "تم إنشاء الموديل بنجاح",
+    "car-model-deleted-successfully": "تم حذف موديل السيارة بنجاح",
+    "tire-model-created-successfully": "تم إنشاء موديل الإطار بنجاح",
+    "tire-model-deleted-successfully": "تم حذف موديل الإطار بنجاح",
+    "client-created-successfully": "تم إنشاء العميل بنجاح",
+    "client-updated-successfully": "تم تحديث العميل بنجاح",
+    "client-deleted-successfully": "تم حذف العميل بنجاح",
+    "expense-created-successfully": "تم إنشاء المصروف بنجاح",
+    "expense-updated-successfully": "تم تحديث المصروف بنجاح",
+    "expense-deleted-successfully": "تم حذف المصروف بنجاح",
+    "supplier-created-successfully": "تم إنشاء المورد بنجاح",
+    "supplier-updated-successfully": "تم تحديث المورد بنجاح",
+    "supplier-deleted-successfully": "تم حذف المورد بنجاح",
+    "cancel": "إلغاء",
+    "delete": "حذف"
+  },
+  "statuses": {
+    "AVAILABLE": "متاح",
+    "UNAVAILABLE": "غير متاح",
+    "ONROAD": "على الطريق",
+    "UNDER_MAINTENANCE": "تحت الصيانة"
+  },
+  "change-status": {
+    "action": "تعديل الحالة",
+    "title": "تعديل الحالة",
+    "select-status": "اختر الحالة",
+    "save": "حفظ",
+    "saving": "جاري الحفظ...",
+    "cancel": "إلغاء"
+  },
+  "vehicle-colors": {
+    "white": "أبيض",
+    "blue": "أزرق",
+    "green": "أخضر",
+    "yellow": "أصفر",
+    "red": "أحمر",
+    "silver": "فضي",
+    "gray": "رمادي",
+    "grey": "رمادي",
+    "black": "أسود"
+  },
+  "loading": "جاري التحميل...",
+  "pagination": {
+    "page": "الصفحة {page}",
+    "first-page": "الصفحة الأولى",
+    "previous-page": "الصفحة السابقة",
+    "next-page": "الصفحة التالية",
+    "last-page": "الصفحة الأخيرة",
+    "page-info": "عرض {startItem} إلى {endItem} من {totalCount} عنصر",
+    "show": "عرض",
+    "element": "عنصر"
+  },
+  "transactions-types": {
+    "INSTAPAY": "انستاباي",
+    "VODAFONE_CASH": "فودافون كاش"
+  },
+  "filters": {
+    "search": "بحث...",
+    "added-date": "تاريخ الإضافة",
+    "quick-periods": "فترات سريعة",
+    "today": "اليوم",
+    "yesterday": "الأمس",
+    "last3": "آخر ٣ أيام",
+    "last7": "آخر ٧ أيام",
+    "last-week": "الأسبوع الماضي",
+    "clear-filters": "إلغاء الفلاتر"
+  },
+  "export": {
+    "label": "تصدير البيانات",
+    "in-progress": "جاري التصدير...",
+    "success": "تم تصدير البيانات بنجاح",
+    "error": "فشل تصدير البيانات",
+    "empty": "لا توجد بيانات للتصدير",
+    "max-rows": "عدد السجلات يتجاوز الحد المسموح ({limit})"
+  },
+  "toolbar": {
+    "add": "اضافة {title}"
+  }
+}

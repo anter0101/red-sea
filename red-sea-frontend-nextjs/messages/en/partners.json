@@ -1,0 +1,26 @@
+{
+  "search-placeholder": "Search partners",
+  "add-partner": "Add Partner",
+  "edit-partner": "Edit Partner",
+  "delete-partner": "Delete Partner",
+  "view-partner": "View Partner",
+  "partner-list": "Partner List",
+  "partner-details": "Partner Details",
+  "partner-info": "Partner Info",
+  "partner-performance": "Partner Performance",
+  "partner-accounts": "Partner Accounts",
+  "no-partners-found": "No partners found",
+  "table": {
+    "headers": {
+      "name": "Partner Name",
+      "bank-account": "Bank Account",
+      "bank-name": "Bank Name",
+      "contribution-percent": "Participation %",
+      "contribution-type": "Contribution Type",
+      "address": "Address",
+      "added-by": "Added by",
+      "join-date": "Date of Joining",
+      "actions": "Actions"
+    }
+  }
+}

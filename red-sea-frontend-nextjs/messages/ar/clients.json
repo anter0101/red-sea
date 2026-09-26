@@ -1,0 +1,105 @@
+{
+  "title": "العملاء",
+  "create": "إضافة عميل",
+  "no-clients": "لا يوجد عملاء",
+  "tabs": {
+    "info": "المعلومات",
+    "trips": "الرحلات",
+    "accounts": "الحسابات"
+  },
+  "cards": {
+    "total-expenses": "إجمالي المصروف",
+    "total-revenue": "إجمالي الإيرادات",
+    "total-net": "إجمالي الصافي"
+  },
+  "info-section": {
+    "title": "معلومات العميل"
+  },
+  "fields": {
+    "name": "اسم العميل",
+    "company-code": "كود الشركة",
+    "commercial-record": "السجل التجاري",
+    "tax-invoice": "الفاتورة الضريبية",
+    "tax-card": "البطاقة الضريبية",
+    "electronic-registration": "التسجيل الإلكتروني",
+    "destinations-file": "ملف الوجهات",
+    "pricing-sheet-kind": "أسلوب شيت الأسعار"
+  },
+  "pricing-sheet-kind": {
+    "ARISH": "العريش",
+    "WATANIA": "الوطنية"
+  },
+  "placeholders": {
+    "name": "أدخل اسم العميل",
+    "commercial-record": "أدخل السجل التجاري",
+    "tax-invoice": "أدخل الفاتورة الضريبية",
+    "tax-card": "أدخل البطاقة الضريبية",
+    "electronic-registration": "أدخل التسجيل الإلكتروني",
+    "destinations-file": "أدخل ملف الوجهات",
+    "pricing-sheet-kind": "اختر أسلوب الشيت"
+  },
+  "validation": {
+    "name-min": "اسم العميل يجب أن يكون على الأقل حرفين",
+    "name-max": "اسم العميل طويل جدًا",
+    "commercial-record-invalid": "السجل التجاري غير صالح",
+    "commercial-record-max": "السجل التجاري طويل جدًا",
+    "commercial-record-min": "السجل التجاري يجب أن يكون على الأقل 5 أحرف",
+    "pricing-sheet-kind-required": "أسلوب شيت الأسعار مطلوب"
+  },
+  "buttons": {
+    "save": "حفظ",
+    "cancel": "إلغاء"
+  },
+  "delivery-prices": {
+    "title": "الوجهات",
+    "add-button": "إضافة أسعار التوصيل",
+    "arish-title": "إضافة وجهة",
+    "wataneya-title": "إضافة وجهة",
+    "governorate": "المحافظة",
+    "area": "منطقة التفريغ",
+    "valid-from": "تاريخ البداية",
+    "valid-to": "تاريخ النهاية",
+    "select-date": "اختر التاريخ",
+    "select-governorate": "اختر المحافظة",
+    "select-area": "اختر منطقة التفريغ",
+    "prices-by-type": "الأسعار حسب نوع التعبئة",
+    "price-details": "تفاصيل الأسعار",
+    "base-price": "مطالبة",
+    "additional-fees": "نقل بالطن",
+    "tax-price": "ض ق م",
+    "total-price": "اجمالي",
+    "nolon-price": "نولون",
+    "save-prices": "حفظ الوجهة",
+    "saving": "جاري الحفظ...",
+    "no-data": "لا توجد بيانات",
+    "loading": "جاري التحميل...",
+    "packing-types": {
+      "bagged": "معبأ",
+      "jumbo-bag": "جامبو",
+      "silo10": "سليو 10",
+      "silo12": "سليو 12",
+      "loose": "سايب"
+    },
+    "validation": {
+      "governorate-required": "يرجى اختيار المحافظة",
+      "area-required": "يرجى اختيار منطقة التفريغ",
+      "valid-from-required": "يرجى اختيار تاريخ البداية",
+      "valid-to-required": "يرجى اختيار تاريخ النهاية",
+      "valid-to-after-from": "تاريخ النهاية يجب أن يكون بعد تاريخ البداية",
+      "base-price-required": "يرجى إدخال سعر المطالبة",
+      "additional-fees-required": "يرجى إدخال سعر النقل بالطن",
+      "tax-price-required": "يرجى إدخال ضريبة القيمة المضافة",
+      "at-least-one-price": "يرجى إدخال سعر واحد على الأقل"
+    },
+    "excel-options": "إكسل",
+    "import-excel": "استيراد من إكسل",
+    "export-excel": "تصدير إلى إكسل",
+    "download-template": "تحميل النموذج",
+    "import": {
+      "title": "استيراد أسعار التوصيل",
+      "description": "قم برفع ملف إكسل يحتوي على أسعار التوصيل",
+      "drop-file": "اسحب الملف هنا أو انقر للاختيار",
+      "confirm": "استيراد"
+    }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "name": "Red Sea System",
+  "logout": "Logout",
+  "forms": {
+    "upload": "Upload",
+    "file": "file",
+    "files": "files",
+    "drag-and-drop": "Drag & drop or click to upload",
+    "max-file-num": "Max 1 file"
+  },
+  "message": {
+    "on-success": "On successful",
+    "on-error": "Failed",
+    "driver-deleted-successfully": "Driver Deleted Successfully",
+    "employee-deleted-successfully": "Employee deleted successfully"
+  },
+  "actions": {
+    "grid-updated-successfully": "Table updated successfully",
+    "partner-created-successfully": "Partner created successfully",
+    "partner-updated-successfully": "Partner updated successfully",
+    "partner-deleted-successfully": "Partner deleted successfully",
+    "owners-updated-successfully": "Owners updated successfully",
+    "user-created-successfully": "User created successfully",
+    "user-updated-successfully": "User updated successfully",
+    "user-deleted-successfully": "User deleted successfully",
+    "contact-created-successfully": "Contact created successfully",
+    "contacts-created-successfully": "Contacts created successfully",
+    "contact-updated-successfully": "Contact updated successfully",
+    "failed-to-create-contacts": "Failed to create contacts",
+    "salary-created-successfully": "Salary created successfully",
+    "salary-updated-successfully": "Salary updated successfully",
+    "failed-to-create-salary": "Failed to create salary",
+    "driver-created-successfully": "Driver created successfully",
+    "driver-updated-successfully": "Driver updated successfully",
+    "car-created-successfully": "Car created successfully",
+    "car-updated-successfully": "Car updated successfully",
+    "axles-created-successfully": "Axles created successfully",
+    "axle-updated-successfully": "Axle updated successfully",
+    "owner-created-successfully": "Owner created successfully",
+    "owners-assigned-successfully": "Owners assigned successfully",
+    "trailer-created-successfully": "Trailer created successfully",
+    "trailer-updated-successfully": "Trailer updated successfully",
+    "employee-created-successfully": "Employee created successfully",
+    "employee-updated-successfully": "Employee updated successfully",
+    "manufacturer-created-successfully": "Manufacturer created successfully",
+    "manufacturer-deleted-successfully": "Manufacturer deleted successfully",
+    "car-manufacturer-deleted-successfully": "Car manufacturer deleted successfully",
+    "trailer-manufacturer-deleted-successfully": "Trailer manufacturer deleted successfully",
+    "model-created-successfully": "Model created successfully",
+    "car-model-deleted-successfully": "Car model deleted successfully",
+    "tire-model-created-successfully": "Tire model created successfully",
+    "tire-model-deleted-successfully": "Tire model deleted successfully",
+    "client-created-successfully": "Client created successfully",
+    "client-updated-successfully": "Client updated successfully",
+    "client-deleted-successfully": "Client deleted successfully",
+    "expense-created-successfully": "Expense created successfully",
+    "expense-updated-successfully": "Expense updated successfully",
+    "expense-deleted-successfully": "Expense deleted successfully",
+    "supplier-created-successfully": "Supplier created successfully",
+    "supplier-updated-successfully": "Supplier updated successfully",
+    "supplier-deleted-successfully": "Supplier deleted successfully",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "statuses": {
+    "AVAILABLE": "Available",
+    "UNAVAILABLE": "Unavailable",
+    "ONROAD": "On road",
+    "UNDER_MAINTENANCE": "Under Maintenance"
+  },
+  "change-status": {
+    "action": "Change status",
+    "title": "Change status",
+    "select-status": "Select status",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel"
+  },
+  "vehicle-colors": {
+    "white": "White",
+    "blue": "Blue",
+    "green": "Green",
+    "yellow": "Yellow",
+    "red": "Red",
+    "silver": "Silver",
+    "gray": "Gray",
+    "grey": "Gray",
+    "black": "Black"
+  },
+  "loading": "Loading...",
+  "pagination": {
+    "page": "Page {page}",
+    "first-page": "First page",
+    "previous-page": "Previous page",
+    "next-page": "Next page",
+    "last-page": "Last page",
+    "page-info": "Display {startItem} to {endItem} of {totalCount} elements",
+    "show": "Show",
+    "element": "Element"
+  },
+  "transactions-types": {
+    "INSTAPAY": "Instapay",
+    "VODAFONE_CASH": "Vodafone Cash"
+  },
+  "filters": {
+    "search": "Search...",
+    "added-date": "Date Added",
+    "quick-periods": "Quick Periods",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last3": "Last 3 Days",
+    "last7": "Last 7 Days",
+    "last-week": "Last Week",
+    "clear-filters": "Clear Filters"
+  },
+  "export": {
+    "label": "Export data",
+    "in-progress": "Exporting...",
+    "success": "Data exported successfully",
+    "error": "Failed to export data",
+    "empty": "No data to export",
+    "max-rows": "Record count exceeds the allowed limit ({limit})"
+  },
+  "toolbar": {
+    "add": "Add {title}"
+  }
+}

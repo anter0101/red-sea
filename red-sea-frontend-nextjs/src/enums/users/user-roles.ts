@@ -1,0 +1,7 @@
+export enum UserRoles {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+  DRIVER = 'DRIVER',
+  DRIVER_ASSISTANT = 'DRIVER_ASSISTANT',
+  DATA_ENTRY = 'DATA_ENTRY',
+}

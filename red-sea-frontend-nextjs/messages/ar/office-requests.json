@@ -1,0 +1,69 @@
+{
+  "title": "طلبات المكتب",
+  "table": {
+    "type": "النوع",
+    "status": "الحالة",
+    "journey": "الرحلة",
+    "amount": "المبلغ",
+    "from": "مقدم الطلب",
+    "to": "إلى",
+    "createdAt": "تاريخ الإنشاء",
+    "actions": "إجراءات",
+    "noData": "لا توجد بيانات"
+  },
+  "types": {
+    "PRINT_DELEGATION": "طباعة التفويض",
+    "END_WORKING_SHIFT": "إنهاء وردية العمل",
+    "ASK_FOR_CUSTODY": "طلب عُهدة"
+  },
+  "statuses": { "PENDING": "قيد الانتظار", "APPROVED": "مقبول", "REJECTED": "مرفوض" },
+  "form": {
+    "createTitle": "إضافة طلب",
+    "type": "النوع",
+    "description": "تفاصيل",
+    "journey": "الرحلة",
+    "from": "مقدم الطلب",
+    "to": "إلى",
+    "selectPlaceholder": "اختر",
+    "noJourneys": "لا توجد رحلات",
+    "amount": "المبلغ",
+    "amountRequired": "المبلغ مطلوب",
+    "save": "حفظ",
+    "cancel": "إلغاء"
+  },
+  "rowActions": { "approve": "قبول", "reject": "رفض", "delete": "حذف" },
+  "actions": {
+    "created": "تم إنشاء الطلب",
+    "deleted": "تم حذف الطلب",
+    "actioned": "تم تحديث حالة الطلب",
+    "actionError": "تعذر تنفيذ الإجراء",
+    "confirmDelete": "هل أنت متأكد من حذف هذا الطلب؟",
+    "confirmApprove": "هل أنت متأكد من قبول هذا الطلب؟",
+    "confirmReject": "هل أنت متأكد من رفض هذا الطلب؟",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء"
+  },
+  "loading": "جارٍ التحميل...",
+  "dialogs": {
+    "endShift": {
+      "title": "إنهاء الوردية",
+      "transferTo": "تحويل إلى",
+      "treasury": "خزينة",
+      "employee": "موظف",
+      "amount": "المبلغ",
+      "selectEmployee": "اختر موظفاً"
+    },
+    "custody": {
+      "title": "طلب عُهدة",
+      "transferFrom": "تحويل من",
+      "treasury": "خزينة",
+      "employee": "موظف",
+      "amount": "المبلغ",
+      "requestedAmount": "المبلغ المطلوب: {amount} جنيه",
+      "invalidAmount": "المبلغ يجب أن يكون أكبر من صفر",
+      "selectEmployee": "اختر موظفاً"
+    },
+    "confirm": "تأكيد",
+    "cancel": "إلغاء"
+  }
+}

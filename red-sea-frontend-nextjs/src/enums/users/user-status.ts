@@ -1,0 +1,5 @@
+export enum UserStatus {
+  AVAILABLE = 'AVAILABLE',
+  UNAVAILABLE = 'UNAVAILABLE',
+  ONROAD = 'ONROAD',
+}

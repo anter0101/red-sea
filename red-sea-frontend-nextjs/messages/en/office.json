@@ -1,0 +1,105 @@
+{
+  "title": "Office",
+  "landing": {
+    "registerPolicy": "Register Policy",
+    "issueDelegation": "Issue Delegation"
+  },
+  "modes": {
+    "title": "Issue Delegation",
+    "nolon": "NOLON Cars",
+    "contract": "Contract Cars",
+    "company": "Company Cars"
+  },
+  "steps": {
+    "vehicle": "Vehicle & crew",
+    "vehicleDescription": "Car, trailer, driver and assistant",
+    "trip": "Trip & cargo",
+    "tripDescription": "Client, direction, packing and quantity",
+    "custody": "Custody",
+    "custodyDescription": "Custody and confirm issue"
+  },
+  "form": {
+    "delegateNumber": "Delegation No.",
+    "car": "Car",
+    "trailer": "Trailer",
+    "driver": "Driver",
+    "assistant": "Assistant",
+    "client": "Loading for",
+    "direction": "Direction",
+    "sellingOrderNo": "Sale Order No.",
+    "receivedCompany": "Deliver to company",
+    "packingType": "Packing Type",
+    "cementGrade": "Cement Grade",
+    "quantity": "Quantity",
+    "deliveryGov": "Delivery governorate",
+    "deliveryArea": "Delivery area",
+    "custodySource": "Custody Source",
+    "custodyAmount": "Custody",
+    "currency": "EGP",
+    "addNew": "Add new",
+    "save": "Save",
+    "cancel": "Cancel",
+    "next": "Next",
+    "previous": "Previous",
+    "selectPlaceholder": "Select",
+    "created": "Delegation issued successfully",
+    "delegateNumberAutoHint": "Delegation number will be generated automatically on save.",
+    "noCustodyTitle": "No custody available",
+    "noCustodyDescription": "Your custody balance is zero. Create an ask-for-custody request first, then issue the delegation again.",
+    "createAskForCustody": "Create custody request",
+    "pendingCustodyDescription": "Your trip details were saved. Create a custody request and wait for approval, then confirm issuance here.",
+    "plateNumber": "Plate Number",
+    "plateLetters": "Plate Letters",
+    "licenseNumber": "License Number",
+    "licenseExpiryDate": "License Expiry Date",
+    "manufacturer": "Manufacturer",
+    "model": "Model",
+    "manufactureYear": "Manufacture Year",
+    "color": "Color",
+    "chassisNumber": "Chassis Number",
+    "chaseType": "Chassis Type",
+    "cylinders": "Cylinders",
+    "horsepower": "Horsepower",
+    "axleCount": "Axle Count",
+    "maxWeight": "Max Weight",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "nationalId": "National ID",
+    "phoneNumber": "Phone Number",
+    "email": "Email",
+    "password": "Password"
+  },
+  "validation": {
+    "required": "This field is required",
+    "numberMin": "Must be a positive number",
+    "yearMin": "Year must be at least 1900",
+    "emailInvalid": "Invalid email address",
+    "passwordMin": "Password must be at least 8 characters"
+  },
+  "inline": {
+    "newDriver": "New Driver",
+    "newCar": "New Car",
+    "newTrailer": "New Trailer"
+  },
+  "tabs": {
+    "select": "Select",
+    "create": "Create"
+  },
+  "packing": {
+    "BAGGED": "Bagged",
+    "JUMBO_BAG": "Jumbo Bag",
+    "SILO10": "Silo 10%",
+    "SILO12": "Silo 12%",
+    "LOOSE": "Loose"
+  },
+  "policyWizard": {
+    "entryChoice": {
+      "title": "Policy Entry Method",
+      "description": "Choose how to enter the policy data",
+      "scanUpload": "Scan / Upload",
+      "scanUploadDescription": "Scan a document or upload an image",
+      "manualEntry": "Manual Entry",
+      "manualEntryDescription": "Enter data manually"
+    }
+  }
+}

@@ -1,0 +1,158 @@
+# Run from this directory: docker compose up --build
+# App dirs are siblings of deployment/: ../redSea-backend-nestjs, ../red-sea-frontend-nextjs
+# Compose loads .env automatically from this directory for ${VAR} substitution.
+#
+# DB export: nginx stream proxies TCP postgres:5432. Host bind/port use POSTGRES_EXPORT_*
+# (default 127.0.0.1:15432 — use SSH -L for pg_dump from your laptop, or set bind 0.0.0.0
+# only with a host firewall restricting who can reach that port).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - redsea
+
+  redis:
+    image: redis:7-alpine
+    container_name: redsea-redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - "${REDIS_PASSWORD}"
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - redsea
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command:
+      - server
+      - /data
+      - --console-address
+      - "${MINIO_CONSOLE_ADDRESS}"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "${MINIO_HEALTH_URL}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - redsea
+
+  minio-init:
+    image: minio/mc:latest
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      BUCKET_NAME: ${BUCKET_NAME}
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"
+        mc mb "local/$$BUCKET_NAME" --ignore-existing || true
+    restart: "no"
+    networks:
+      - redsea
+
+  backend:
+    build:
+      context: ../redSea-backend-nestjs
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      GPS_API_HashKey: ${GPS_API_HASH}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    expose:
+      - "${PORT}"
+    restart: unless-stopped
+    networks:
+      - redsea
+
+  frontend:
+    build:
+      context: ../red-sea-frontend-nextjs
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
+        NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+    environment:
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NODE_ENV: ${NODE_ENV}
+    depends_on:
+      - backend
+    expose:
+      - "3000"
+    restart: unless-stopped
+    networks:
+      - redsea
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${NGINX_HTTP_BIND}:80:80"
+      - "${POSTGRES_EXPORT_BIND:-127.0.0.1}:${POSTGRES_EXPORT_PORT:-15432}:5432"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      postgres:
+        condition: service_started
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - redsea
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  redsea:
+    driver: bridge

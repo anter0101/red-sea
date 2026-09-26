@@ -1,0 +1,6 @@
+export enum OwnerShipTypes {
+  SHARE = 'SHARE',
+  NOLON_CAR = 'NOLON_CAR',
+  CONTRACT_CAR = 'CONTRACT_CAR',
+  COMPANY_CAR = 'COMPANY_CAR',
+}

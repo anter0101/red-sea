@@ -1,0 +1,284 @@
+{
+  "sidebar": {
+    "title": "المحاسبة",
+    "accounts": "الحسابات",
+    "journals": "القيود اليومية",
+    "transactions": "المعاملات",
+    "reports": "التقارير"
+  },
+  "accounts": {
+    "title": "الحسابات",
+    "table": {
+      "expand": "",
+      "code": "الكود",
+      "name": "اسم الحساب",
+      "type": "النوع",
+      "normal-balance": "طبيعة الحساب",
+      "actions": "الإجراءات",
+      "is-leaf": "حساب فرعي",
+      "parent-account": "الحساب الرئيسي",
+      "opening-balance": "الرصيد الافتتاحي"
+    },
+    "types": {
+      "ASSET": "أصول",
+      "LIABILITY": "التزامات",
+      "EQUITY": "حقوق الملكية",
+      "REVENUE": "إيرادات",
+      "EXPENSE": "مصروفات",
+      "CASH": "مشتريات"
+    },
+    "balance-types": {
+      "DEBIT": "مدين",
+      "CREDIT": "دائن"
+    },
+    "form": {
+      "title-create": "إنشاء حساب جديد",
+      "title-edit": "تعديل الحساب",
+      "code": "كود الحساب",
+      "name": "اسم الحساب",
+      "type": "نوع الحساب",
+      "normal-balance": "طبيعة الحساب",
+      "parent-account": "الحساب الرئيسي",
+      "is-leaf": "حساب فرعي (قابل للترحيل)",
+      "select-type": "اختر النوع",
+      "select-balance": "اختر الرصيد",
+      "select-parent": "اختر الحساب الرئيسي",
+      "no-parent": "بدون حساب رئيسي",
+      "opening-balance": "الرصيد الافتتاحي",
+      "opening-balance-note": "هذا الرصيد للافتتاح ولا يمكن تعديله لاحقاً.",
+      "is-child": "هل هذا حساب فرعي؟"
+    },
+    "list": {
+      "loading": "جاري التحميل...",
+      "no-data": "لا توجد حسابات",
+      "no-children": "لا توجد حسابات فرعية"
+    },
+    "actions": {
+      "created": "تم إنشاء الحساب بنجاح",
+      "updated": "تم تعديل الحساب بنجاح",
+      "deleted": "تم حذف الحساب بنجاح",
+      "confirm-delete": "هل أنت متأكد من حذف هذا الحساب؟",
+      "confirm-delete-desc": "هذا الإجراء لا يمكن التراجع عنه. سيتم حذف الحساب نهائياً."
+    }
+  },
+  "journals": {
+    "title": "القيود اليومية",
+    "table": {
+      "code": "الكود",
+      "name": "اسم الدفتر",
+      "type": "النوع",
+      "status": "الحالة",
+      "transactions-count": "عدد المعاملات",
+      "actions": "الإجراءات"
+    },
+    "types": {
+      "GENERAL": "عام",
+      "CASH": "نقدي",
+      "SALES": "مبيعات",
+      "PURCHASES": "مشتريات"
+    },
+    "form": {
+      "title-create": "إنشاء دفتر يومية جديد",
+      "title-edit": "تعديل دفتر اليومية",
+      "code": "كود الدفتر",
+      "name": "اسم الدفتر",
+      "type": "نوع الدفتر",
+      "select-type": "اختر النوع"
+    },
+    "stats": {
+      "total": "إجمالي الدفاتر"
+    },
+    "list": {
+      "loading": "جاري التحميل...",
+      "no-data": "لا توجد دفاتر يومية"
+    },
+    "actions": {
+      "created": "تم إنشاء الدفتر بنجاح",
+      "updated": "تم تعديل الدفتر بنجاح",
+      "deleted": "تم حذف الدفتر بنجاح"
+    }
+  },
+  "transactions": {
+    "title": "المعاملات",
+    "table": {
+      "code": "المرجع",
+      "date": "التاريخ",
+      "description": "الوصف",
+      "status": "الحالة",
+      "journal": "الدفتر",
+      "lines-count": "عدد البنود",
+      "total-debit": "إجمالي مدين",
+      "total-credit": "إجمالي دائن",
+      "actions": "الإجراءات",
+      "edit-draft": "إنهاء المسودة (ترحيل أو إلغاء)"
+    },
+    "statuses": {
+      "DRAFT": "مسودة",
+      "POSTED": "مرحّل",
+      "CANCELLED": "ملغي"
+    },
+    "form": {
+      "title-create": "إنشاء معاملة جديدة",
+      "title-edit": "تعديل المعاملة",
+      "code": "كود المعاملة",
+      "date": "التاريخ",
+      "description": "الوصف",
+      "status": "الحالة",
+      "journal": "دفتر اليومية",
+      "select-journal": "اختر الدفتر",
+      "select-status": "اختر الحالة",
+      "select-date": "اختر التاريخ",
+      "step-1": "المعلومات الأساسية",
+      "step-2": "اختيار الدفتر",
+      "step-3": "بنود المعاملة",
+      "next": "التالي",
+      "previous": "السابق",
+      "create": "إنشاء المعاملة",
+      "add-line": "إضافة بند",
+      "account": "الحساب",
+      "debit": "مدين",
+      "credit": "دائن",
+      "line-description": "الوصف",
+      "select-account": "اختر الحساب",
+      "total-debit": "إجمالي مدين",
+      "total-credit": "إجمالي دائن",
+      "difference": "الفرق",
+      "balanced": "متوازن",
+      "not-balanced": "غير متوازن",
+      "entry-type-locked": "هذا النوع يتم تحديده تلقائياً بناءً على طبيعة الحساب (مدين/دائن) لضمان دقة التقارير المالية.",
+      "title-finalize-draft": "إنهاء المعاملة",
+      "finalize-draft-hint": "اختر مرحّل أو ملغي. لا يمكن تغيير الحقول الأخرى.",
+      "cannot-edit-non-draft": "يمكن تعديل المعاملات المسودة فقط. لا يمكن تغيير المعاملات المرحّلة أو الملغاة."
+    },
+    "stats": {
+      "total": "إجمالي المعاملات",
+      "draft": "مسودة",
+      "posted": "مرحّلة",
+      "cancelled": "ملغية"
+    },
+    "list": {
+      "loading": "جاري التحميل...",
+      "no-data": "لا توجد معاملات"
+    },
+    "actions": {
+      "created": "تم إنشاء المعاملة بنجاح",
+      "updated": "تم تعديل المعاملة بنجاح",
+      "deleted": "تم حذف المعاملة بنجاح"
+    }
+  },
+  "transaction-lines": {
+    "title": "التقارير",
+    "table": {
+      "id": "#",
+      "transaction": "المعاملة",
+      "account": "الحساب",
+      "entry-type": "النوع",
+      "amount": "المبلغ",
+      "description": "الوصف",
+      "actions": "الإجراءات"
+    },
+    "entry-types": {
+      "DEBIT": "مدين",
+      "CREDIT": "دائن"
+    },
+    "list": {
+      "loading": "جاري التحميل...",
+      "no-data": "لا توجد بنود"
+    },
+    "stats": {
+      "total": "إجمالي البنود"
+    }
+  },
+  "reports": {
+    "title": "التقارير",
+    "description": "تحليلات وتقارير مالية شاملة",
+    "export-data": "تصدير البيانات",
+    "tabs": {
+      "journals-summary": "ملخص الدفاتر",
+      "general-ledger": "دفتر الأستاذ",
+      "trial-balance": "ميزان المراجعة",
+      "income-statement": "قائمة الدخل",
+      "balance-sheet": "قائمة المركز المالي"
+    },
+    "journals-summary": {
+      "type": "نوع الدفتر",
+      "transactions-count": "عدد المعاملات",
+      "total-debit": "إجمالي المدين",
+      "total-credit": "إجمالي الدائن",
+      "net-balance": "صافي الرصيد"
+    },
+    "general-ledger": {
+      "subtitle": "سجل المعاملات للحساب المحدد",
+      "opening-balance": "الرصيد الافتتاحي",
+      "closing-balance": "الرصيد الختامي",
+      "net-change": "صافي التغير",
+      "table": {
+        "date": "التاريخ",
+        "reference": "المرجع",
+        "description": "الوصف",
+        "debit": "المدين",
+        "credit": "الدائن",
+        "balance": "الرصيد"
+      }
+    },
+    "trial-balance": {
+      "subtitle": "ملخص أرصدة جميع الحسابات",
+      "total-debit": "إجمالي المدين",
+      "total-credit": "إجمالي الدائن",
+      "difference": "الفرق",
+      "unbalanced": "غير متوازن",
+      "unbalanced-difference": "الفرق:",
+      "balanced": "ميزان المراجعة متوازن",
+      "balanced-description": "مجموع الجانب المدين يساوي مجموع الجانب الدائن",
+      "table": {
+        "code": "الكود",
+        "account-name": "اسم الحساب",
+        "debit": "مدين",
+        "credit": "دائن",
+        "balance": "الرصيد",
+        "total": "الإجمالي",
+        "opening-balance": "الرصيد الافتتاحي",
+        "period-movement": "الحركة خلال الفترة",
+        "closing-balance": "الرصيد الختامي"
+      }
+    },
+    "income-statement": {
+      "subtitle": "تقرير الأرباح والخسائر للفترة المالية",
+      "net-income": "صافي الربح",
+      "total-expenses": "إجمالي المصروفات",
+      "total-revenue": "إجمالي الإيرادات",
+      "revenue": "الإيرادات",
+      "expenses": "المصروفات"
+    },
+    "balance-sheet": {
+      "subtitle": "الميزانية العمومية - الوضع المالي الحالي",
+      "unbalanced": "غير متوازن",
+      "unbalanced-difference": "يوجد فرق بين جانبي الميزانية، يرجى المراجعة",
+      "assets": "الأصول",
+      "total-assets": "إجمالي الأصول",
+      "liabilities": "الالتزامات",
+      "total-liabilities": "إجمالي الالتزامات",
+      "equity": "حقوق الملكية",
+      "total-equity": "إجمالي حقوق الملكية",
+      "liabilities-and-equity": "الالتزامات وحقوق الملكية",
+      "total-liabilities-equity": "إجمالي الالتزامات وحقوق الملكية",
+      "table": {
+        "code": "الكود"
+      }
+    }
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "view": "عرض",
+    "add": "إضافة",
+    "search": "بحث",
+    "export": "تصدير البيانات",
+    "confirm-delete": "هل أنت متأكد من الحذف؟",
+    "confirm-delete-desc": "هذا الإجراء لا يمكن التراجع عنه.",
+    "yes-delete": "نعم، احذف",
+    "no-cancel": "لا، إلغاء"
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "title": "المكتب",
+  "landing": {
+    "registerPolicy": "تسجيل بوليصة",
+    "issueDelegation": "اصدار تفويض"
+  },
+  "modes": {
+    "title": "اصدار تفويض",
+    "nolon": "سيارات بالناولون",
+    "contract": "سيارات تعاقد",
+    "company": "سيارات الشركة"
+  },
+  "steps": {
+    "vehicle": "المركبة والطاقم",
+    "vehicleDescription": "السيارة، المقطورة، السائق والتابع",
+    "trip": "الرحلة والشحنة",
+    "tripDescription": "العميل والجهة والتعبئة والكمية",
+    "custody": "العهدة",
+    "custodyDescription": "العهدة وتأكيد الإصدار"
+  },
+  "form": {
+    "delegateNumber": "تفويض رقم",
+    "car": "السيارة",
+    "trailer": "المقطورة",
+    "driver": "السائق",
+    "assistant": "التابع",
+    "client": "التحميل لصالح",
+    "direction": "الجهة",
+    "sellingOrderNo": "امر بيع رقم",
+    "receivedCompany": "لتسليمها لشركة",
+    "packingType": "نوع التعبئة",
+    "cementGrade": "رتبة الاسمنت",
+    "quantity": "الكمية",
+    "deliveryGov": "محافظة التسليم",
+    "deliveryArea": "منطقة التسليم",
+    "custodySource": "مصدر العهدة",
+    "custodyAmount": "العهدة",
+    "currency": "جنيه",
+    "addNew": "إضافة جديد",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "next": "التالي",
+    "previous": "السابق",
+    "selectPlaceholder": "اختر",
+    "created": "تم اصدار التفويض بنجاح",
+    "delegateNumberAutoHint": "رقم التفويض يُنشأ تلقائياً عند الحفظ.",
+    "noCustodyTitle": "لا توجد عُهدة متاحة",
+    "noCustodyDescription": "رصيد العُهدة لديك صفر. أنشئ طلب عُهدة أولاً ثم أعد إصدار التفويض.",
+    "createAskForCustody": "إنشاء طلب عُهدة",
+    "pendingCustodyDescription": "تم حفظ بيانات الرحلة. أنشئ طلب عُهدة وانتظر الاعتماد، ثم أكّد الإصدار من هنا.",
+    "plateNumber": "رقم اللوحة",
+    "plateLetters": "حروف اللوحة",
+    "licenseNumber": "رقم الرخصة",
+    "licenseExpiryDate": "تاريخ انتهاء الرخصة",
+    "manufacturer": "الشركة المصنعة",
+    "model": "الموديل",
+    "manufactureYear": "سنة الصنع",
+    "color": "اللون",
+    "chassisNumber": "رقم الهيكل",
+    "chaseType": "نوع الشاسيه",
+    "cylinders": "عدد السلندرات",
+    "horsepower": "حصان",
+    "axleCount": "عدد المحاور",
+    "maxWeight": "الحمولة القصوى",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "nationalId": "الرقم القومي",
+    "phoneNumber": "رقم الهاتف",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "numberMin": "يجب أن يكون رقماً موجباً",
+    "yearMin": "السنة يجب أن تكون على الأقل 1900",
+    "emailInvalid": "البريد الإلكتروني غير صالح",
+    "passwordMin": "كلمة المرور يجب أن تكون على الأقل 8 أحرف"
+  },
+  "inline": {
+    "newDriver": "سائق جديد",
+    "newCar": "سيارة جديدة",
+    "newTrailer": "مقطورة جديدة"
+  },
+  "tabs": {
+    "select": "اختيار",
+    "create": "إضافة"
+  },
+  "packing": {
+    "BAGGED": "معبأ",
+    "JUMBO_BAG": "جامبو",
+    "SILO10": "سليو %10",
+    "SILO12": "سليو %12",
+    "LOOSE": "سايب"
+  },
+  "policyWizard": {
+    "entryChoice": {
+      "title": "طريقة إدخال البوليصة",
+      "description": "اختر طريقة إدخال بيانات البوليصة",
+      "scanUpload": "مسح / رفع",
+      "scanUploadDescription": "مسح المستند أو رفع صورة",
+      "manualEntry": "إدخال يدوي",
+      "manualEntryDescription": "إدخال البيانات يدوياً"
+    }
+  }
+}

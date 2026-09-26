@@ -1,0 +1,47 @@
+{
+  "title": "العُهد",
+  "table": {
+    "employee": "الموظف",
+    "account": "الحساب",
+    "custodyAmount": "قيمة العهدة",
+    "journey": "الرحلة",
+    "driver": "السائق",
+    "driverLicense": "رخصة السائق",
+    "driverAssistant": "التابع",
+    "car": "السيارة",
+    "trailer": "المقطورة",
+    "status": "الحالة",
+    "createdAt": "تاريخ الإنشاء",
+    "actions": "إجراءات",
+    "noData": "لا توجد بيانات"
+  },
+  "statuses": { "ACTIVE": "نشطة", "INACTIVE": "غير نشطة", "CLOSED": "مغلقة" },
+  "stats": {
+    "myCustodyAmount": "رصيد عهدتي الحالي"
+  },
+  "form": {
+    "createTitle": "إضافة عهدة",
+    "editTitle": "تعديل العهدة",
+    "employee": "الموظف",
+    "account": "الحساب",
+    "status": "الحالة",
+    "journey": "الرحلة",
+    "driver": "السائق",
+    "selectPlaceholder": "اختر",
+    "save": "حفظ",
+    "cancel": "إلغاء"
+  },
+  "actions": {
+    "created": "تم إنشاء العهدة",
+    "updated": "تم تحديث العهدة",
+    "deleted": "تم حذف العهدة",
+    "confirmDelete": "هل أنت متأكد من حذف هذه العهدة؟"
+  },
+  "print": {
+    "delegation": "طباعة التفويض",
+    "marked": "تم تسجيل طباعة التفويض",
+    "alreadyPrinted": "تم طباعة التفويض مسبقاً",
+    "error": "فشل تحديث حالة الطباعة"
+  },
+  "loading": "جارٍ التحميل..."
+}

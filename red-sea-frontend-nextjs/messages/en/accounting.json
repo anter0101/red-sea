@@ -1,0 +1,294 @@
+{
+  "sidebar": {
+    "title": "Accounting",
+    "accounts": "Accounts",
+    "journals": "Journals",
+    "transactions": "Transactions",
+    "reports": "Reports"
+  },
+  "accounts": {
+    "title": "Accounts",
+    "table": {
+      "expand": "",
+      "code": "Code",
+      "name": "Account Name",
+      "type": "Type",
+      "normal-balance": "Balance",
+      "actions": "Actions",
+      "is-leaf": "Leaf Account",
+      "parent-account": "Parent Account",
+      "opening-balance": "Opening Balance"
+    },
+    "types": {
+      "ASSET": "Asset",
+      "LIABILITY": "Liability",
+      "EQUITY": "Equity",
+      "REVENUE": "Revenue",
+      "EXPENSE": "Expense",
+      "CASH": "Purchases"
+    },
+    "balance-types": {
+      "DEBIT": "Debit",
+      "CREDIT": "Credit"
+    },
+    "form": {
+      "title-create": "Create New Account",
+      "title-edit": "Edit Account",
+      "code": "Account Code",
+      "name": "Account Name",
+      "type": "Account Type",
+      "normal-balance": "Normal Balance",
+      "parent-account": "Parent Account",
+      "is-leaf": "Leaf Account (Postable)",
+      "select-type": "Select Type",
+      "select-balance": "Select Balance",
+      "select-parent": "Select Parent Account",
+      "no-parent": "No Parent Account",
+      "opening-balance": "Opening Balance",
+      "opening-balance-note": "The initial balance for the account. Once set, it cannot be changed.",
+      "is-child": "Is this a child account?"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "leaf": "Leaf",
+      "parent": "Parent"
+    },
+    "stats": {
+      "total": "Total Accounts",
+      "active": "Active Accounts",
+      "inactive": "Inactive Accounts"
+    },
+    "list": {
+      "loading": "Loading...",
+      "no-data": "No accounts found",
+      "no-children": "No child accounts"
+    },
+    "actions": {
+      "created": "Account created successfully",
+      "updated": "Account updated successfully",
+      "deleted": "Account deleted successfully",
+      "confirm-delete": "Are you sure you want to delete this account?",
+      "confirm-delete-desc": "This action cannot be undone. The account will be permanently deleted."
+    }
+  },
+  "journals": {
+    "title": "Journals",
+    "table": {
+      "code": "Code",
+      "name": "Journal Name",
+      "type": "Type",
+      "transactions-count": "Transactions Count",
+      "actions": "Actions"
+    },
+    "types": {
+      "GENERAL": "General",
+      "CASH": "Cash",
+      "SALES": "Sales",
+      "PURCHASES": "Purchases"
+    },
+    "form": {
+      "title-create": "Create New Journal",
+      "title-edit": "Edit Journal",
+      "code": "Journal Code",
+      "name": "Journal Name",
+      "type": "Journal Type",
+      "select-type": "Select Type"
+    },
+    "stats": {
+      "total": "Total Journals"
+    },
+    "list": {
+      "loading": "Loading...",
+      "no-data": "No journals found"
+    },
+    "actions": {
+      "created": "Journal created successfully",
+      "updated": "Journal updated successfully",
+      "deleted": "Journal deleted successfully"
+    }
+  },
+  "transactions": {
+    "title": "Transactions",
+    "table": {
+      "code": "Code",
+      "date": "Date",
+      "description": "Description",
+      "status": "Status",
+      "journal": "Journal",
+      "lines-count": "Lines Count",
+      "total-debit": "Total Debit",
+      "total-credit": "Total Credit",
+      "actions": "Actions",
+      "edit-draft": "Finalize draft (post or cancel)"
+    },
+    "statuses": {
+      "DRAFT": "Draft",
+      "POSTED": "Posted",
+      "CANCELLED": "Cancelled"
+    },
+    "form": {
+      "title-create": "Create Transaction",
+      "title-edit": "Edit Transaction",
+      "code": "Transaction Code",
+      "date": "Date",
+      "description": "Description",
+      "status": "Status",
+      "journal": "Journal",
+      "select-journal": "Select Journal",
+      "select-status": "Select Status",
+      "select-date": "Select Date",
+      "step-1": "Basic Info",
+      "step-2": "Select Journal",
+      "step-3": "Transaction Lines",
+      "next": "Next",
+      "previous": "Previous",
+      "create": "Create Transaction",
+      "add-line": "Add Line",
+      "account": "Account",
+      "debit": "Debit",
+      "credit": "Credit",
+      "line-description": "Description",
+      "select-account": "Select Account",
+      "total-debit": "Total Debit",
+      "total-credit": "Total Credit",
+      "difference": "Difference",
+      "balanced": "Balanced",
+      "not-balanced": "Not Balanced",
+      "entry-type-locked": "This type is automatically determined by the account's normal balance (Debit/Credit) to ensure financial reporting accuracy.",
+      "title-finalize-draft": "Finalize transaction",
+      "finalize-draft-hint": "Choose Posted or Cancelled. Other fields cannot be changed.",
+      "cannot-edit-non-draft": "Only draft transactions can be edited. Posted or cancelled transactions cannot be changed."
+    },
+    "stats": {
+      "total": "Total Transactions",
+      "draft": "Draft",
+      "posted": "Posted",
+      "cancelled": "Cancelled"
+    },
+    "list": {
+      "loading": "Loading...",
+      "no-data": "No transactions found"
+    },
+    "actions": {
+      "created": "Transaction created successfully",
+      "updated": "Transaction updated successfully",
+      "deleted": "Transaction deleted successfully"
+    }
+  },
+  "transaction-lines": {
+    "title": "Reports",
+    "table": {
+      "id": "#",
+      "transaction": "Transaction",
+      "account": "Account",
+      "entry-type": "Type",
+      "amount": "Amount",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "entry-types": {
+      "DEBIT": "Debit",
+      "CREDIT": "Credit"
+    },
+    "list": {
+      "loading": "Loading...",
+      "no-data": "No lines found"
+    },
+    "stats": {
+      "total": "Total Lines"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Comprehensive financial analyses and reports",
+    "export-data": "Export Data",
+    "tabs": {
+      "journals-summary": "Journals Summary",
+      "general-ledger": "General Ledger",
+      "trial-balance": "Trial Balance",
+      "income-statement": "Income Statement",
+      "balance-sheet": "Balance Sheet"
+    },
+    "journals-summary": {
+      "type": "Journal Type",
+      "transactions-count": "Transactions Count",
+      "total-debit": "Total Debit",
+      "total-credit": "Total Credit",
+      "net-balance": "Net Balance"
+    },
+    "general-ledger": {
+      "subtitle": "Transaction log for selected account",
+      "opening-balance": "Opening Balance",
+      "closing-balance": "Closing Balance",
+      "net-change": "Net Change",
+      "table": {
+        "date": "Date",
+        "reference": "Reference",
+        "description": "Description",
+        "debit": "Debit",
+        "credit": "Credit",
+        "balance": "Balance"
+      }
+    },
+    "trial-balance": {
+      "subtitle": "Summary of all account balances",
+      "total-debit": "Total Debit",
+      "total-credit": "Total Credit",
+      "difference": "Difference",
+      "unbalanced": "Out of Balance",
+      "unbalanced-difference": "Difference:",
+      "balanced": "Trial Balance is Balanced",
+      "balanced-description": "Total debits equal total credits",
+      "table": {
+        "code": "Code",
+        "account-name": "Account Name",
+        "debit": "Debit",
+        "credit": "Credit",
+        "balance": "Balance",
+        "total": "Total",
+        "opening-balance": "Opening Balance",
+        "period-movement": "Period Movement",
+        "closing-balance": "Closing Balance"
+      }
+    },
+    "income-statement": {
+      "subtitle": "Profit and Loss report for the financial period",
+      "net-income": "Net Income",
+      "total-expenses": "Total Expenses",
+      "total-revenue": "Total Revenue",
+      "revenue": "Revenue",
+      "expenses": "Expenses"
+    },
+    "balance-sheet": {
+      "subtitle": "Statement of Financial Position",
+      "unbalanced": "Out of Balance",
+      "unbalanced-difference": "There is a difference between assets and liabilities, please review.",
+      "assets": "Assets",
+      "total-assets": "Total Assets",
+      "liabilities": "Liabilities",
+      "total-liabilities": "Total Liabilities",
+      "equity": "Equity",
+      "total-equity": "Total Equity",
+      "liabilities-and-equity": "Liabilities and Equity",
+      "total-liabilities-equity": "Total Liabilities and Equity",
+      "table": {
+        "code": "Code"
+      }
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "add": "Add",
+    "search": "Search",
+    "export": "Export Data",
+    "confirm-delete": "Are you sure you want to delete?",
+    "confirm-delete-desc": "This action cannot be undone.",
+    "yes-delete": "Yes, Delete",
+    "no-cancel": "No, Cancel"
+  }
+}

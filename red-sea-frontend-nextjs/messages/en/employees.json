@@ -1,0 +1,102 @@
+{
+  "title": "Employees",
+  "add-employee": "Add Employee",
+  "edit-employee": "Edit Employee",
+  "fields": {
+    "first-name": "First Name",
+    "last-name": "Last Name",
+    "phone": "Phone Number",
+    "personal-id": "Personal ID",
+    "personal-id-expiry-date": "Personal ID Expiry Date",
+    "role": "Role",
+    "email": "Email",
+    "password": "Password",
+    "new-password": "New Password",
+    "confirm-password": "Confirm Password",
+    "branch": "Branch",
+    "custody": "Custody",
+    "join-date": "Join Date",
+    "salary": "Salary",
+    "salary-type": "Salary Type",
+    "status": "Status",
+    "last-seen": "Last Seen"
+  },
+  "placeholders": {
+    "first-name": "Enter first name",
+    "last-name": "Enter last name",
+    "phone": "+2 (01) 000-0000-00",
+    "personal-id": "Enter personal ID",
+    "custody": "Enter custody amount",
+    "salary": "Enter salary",
+    "email": "Enter email address",
+    "password": "Enter password",
+    "confirm-password": "Re-enter password",
+    "pick-date": "Pick a date"
+  },
+  "validation": {
+    "first-name-required": "First name is required",
+    "last-name-required": "Last name is required",
+    "email-required": "Email is required",
+    "email-invalid": "Invalid email address",
+    "password-required": "Password is required",
+    "password-min-length": "Password must be at least 8 characters",
+    "password-complexity": "Password must include uppercase, lowercase, number, and special character",
+    "confirm-password-required": "Password confirmation is required",
+    "passwords-must-match": "Passwords do not match"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "suspend": "Suspend Account"
+  },
+  "show-password": "Show password",
+  "hide-password": "Hide password",
+  "roles": {
+    "DATA_ENTRY": "Data Entry"
+  },
+  "salary-types": {
+    "MONTHLY": "Monthly",
+    "DAILY": "Daily",
+    "HOURLY": "Hourly",
+    "FIXED": "Fixed"
+  },
+  "statuses": {
+    "AVAILABLE": "Available",
+    "UNAVAILABLE": "Suspended"
+  },
+  "tabs": {
+    "info": "Information",
+    "performance": "Performance",
+    "accounts": "Accounts"
+  },
+  "messages": {
+    "no-employees": "No employees found",
+    "loading": "Loading...",
+    "loading-error": "An error occurred while loading employee data",
+    "not-found": "Employee not found",
+    "delete-confirmation": "Are you sure you want to delete this employee?",
+    "delete-warning": "This action cannot be undone. The employee and all associated data will be permanently deleted."
+  },
+  "detail-page": {
+    "personal-info": "Personal Information",
+    "name": "Name"
+  },
+  "table": {
+    "employee": "Employee",
+    "role": "Role",
+    "custody": "Custody",
+    "last-seen": "Last Seen",
+    "status": "Status",
+    "salary": "Salary",
+    "salary-type": "Salary Type",
+    "join-date": "Join Date",
+    "actions": "Actions"
+  },
+  "delete-dialog": {
+    "title": "Are you sure you want to delete this employee?",
+    "description": "This action cannot be undone. The employee and all associated data will be permanently deleted.",
+    "deleting": "Deleting..."
+  }
+}

@@ -1,0 +1,15 @@
+# Secrets. Examples stay tracked.
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Scratch extracts at the repo root
+_docx_extract/
+_red_sea_doc/
+_docx_extracted_text.txt
+_red_sea_doc.zip
+
+# Local Postman runtime tokens and reports
+**/.newman-runtime.postman_environment.json
+**/.newman-report.json

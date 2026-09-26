@@ -1,0 +1,105 @@
+{
+  "title": "Clients",
+  "create": "Create Client",
+  "no-clients": "No clients found",
+  "tabs": {
+    "info": "Information",
+    "trips": "Trips",
+    "accounts": "Accounts"
+  },
+  "cards": {
+    "total-expenses": "Total Expenses",
+    "total-revenue": "Total Revenue",
+    "total-net": "Total Net"
+  },
+  "info-section": {
+    "title": "Client Information"
+  },
+  "fields": {
+    "name": "Client Name",
+    "company-code": "Company Code",
+    "commercial-record": "Commercial Record",
+    "tax-invoice": "Tax Invoice",
+    "tax-card": "Tax Card",
+    "electronic-registration": "Electronic Registration",
+    "destinations-file": "Destinations File",
+    "pricing-sheet-kind": "Price sheet style"
+  },
+  "pricing-sheet-kind": {
+    "ARISH": "Arish",
+    "WATANIA": "Watania"
+  },
+  "placeholders": {
+    "name": "Enter client name",
+    "commercial-record": "Enter commercial record",
+    "tax-invoice": "Enter tax invoice",
+    "tax-card": "Enter tax card",
+    "electronic-registration": "Enter electronic registration",
+    "destinations-file": "Enter destinations file",
+    "pricing-sheet-kind": "Select price sheet style"
+  },
+  "validation": {
+    "name-min": "Client name must be at least 2 characters",
+    "name-max": "Client name is too long",
+    "commercial-record-invalid": "Commercial record is invalid",
+    "commercial-record-max": "Commercial record is too long",
+    "commercial-record-min": "Commercial record must be at least 5 characters",
+    "pricing-sheet-kind-required": "Price sheet style is required"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "delivery-prices": {
+    "title": "Destinations",
+    "add-button": "Add Delivery Prices",
+    "arish-title": "Add Destinations",
+    "wataneya-title": "Add Destinations",
+    "governorate": "Governorate",
+    "area": "Delivery Area",
+    "valid-from": "Valid From",
+    "valid-to": "Valid To",
+    "select-date": "Select Date",
+    "select-governorate": "Select Governorate",
+    "select-area": "Select Delivery Area",
+    "prices-by-type": "Prices by Packing Type",
+    "price-details": "Price Details",
+    "base-price": "Base Price",
+    "additional-fees": "Transport per Ton",
+    "tax-price": "VAT",
+    "total-price": "Total",
+    "nolon-price": "Nolon",
+    "save-prices": "Save Destination",
+    "saving": "Saving...",
+    "no-data": "No data available",
+    "loading": "Loading...",
+    "packing-types": {
+      "bagged": "Bagged",
+      "jumbo-bag": "Jumbo Bag",
+      "silo10": "Silo 10 Ton",
+      "silo12": "Silo 12 Ton",
+      "loose": "Loose"
+    },
+    "validation": {
+      "governorate-required": "Please select a governorate",
+      "area-required": "Please select a delivery area",
+      "valid-from-required": "Please select a start date",
+      "valid-to-required": "Please select an end date",
+      "valid-to-after-from": "End date must be after start date",
+      "base-price-required": "Please enter the base price",
+      "additional-fees-required": "Please enter the transport fee",
+      "tax-price-required": "Please enter the VAT",
+      "at-least-one-price": "Please enter at least one price"
+    },
+    "excel-options": "Excel",
+    "import-excel": "Import from Excel",
+    "export-excel": "Export to Excel",
+    "download-template": "Download Template",
+    "import": {
+      "title": "Import Delivery Prices",
+      "description": "Upload an Excel file containing delivery prices",
+      "drop-file": "Drag file here or click to select",
+      "confirm": "Import"
+    }
+  }
+}

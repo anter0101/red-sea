@@ -1,0 +1,20 @@
+{
+  "no-branches": "لا يوجد فروع",
+  "tabs": {
+    "employees": "الموظفين",
+    "trips": "الرحلات",
+    "accounts": "الحسابات"
+  },
+  "stats": {
+    "total-expenses": "اجمالى المصروف",
+    "total-revenue": "اجمالى الارادات",
+    "total-net": "اجمالى الصافى"
+  },
+  "sections": {
+    "employees": "الموظفين"
+  },
+  "actions": {
+    "add-employee": "إضافة موظف",
+    "export-data": "تصدير البيانات"
+  }
+}

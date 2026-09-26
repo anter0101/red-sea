@@ -1,0 +1,30 @@
+export const TrailersTypes = [
+  { label: 'Schmitz', value: 'Schmitz' },
+  { label: 'Krone', value: 'Krone' },
+  { label: 'Schwarzmüller', value: 'Schwarzmuller' },
+  { label: 'Wielton', value: 'Wielton' },
+  { label: 'Kögel', value: 'Kogel' },
+  { label: 'Fruehauf', value: 'Fruehauf' },
+  { label: 'Utility', value: 'Utility' },
+  { label: 'Great Dane', value: 'Great Dane' },
+  { label: 'Wabash', value: 'Wabash' },
+  { label: 'Hyundai Translead', value: 'Hyundai Translead' },
+  { label: 'Vanguard', value: 'Vanguard' },
+  { label: 'Stoughton', value: 'Stoughton' },
+  { label: 'Fontaine', value: 'Fontaine' },
+  { label: 'Manac', value: 'Manac' },
+  { label: 'Travis', value: 'Travis' },
+];
+
+export const ChaseTypes = [
+  { label: 'Semi-Trailer', value: 'Semi-Trailer' },
+  { label: 'Full-Trailer', value: 'Full-Trailer' },
+  { label: 'Flatbed', value: 'Flatbed' },
+  { label: 'Refrigerated', value: 'Refrigerated' },
+  { label: 'Tanker', value: 'Tanker' },
+  { label: 'Container', value: 'Container' },
+  { label: 'Lowboy', value: 'Lowboy' },
+  { label: 'Car Carrier', value: 'Car Carrier' },
+  { label: 'Livestock', value: 'Livestock' },
+  { label: 'Dump', value: 'Dump' },
+];

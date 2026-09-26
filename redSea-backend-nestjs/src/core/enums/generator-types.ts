@@ -1,0 +1,10 @@
+export enum GeneratorTypes {
+  CAR = 'CAR',
+  TRAILER = 'TRAILER',
+  SUPPLIER = 'SUPPLIER',
+  WAREHOUSE = 'WAREHOUSE',
+  ACCOUNT = 'ACCOUNT',
+  TRANSACTION = 'TRANSACTION',
+  CLIENT = 'CLIENT',
+  JOURNEY = 'JOURNEY',
+}

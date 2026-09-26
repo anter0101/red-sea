@@ -1,0 +1,17 @@
+export const CarsTypes = [
+  { label: 'Mercedes', value: 'mercedes' },
+  { label: 'BMW', value: 'bmw' },
+  { label: 'Audi', value: 'audi' },
+  { label: 'Toyota', value: 'toyota' },
+  { label: 'Honda', value: 'honda' },
+  { label: 'Ford', value: 'ford' },
+  { label: 'Volkswagen', value: 'volkswagen' },
+  { label: 'Hyundai', value: 'hyundai' },
+  { label: 'Kia', value: 'kia' },
+  { label: 'Nissan', value: 'nissan' },
+  { label: 'Chevrolet', value: 'chevrolet' },
+  { label: 'Tesla', value: 'tesla' },
+  { label: 'Porsche', value: 'porsche' },
+  { label: 'Jaguar', value: 'jaguar' },
+  { label: 'Land Rover', value: 'land_rover' },
+];

@@ -1,0 +1,69 @@
+{
+  "title": "Office Requests",
+  "table": {
+    "type": "Type",
+    "status": "Status",
+    "journey": "Journey",
+    "amount": "Amount",
+    "from": "Requested by",
+    "to": "To",
+    "createdAt": "Created",
+    "actions": "Actions",
+    "noData": "No data"
+  },
+  "types": {
+    "PRINT_DELEGATION": "Print Delegation",
+    "END_WORKING_SHIFT": "End Working Shift",
+    "ASK_FOR_CUSTODY": "Ask for Custody"
+  },
+  "statuses": { "PENDING": "Pending", "APPROVED": "Approved", "REJECTED": "Rejected" },
+  "form": {
+    "createTitle": "Add Request",
+    "type": "Type",
+    "description": "Description",
+    "journey": "Journey",
+    "from": "Requested by",
+    "to": "To",
+    "selectPlaceholder": "Select",
+    "noJourneys": "No journeys found",
+    "amount": "Amount",
+    "amountRequired": "Amount is required",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "rowActions": { "approve": "Approve", "reject": "Reject", "delete": "Delete" },
+  "actions": {
+    "created": "Request created",
+    "deleted": "Request deleted",
+    "actioned": "Request status updated",
+    "actionError": "Could not perform the action",
+    "confirmDelete": "Are you sure you want to delete this request?",
+    "confirmApprove": "Are you sure you want to approve this request?",
+    "confirmReject": "Are you sure you want to reject this request?",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "loading": "Loading...",
+  "dialogs": {
+    "endShift": {
+      "title": "End Working Shift",
+      "transferTo": "Transfer to",
+      "treasury": "Treasury",
+      "employee": "Employee",
+      "amount": "Amount",
+      "selectEmployee": "Select employee"
+    },
+    "custody": {
+      "title": "Approve Custody Request",
+      "transferFrom": "Transfer from",
+      "treasury": "Treasury",
+      "employee": "Employee",
+      "amount": "Amount",
+      "requestedAmount": "Requested amount: {amount} EGP",
+      "invalidAmount": "Amount must be greater than zero",
+      "selectEmployee": "Select employee"
+    },
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  }
+}

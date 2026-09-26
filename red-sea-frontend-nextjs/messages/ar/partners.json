@@ -1,0 +1,26 @@
+{
+  "search-placeholder": "ابحث عن شريك",
+  "add-partner": "اضافة شريك",
+  "edit-partner": "تعديل شريك",
+  "delete-partner": "حذف شريك",
+  "view-partner": "عرض شريك",
+  "partner-list": "قائمة الشركاء",
+  "partner-details": "تفاصيل الشريك",
+  "partner-info": "معلومات الشريك",
+  "partner-performance": "أداء الشريك",
+  "partner-accounts": "حسابات الشريك",
+  "no-partners-found": "لا يوجد شركاء",
+  "table": {
+    "headers": {
+      "name": "اسم الشريك",
+      "bank-account": "الحساب البنكي",
+      "bank-name": "اسم البنك",
+      "contribution-percent": "% المشاركة",
+      "contribution-type": "نوع المساهمة",
+      "address": "العنوان",
+      "added-by": "اضيف بواسطة",
+      "join-date": "تاريخ الانضمام",
+      "actions": "الاجراءات"
+    }
+  }
+}

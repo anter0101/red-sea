@@ -1,0 +1,403 @@
+classDiagram
+class Transaction {
+  +code: varchar
+  +date: date
+  +description: text
+  +status: enum
+}
+class TransactionLine {
+  +entryType: enum
+  +amount: decimal
+  +description: text
+}
+class Account {
+  +code: varchar
+  +name: varchar
+  +type: enum
+  +normalBalance: enum
+  +isLeaf: boolean
+  +isSystem: boolean
+  +openingBalance: decimal
+  +openingBalanceLocked: boolean
+}
+class Government {
+  +name: varchar
+}
+class Client {
+  +name: varchar
+  +commercialRecord: varchar
+  +taxInvoice: varchar
+  +companyCode: varchar
+  +destinationsFile: varchar
+}
+class PriceType {
+  +name: varchar
+  +description: text
+}
+class DeliveryPrice {
+  +basePrice: decimal
+  +additionalFees: decimal
+  +taxPrice: decimal
+  +totalPrice: decimal
+  +validFrom: date
+  +validTo: date
+  +notes: text
+}
+class Area {
+  +name: varchar
+}
+class CarAttachment {
+  +type: enum
+  +documentExpiryDate: date
+  +url: varchar
+  +notes: text
+}
+class TrailerAttachment {
+  +type: enum
+  +documentExpiryDate: date
+  +url: varchar
+  +notes: text
+}
+class Trailer {
+  +code: varchar
+  +chaseType: varchar
+  +manufacturer: varchar
+  +status: enum
+  +manufactureYear: int
+  +color: varchar
+  +maxWeight: int
+  +plateNumber: varchar
+  +plateLetters: varchar
+  +chassisNumber: varchar
+  +licenseNumber: varchar
+  +licenseExpiryDate: date
+  +axleCount: int
+  +notes: text
+  +ownerShip: varchar
+}
+class RelTrailerOwner {
+  +percentage: decimal
+  +contractUrl: varchar
+  +notes: text
+}
+class Owner {
+  +name: varchar
+  +phone: varchar
+  +transactionType: enum
+  +email: varchar
+  +address: varchar
+  +paymentNumber: varchar
+  +notes: text
+  +bankAccountNumber: varchar
+  +bankName: varchar
+}
+class RelCarOwner {
+  +percentage: decimal
+  +contractUrl: varchar
+  +notes: text
+}
+class Car {
+  +code: varchar
+  +manufacturer: varchar
+  +status: enum
+  +model: varchar
+  +manufactureYear: int
+  +color: varchar
+  +cylinders: int
+  +horsepower: int
+  +axleCount: int
+  +maxWeight: int
+  +plateNumber: varchar
+  +plateLetters: varchar
+  +chassisNumber: varchar
+  +licenseNumber: varchar
+  +licenseExpiryDate: date
+  +notes: text
+  +ownerShip: varchar
+}
+class Tire {
+  +serialNumber: varchar
+  +type: varchar
+  +healthPercentage: varchar
+  +location: varchar
+  +createdDate: timestamp
+}
+class Axle {
+  +number: int
+}
+class Contact {
+  +phone: varchar
+  +isPrimary: boolean
+}
+class Driver {
+  +licenseNumber: varchar
+  +licenseExpiryDate: date
+}
+class Salary {
+  +salaryType: enum
+  +salaryAmount: decimal
+}
+class UserAttachment {
+  +url: varchar
+  +type: enum
+  +notes: text
+  +documentExpiryDate: date
+}
+class User {
+  +email: varchar
+  +password: varchar
+  +username: varchar
+  +status: enum
+  +activated: boolean
+  +imageUrl: varchar
+  +role: enum
+  +firstName: varchar
+  +lastName: varchar
+  +personalId: varchar
+  +personalIdExpiryDate: date
+  +notes: varchar
+  +code: varchar
+}
+class Employee {
+
+}
+class Branch {
+  +name: varchar
+}
+class CarModel {
+  +name: varchar
+}
+class CarManufacturer {
+  +name: varchar
+}
+class ExpenseAttachment {
+  +url: varchar
+  +type: enum
+  +notes: text
+  +documentExpiryDate: date
+}
+class Expense {
+  +amount: decimal
+  +date: date
+  +monthlyRecurring: boolean
+  +status: enum
+  +notes: text
+  +type: enum
+}
+class CustodyExpense {
+
+}
+class ExceptionalExpense {
+  +subType: varchar
+  +beneficiary: varchar
+}
+class IncentiveExpense {
+
+}
+class MaintenanceExpense {
+  +maintenanceType: varchar
+  +center: varchar
+  +partName: varchar
+  +partSource: varchar
+  +unitPrice: decimal
+  +quantity: decimal
+  +consumable: boolean
+}
+class PenaltyExpense {
+
+}
+class TaxFeeExpense {
+  +feeType: varchar
+  +expiryDate: date
+}
+class UtilityExpense {
+  +serviceType: varchar
+  +place: varchar
+}
+class GpsTail {
+  +latitude: double precision
+  +longitude: double precision
+  +sequenceOrder: int
+  +timestamp: timestamp without time zone
+}
+class GpsDevice {
+  +name: varchar
+  +imei: varchar
+  +lastLatitude: double precision
+  +lastLongitude: double precision
+  +speed: double precision
+  +totalDistance: double precision
+  +batteryLevel: double precision
+  +signalStrength: double precision
+  +engineStatus: boolean
+  +lastUpdate: timestamp without time zone
+}
+class Grids {
+  +pageKey: text
+  +columns: jsonb
+}
+class JourneyPolicy {
+  +bookWeight: float
+  +actualWeight: float
+  +deliveryWeight: float
+  +shortageQty: float
+  +policyNo: varchar
+  +policyDate: date
+  +entryTimeFactory: timestamp
+  +exitTimeFactory: timestamp
+  +loadingDate: date
+  +loadingPermitNo: varchar
+  +archiveNo: varchar
+  +tripDuration: varchar
+  +tripDate: date
+  +tripDistance: float
+}
+class JourneyTransaction {
+  +transactionType: enum
+  +category: enum
+  +description: text
+  +quantity: float
+  +unitPrice: float
+  +placeOrService: varchar
+  +invoiceUrl: text
+  +amount: float
+}
+class Journey {
+  +delegateNumber: varchar
+  +delegateDate: date
+  +tripStatus: varchar
+  +direction: varchar
+  +quantity: float
+  +cementGrade: varchar
+  +packingType: varchar
+  +sellingOrderNo: varchar
+  +receivedCompany: varchar
+}
+class JourneyAttachment {
+  +type: varchar
+  +url: varchar
+}
+class Supplier {
+  +code: varchar
+  +name: varchar
+  +activity: enum
+  +governorate: varchar
+  +city: varchar
+  +phone: varchar
+  +commercialRegister: varchar
+  +taxCard: varchar
+  +taxRegistrationNumber: varchar
+}
+class TireModel {
+  +name: varchar
+}
+class TrailerManufacturer {
+  +name: varchar
+}
+class Warehouse {
+  +code: varchar
+  +name: varchar
+  +status: varchar
+  +condition: varchar
+  +category: varchar
+  +quantity: int
+  +alertQuantity: int
+  +unit: varchar
+  +unitPrice: float
+  +manufacturingYear: int
+  +purchaseDate: date
+  +expiryDate: date
+}
+class BaseEntity {
+  +(PK) id: number
+}
+BaseEntity <|-- Transaction
+BaseEntity <|-- TransactionLine
+BaseEntity <|-- Account
+BaseEntity <|-- Government
+BaseEntity <|-- Client
+BaseEntity <|-- PriceType
+BaseEntity <|-- DeliveryPrice
+BaseEntity <|-- Area
+BaseEntity <|-- CarAttachment
+BaseEntity <|-- TrailerAttachment
+BaseEntity <|-- Trailer
+BaseEntity <|-- RelTrailerOwner
+BaseEntity <|-- Owner
+BaseEntity <|-- RelCarOwner
+BaseEntity <|-- Car
+BaseEntity <|-- Tire
+BaseEntity <|-- Axle
+BaseEntity <|-- Contact
+BaseEntity <|-- Driver
+BaseEntity <|-- Salary
+BaseEntity <|-- UserAttachment
+BaseEntity <|-- User
+BaseEntity <|-- Employee
+BaseEntity <|-- Branch
+BaseEntity <|-- CarModel
+BaseEntity <|-- CarManufacturer
+BaseEntity <|-- ExpenseAttachment
+BaseEntity <|-- Expense
+Expense <|-- CustodyExpense
+Expense <|-- ExceptionalExpense
+Expense <|-- IncentiveExpense
+Expense <|-- MaintenanceExpense
+Expense <|-- PenaltyExpense
+Expense <|-- TaxFeeExpense
+Expense <|-- UtilityExpense
+BaseEntity <|-- GpsTail
+BaseEntity <|-- GpsDevice
+BaseEntity <|-- Grids
+BaseEntity <|-- JourneyPolicy
+BaseEntity <|-- JourneyTransaction
+BaseEntity <|-- Journey
+BaseEntity <|-- JourneyAttachment
+BaseEntity <|-- Supplier
+BaseEntity <|-- TireModel
+BaseEntity <|-- TrailerManufacturer
+BaseEntity <|-- Warehouse
+TransactionLine "*" --> "1" Transaction : transaction (fk: transaction_id)
+TransactionLine "*" --> "1" Account : account (fk: account_id)
+DeliveryPrice "*" --> "1" Client : client (fk: client_id)
+DeliveryPrice "*" --> "1" Area : area (fk: area_id)
+DeliveryPrice "*" --> "1" PriceType : priceType (fk: price_type_id)
+Area "*" --> "1" Government : government (fk: government_id)
+CarAttachment "*" --> "1" Car : car (fk: car_id)
+TrailerAttachment "*" --> "1" Trailer : trailer (fk: trailer_id)
+RelTrailerOwner "*" --> "1" Owner : owner
+RelTrailerOwner "*" --> "1" Trailer : trailer
+RelCarOwner "*" --> "1" Owner : owner
+RelCarOwner "*" --> "1" Car : car
+Tire "*" --> "1" Axle : axle
+Axle "*" --> "1" Car : car (fk: carId)
+Axle "*" --> "1" Trailer : trailer (fk: trailerId)
+Contact "*" --> "1" User : user
+Driver "1" --> "1" User : user
+Salary "1" --> "1" User : user (fk: user_id)
+UserAttachment "*" --> "1" User : user (fk: user_id)
+User "1" --> "1" Salary : salary
+User "1" --> "1" Driver : driver
+User "1" --> "1" Employee : employee
+Employee "1" --> "1" User : user
+Employee "*" --> "1" Branch : branch
+CarModel "*" --> "1" CarManufacturer : manufacturer
+ExpenseAttachment "*" --> "1" Expense : expense (fk: expense_id)
+Expense "*" --> "1" Employee : employee (fk: employee_id)
+Expense "*" --> "1" Car : car (fk: car_id)
+GpsTail "*" --> "1" GpsDevice : gpsDevice (fk: device_id)
+GpsDevice "1" --> "1" Car : car (fk: carId)
+Grids "*" --> "1" User : user (fk: user_id)
+JourneyPolicy "*" --> "1" Journey : journey (fk: journey_id)
+JourneyPolicy "*" --> "1" Government : deliveryGov (fk: delivery_gov_id)
+JourneyPolicy "*" --> "1" Area : deliveryArea (fk: delivery_area_id)
+JourneyPolicy "*" --> "1" Employee : employee (fk: employee_id)
+JourneyTransaction "*" --> "1" Journey : journey (fk: journey_id)
+Journey "*" --> "1" Driver : driver (fk: driver_id)
+Journey "*" --> "1" User : assistant (fk: assistant_id)
+Journey "*" --> "1" Car : car (fk: car_id)
+Journey "*" --> "1" Client : client (fk: client_id)
+Journey "*" --> "1" Trailer : trailer (fk: trailer_id)
+Journey "*" --> "1" Employee : custodySource (fk: custody_source_id)
+JourneyAttachment "*" --> "1" Journey : journey (fk: journey_id)
+Warehouse "*" --> "1" Supplier : supplier (fk: supplier_id)

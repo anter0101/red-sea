@@ -1,0 +1,8 @@
+export enum SalaryType {
+  FIXED = 'FIXED',
+  HOURLY = 'HOURLY',
+  DAILY = 'DAILY',
+  MONTHLY = 'MONTHLY',
+  COMMISSION = 'COMMISSION',
+  NOLON_PERCENT = 'NOLON_PERCENT',
+}

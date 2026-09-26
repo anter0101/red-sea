@@ -1,0 +1,11 @@
+export enum OfficeRequestStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+export enum OfficeRequestType {
+  PRINT_DELEGATION = 'PRINT_DELEGATION',
+  END_WORKING_SHIFT = 'END_WORKING_SHIFT',
+  ASK_FOR_CUSTODY = 'ASK_FOR_CUSTODY',
+}

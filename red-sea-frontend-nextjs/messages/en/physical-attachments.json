@@ -1,0 +1,46 @@
+{
+  "title": "Physical attachments",
+  "subtitle": "Photos and notes linked to this vehicle",
+  "tab": "Physical attachments",
+  "loading": "Loading attachments…",
+  "error": "Could not load attachments.",
+  "empty": "No physical attachments yet. Add the first one.",
+  "confirmed": "Confirmed OK",
+  "fields": {
+    "name": "Name",
+    "date": "Date",
+    "description": "Description",
+    "photo": "Photo",
+    "price": "Price"
+  },
+  "form": {
+    "add-title": "Add physical attachment",
+    "edit-title": "Edit physical attachment",
+    "current-photo": "Current photo"
+  },
+  "no-photo": "No photo",
+  "actions": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "create": "Create",
+    "update": "Update",
+    "saving": "Saving…",
+    "print": "Print checklist",
+    "confirm-ok": "Confirm OK"
+  },
+  "print": {
+    "title": "Physical attachments checklist",
+    "status": "Status",
+    "pending": "Pending confirmation"
+  },
+  "delete": {
+    "title": "Delete attachment?",
+    "description": "This will permanently remove the physical attachment."
+  },
+  "validation": {
+    "name-required": "Name is required",
+    "date-required": "Date is required"
+  }
+}
