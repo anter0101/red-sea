@@ -1,7 +1,7 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from 'src/core/utils/base.entity';
 import { JourneyStatus } from 'src/core/enums/journey';
-import { Journey } from '../journey/journey.entity';
+import { Journey } from './journey.entity';
 
 @Entity('journey_status_events')
 @Index('IDX_journey_status_events_journey_id', ['journey'])

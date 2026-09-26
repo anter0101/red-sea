@@ -1,5 +1,5 @@
-import { JourneyAttachment } from './../journey-attachment/journey-attachment.entity';
-import { GovernmentService } from './../government/government.service';
+import { JourneyAttachment } from '../journey-attachment/journey-attachment.entity';
+import { GovernmentService } from '../government/government.service';
 import {
   BadRequestException,
   Body,

@@ -1,4 +1,4 @@
-import { SupplierService } from './../supplier/supplier.service';
+import { SupplierService } from '../supplier/supplier.service';
 import {
   Controller,
   Logger,

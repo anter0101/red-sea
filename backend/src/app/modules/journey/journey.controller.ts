@@ -1,5 +1,5 @@
-import { ClientService } from './../factory/client.service';
-import { JourneyTransactionService } from './../journey-transaction/journey-transaction.service';
+import { ClientService } from '../factory/client.service';
+import { JourneyTransactionService } from '../journey-transaction/journey-transaction.service';
 import { JourneyTransaction } from '../journey-transaction/journey-transaction.entity';
 import {
   Body,
