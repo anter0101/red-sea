@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js App Router, TanStack Query, React Hook Form + Zod, next-intl (RTL), shadcn `Table`/`Dialog`/`Select`, Jest + @testing-library/react.
 
-**Spec:** [docs/superpowers/specs/2026-06-12-phase-6-office-custody-requests-design.md](../specs/2026-06-12-phase-6-office-custody-requests-design.md) · **API:** [phase-6-api.md §2](../../../phase-6-api.md) · **Prereq:** run Task 0 of the [office-flow plan](./2026-06-12-phase-6-office-flow.md) first (deps install + test runner).
+**Spec:** [docs/superpowers/specs/2026-06-12-phase-6-office-custody-requests-design.md](../specs/2026-06-12-phase-6-office-custody-requests-design.md) · **API:** [phase-6-api.md §2](../../../../frontend/phase-6-api.md) · **Prereq:** run Task 0 of the [office-flow plan](./2026-06-12-phase-6-office-flow.md) first (deps install + test runner).
 
 ---
 
@@ -1071,7 +1071,7 @@ git commit -m "feat(office-requests): add list page and route"
 
 ## Self-Review (completed during planning)
 
-- **Spec coverage:** list + filters ✓ (Tasks 3/8), create (ADMIN/USER) ✓ (Task 7), approve/reject (ADMIN, PENDING only) ✓ (Tasks 4/6/8), delete ✓ (Tasks 4/8), type/status localized ✓ (Tasks 5/6), i18n ✓ (Task 5). Query params from [phase-6-api.md §2](../../../phase-6-api.md) covered by `IOfficeRequestQueryParams`.
+- **Spec coverage:** list + filters ✓ (Tasks 3/8), create (ADMIN/USER) ✓ (Task 7), approve/reject (ADMIN, PENDING only) ✓ (Tasks 4/6/8), delete ✓ (Tasks 4/8), type/status localized ✓ (Tasks 5/6), i18n ✓ (Task 5). Query params from [phase-6-api.md §2](../../../../frontend/phase-6-api.md) covered by `IOfficeRequestQueryParams`.
 - **Placeholder scan:** empty `journeys` list in Task 8 is an explicit scoped follow-up with the mapping given. No TODOs.
 - **Type consistency:** `IOfficeRequestResponse`, `IOfficeRequestTableRow`, `OfficeRequestFormValues`, `OfficeRequestBody`, `toOfficeRequestBody`, `toOfficeRequestRow`, `useGetAllOfficeRequests`, `useCreateOfficeRequest`, `useRequestAction` (args `{ id, status }`), `useDeleteOfficeRequest` consistent across tasks.
 

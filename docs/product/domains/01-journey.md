@@ -30,7 +30,7 @@ Align journeys with the business workflow: delegation → policy → invoice; re
 
 ### Status enum
 
-**File:** `redSea-backend-nestjs/src/core/enums/journey.ts`
+**File:** `backend/src/core/enums/journey.ts`
 
 Replace:
 

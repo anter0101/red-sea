@@ -23,10 +23,10 @@ One reusable journey table and one stats API so every entity page shows the same
 
 | File | Work |
 | --- | --- |
-| `redSea-backend-nestjs/src/app/modules/journey/dtos/query-journey.dto.ts` | Add optional: `driverId`, `carId`, `trailerId`, `clientId`, `driverAssistantId`, `branchId` |
-| `redSea-backend-nestjs/src/app/modules/journey/journey.service.ts` | Extend `applyJourneyFilters()`; add `getStats()` |
-| `redSea-backend-nestjs/src/app/modules/journey/journey.controller.ts` | Add `GET /stats` route |
-| `redSea-backend-nestjs/src/app/modules/journey/dtos/journey-stats.dto.ts` | Response shape: `total`, `byStatus`, `journeyCount`, `workingDays`, `currentJourneyId`, `currentCarCode`, `totalDistance` |
+| `backend/src/app/modules/journey/dtos/query-journey.dto.ts` | Add optional: `driverId`, `carId`, `trailerId`, `clientId`, `driverAssistantId`, `branchId` |
+| `backend/src/app/modules/journey/journey.service.ts` | Extend `applyJourneyFilters()`; add `getStats()` |
+| `backend/src/app/modules/journey/journey.controller.ts` | Add `GET /stats` route |
+| `backend/src/app/modules/journey/dtos/journey-stats.dto.ts` | Response shape: `total`, `byStatus`, `journeyCount`, `workingDays`, `currentJourneyId`, `currentCarCode`, `totalDistance` |
 
 ### Branch filter rule
 

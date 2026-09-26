@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js App Router, TanStack Query (base hooks), React Hook Form + Zod, next-intl (RTL), shadcn `Table`/`Dialog`/`Select`, Jest + @testing-library/react.
 
-**Spec:** [docs/superpowers/specs/2026-06-12-phase-6-office-custody-requests-design.md](../specs/2026-06-12-phase-6-office-custody-requests-design.md) · **API:** [phase-6-api.md §1](../../../phase-6-api.md) · **Prereq:** run Task 0 of the [office-flow plan](./2026-06-12-phase-6-office-flow.md) first (deps install + test runner).
+**Spec:** [docs/superpowers/specs/2026-06-12-phase-6-office-custody-requests-design.md](../specs/2026-06-12-phase-6-office-custody-requests-design.md) · **API:** [phase-6-api.md §1](../../../../frontend/phase-6-api.md) · **Prereq:** run Task 0 of the [office-flow plan](./2026-06-12-phase-6-office-flow.md) first (deps install + test runner).
 
 ---
 
@@ -528,7 +528,7 @@ git commit -m "feat(custody): add custody i18n namespace"
 - Create: `src/features/custody/components/custody-table.tsx`
 - Test: `src/features/custody/components/__tests__/custody-table.test.tsx`
 
-Mirrors [transactions-table.tsx](../../../src/features/accounting/transactions/components/transactions-table.tsx).
+Mirrors [transactions-table.tsx](../../../../frontend/src/features/accounting/transactions/components/transactions-table.tsx).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1076,7 +1076,7 @@ git commit -m "feat(custody): add list page, detail view and routes"
 
 ## Self-Review (completed during planning)
 
-- **Spec coverage:** list + filters ✓ (Tasks 3/8), create/edit ✓ (Task 7), detail ✓ (Task 8), delete ✓ (Tasks 4/8), status badge ✓ (Task 6), role gating ✓ (Task 8 `canManage`), i18n ✓ (Task 5). Query params from [phase-6-api.md §1](../../../phase-6-api.md) covered by `ICustodyQueryParams`.
+- **Spec coverage:** list + filters ✓ (Tasks 3/8), create/edit ✓ (Task 7), detail ✓ (Task 8), delete ✓ (Tasks 4/8), status badge ✓ (Task 6), role gating ✓ (Task 8 `canManage`), i18n ✓ (Task 5). Query params from [phase-6-api.md §1](../../../../frontend/phase-6-api.md) covered by `ICustodyQueryParams`.
 - **Placeholder scan:** the empty `accounts`/`journeys` arrays in Task 8 are an explicit, scoped follow-up (mapping pattern given), not an unknown. No TODOs.
 - **Type consistency:** `ICustodyResponse`, `ICustodyTableRow`, `CustodyFormValues`, `CustodyBody`, `toCustodyBody`, `toCustodyRow`, `useGetAllCustodies`, `useGetOneCustody`, `useCreateCustody`, `useUpdateCustody`, `useDeleteCustody` consistent across tasks.
 

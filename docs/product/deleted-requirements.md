@@ -2,7 +2,7 @@
 
 Fill a row **when the removal ships**, not before. Source: domain notes — anything removed from the product must be listed here for review.
 
-**Implementation guides:** [docs/domains/README.md](./domains/README.md)
+**Implementation guides:** [domains/README.md](./domains/README.md)
 
 | Item | Arabic / UI label | Removed from | Replacement / notes | Date | PR |
 | --- | --- | --- | --- | --- | --- |

@@ -8,10 +8,10 @@
 
 **Do not paste this whole markdown file into Mermaid Live.**
 
-Open **`docs/mermaid/chart-of-accounts.mmd`** instead:
+Open **`mermaid/chart-of-accounts.mmd`** instead:
 
 1. Go to [https://mermaid.live](https://mermaid.live)
-2. Open `docs/mermaid/chart-of-accounts.mmd`
+2. Open `mermaid/chart-of-accounts.mmd`
 3. **Ctrl+A** → **Ctrl+C** → paste into Mermaid Live
 4. Export PNG / SVG / PDF
 
@@ -32,7 +32,7 @@ The first diagram line must be `flowchart TB` (comments starting with `%%` at th
 
 ## Full chart (copy this block)
 
-File: `docs/mermaid/chart-of-accounts.mmd`
+File: `mermaid/chart-of-accounts.mmd`
 
 ```
 %% Seeded Chart of Accounts — Red Sea DMS

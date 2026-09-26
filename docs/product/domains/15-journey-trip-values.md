@@ -86,16 +86,16 @@ enum PricingSheetKind {
 
 | File | Work |
 | --- | --- |
-| `redSea-backend-nestjs/src/core/enums/pricing-sheet-kind.ts` | New enum |
-| `redSea-backend-nestjs/src/app/modules/factory/client.entity.ts` | Column `pricingSheetKind` NOT NULL |
-| `redSea-backend-nestjs/src/app/modules/factory/dtos/client.dto.ts` | Required `@IsEnum` |
-| `redSea-backend-nestjs/src/app/modules/factory/client.mapper.ts` | Map create/update/list |
-| `redSea-backend-nestjs/src/app/modules/factory/client.controller.ts` | Include in GET select lists |
+| `backend/src/core/enums/pricing-sheet-kind.ts` | New enum |
+| `backend/src/app/modules/factory/client.entity.ts` | Column `pricingSheetKind` NOT NULL |
+| `backend/src/app/modules/factory/dtos/client.dto.ts` | Required `@IsEnum` |
+| `backend/src/app/modules/factory/client.mapper.ts` | Map create/update/list |
+| `backend/src/app/modules/factory/client.controller.ts` | Include in GET select lists |
 | Migration | Add column, backfill, set NOT NULL |
-| `red-sea-frontend-nextjs/src/features/clients/types/create-schema.ts` | Required field |
-| `red-sea-frontend-nextjs/src/features/clients/components/client-form.tsx` | Select ARISH / WATANIA |
-| `red-sea-frontend-nextjs/src/features/clients/components/client-page-client.tsx` | Branch on kind, not id |
-| `red-sea-frontend-nextjs/src/app/[locale]/(loggedIn)/clients/[clientId]/delivery-prices/create/page.tsx` | Same |
+| `frontend/src/features/clients/types/create-schema.ts` | Required field |
+| `frontend/src/features/clients/components/client-form.tsx` | Select ARISH / WATANIA |
+| `frontend/src/features/clients/components/client-page-client.tsx` | Branch on kind, not id |
+| `frontend/src/app/[locale]/(loggedIn)/clients/[clientId]/delivery-prices/create/page.tsx` | Same |
 
 ---
 
@@ -186,13 +186,13 @@ Do **not** keep a live sheet join for list revenue that changes when the sheet i
 
 | File | Work |
 | --- | --- |
-| `redSea-backend-nestjs/src/app/modules/journey/journey.entity.ts` | `expectedRevenue`, `actualRevenue` nullable decimal |
-| `redSea-backend-nestjs/src/app/modules/journey/dtos/journey.dto.ts` | Expose both |
-| `redSea-backend-nestjs/src/app/modules/journey/journey-revenue.calculator.ts` | Pure `x`, expected, actual |
-| `redSea-backend-nestjs/src/app/modules/journey/journey-revenue.service.ts` | Lookup row + write columns |
-| `redSea-backend-nestjs/src/app/modules/journey-goods/journey-policy.controller.ts` | Call writer on create/update |
-| `redSea-backend-nestjs/src/app/modules/journey/journey-list-query.builder.ts` | Read stored columns |
-| `redSea-backend-nestjs/src/app/modules/journey/journey.service.ts` | Detail JSON: same stored values |
+| `backend/src/app/modules/journey/journey.entity.ts` | `expectedRevenue`, `actualRevenue` nullable decimal |
+| `backend/src/app/modules/journey/dtos/journey.dto.ts` | Expose both |
+| `backend/src/app/modules/journey/journey-revenue.calculator.ts` | Pure `x`, expected, actual |
+| `backend/src/app/modules/journey/journey-revenue.service.ts` | Lookup row + write columns |
+| `backend/src/app/modules/journey-goods/journey-policy.controller.ts` | Call writer on create/update |
+| `backend/src/app/modules/journey/journey-list-query.builder.ts` | Read stored columns |
+| `backend/src/app/modules/journey/journey.service.ts` | Detail JSON: same stored values |
 
 ---
 

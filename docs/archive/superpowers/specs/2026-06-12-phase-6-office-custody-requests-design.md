@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-12
 **Status:** Approved (pending written-spec review)
-**Source of truth:** [`phase-6-api.md`](../../../phase-6-api.md) (backend API), Figma RedSea System V1 nodes `1134-14954`, `1134-15180`, `1134-15405`, `1134-15855`.
+**Source of truth:** [`phase-6-api.md`](../../../../frontend/phase-6-api.md) (backend API), Figma RedSea System V1 nodes `1134-14954`, `1134-15180`, `1134-15405`, `1134-15855`.
 
 ## 1. Overview
 
@@ -28,7 +28,7 @@ Implementation follows the existing feature conventions (`src/features/{feature}
 
 ### Side menu
 
-Add an `office` entry (briefcase icon from the design) to `sideMenuIcons` in [`src/utils/icons.ts`](../../../src/utils/icons.ts), with sub-items:
+Add an `office` entry (briefcase icon from the design) to `sideMenuIcons` in [`src/utils/icons.ts`](../../../../frontend/src/utils/icons.ts), with sub-items:
 
 ```
 المكتب (/office)
@@ -45,11 +45,11 @@ Add an `office` entry (briefcase icon from the design) to `sideMenuIcons` in [`s
 - `/custody` — list; `/custody/[custodyId]` — detail
 - `/office-requests` — list
 
-Each route `page.tsx` is a thin server component rendering the feature client component (mirrors [`trips/create-delegate/page.tsx`](<../../../src/app/[locale]/(loggedIn)/trips/create-delegate/page.tsx>)).
+Each route `page.tsx` is a thin server component rendering the feature client component (mirrors [`trips/create-delegate/page.tsx`](<../../../../frontend/src/app/[locale]/(loggedIn)/trips/create-delegate/page.tsx>)).
 
 ### Roles
 
-`session.user.role` is already populated by the auth callbacks ([`auth.config.ts`](../../../src/app/[locale]/authentication/auth.config.ts)). Gate **UI affordances** by role; the backend enforces the hard rules:
+`session.user.role` is already populated by the auth callbacks ([`auth.config.ts`](../../../../frontend/src/app/[locale]/authentication/auth.config.ts)). Gate **UI affordances** by role; the backend enforces the hard rules:
 
 - Office create flow — `EMPLOYEE`
 - Custody create/edit/delete, Office-request approve/reject/delete — `ADMIN`
@@ -79,7 +79,7 @@ src/features/office/
 - **`office-landing.tsx`** — two `ChoiceCard`s. `اصدار تفويض` → `/office/issue-delegation`. `تسجيل بوليصة` → links to the **existing** policy flow (not a new Phase-6 endpoint; link-out only).
 - **`vehicle-mode-selection.tsx`** — three `ChoiceCard`s → `/office/issue-delegation/{mode}`.
 - **`choice-card.tsx`** — large white card, centered Arabic label, hover-lift. Reused by both screens.
-- Both use the shared [`BreadCrumb`](../../../src/components/common/bread-crumb.tsx) (`اسم المكتب • اصدار تفويض`).
+- Both use the shared [`BreadCrumb`](../../../../frontend/src/components/common/bread-crumb.tsx) (`اسم المكتب • اصدار تفويض`).
 
 ### The form (`office-journey-form.tsx`)
 
@@ -114,7 +114,7 @@ type AssetValue<TInline> = { id: number } | TInline; // selected vs. inline-crea
 
 The "+ New" affordance in `SelectWithActions` (`canAddItem` + `addDialog`) opens a dialog that collects the asset fields (reusing the existing driver/car/trailer create schemas) and writes the **inline object** into form state. On submit the inline object is sent **inside** the `POST /api/journeys/office` body (`driver: {...}`, `car: {...}`, `trailer: {...}`); the backend creates the asset atomically within its DB transaction. No separate create API calls are made.
 
-Inline payload shapes follow [`phase-6-api.md §3.1`](../../../phase-6-api.md):
+Inline payload shapes follow [`phase-6-api.md §3.1`](../../../../frontend/phase-6-api.md):
 
 - **Driver:** `licenseNumber`, `licenseExpiryDate`, `user{ firstName, lastName, nationalId, phoneNumber, email, password }`
 - **Car:** `plateNumber`, `plateLetters`, `licenseNumber`, `licenseExpiryDate`, `manufacturer`, `model`, `manufactureYear`, `color`, `chassisNumber`
@@ -154,7 +154,7 @@ src/features/custody/
 
 ### List (`/custody`)
 
-`EntitiesToolbar` + `TableFilters` + `DataTable` + `TablePagination` (mirrors [`transactions-page-client.tsx`](../../../src/features/accounting/transactions/components/transactions-page-client.tsx)).
+`EntitiesToolbar` + `TableFilters` + `DataTable` + `TablePagination` (mirrors [`transactions-page-client.tsx`](../../../../frontend/src/features/accounting/transactions/components/transactions-page-client.tsx)).
 
 - **Columns:** id, employee name, account name, journey `delegateNumber`, driver name, `status` (badge), createdAt, row actions (view / edit / delete).
 - **Filters → query params:** `status`, `employeeId`, `accountId`, `journeyId`, `driverId`, `search`, `createdAtFrom/To`, `updatedAtFrom/To`.
@@ -166,7 +166,7 @@ Fields: `employeeId` (select, required), `accountId` (select, required), `status
 
 ### Detail (`/custody/[custodyId]`) & delete
 
-Read view via [`info-section`](../../../src/components/common/info-section.tsx). Delete → confirm → `useDelete`.
+Read view via [`info-section`](../../../../frontend/src/components/common/info-section.tsx). Delete → confirm → `useDelete`.
 
 ### Roles
 
@@ -206,7 +206,7 @@ Confirm → `useDelete`.
 
 ## 6. Shared concerns
 
-- **Enums** ([`phase-6-api.md §4`](../../../phase-6-api.md)): `JourneyVehicleMode`, `CustodyStatus`, `OfficeRequestStatus`, `OfficeRequestType` in their feature `enums/`. Reuse the existing `PackingType` and cement-grade constants from `trips`/`clients`.
+- **Enums** ([`phase-6-api.md §4`](../../../../frontend/phase-6-api.md)): `JourneyVehicleMode`, `CustodyStatus`, `OfficeRequestStatus`, `OfficeRequestType` in their feature `enums/`. Reuse the existing `PackingType` and cement-grade constants from `trips`/`clients`.
 - **i18n:** new namespaces `messages/{en,ar}/office.json`, `custody.json`, `office-requests.json`, loaded via `getLocaleMessages`. All Arabic labels from the screens live here; RTL throughout.
 - **Shared selects:** reuse `useGetAllDrivers/Cars/Trailers/Employees/Clients`; add an ownership filter param where needed.
 - **Tests:** Jest unit tests co-located in `__tests__/` for: the office Zod schema (esp. the `{id} | inline` union and the mode-conditional fields), the form→office-payload mapper, and the custody/request-action mutation hooks. Maintain the 70% coverage threshold. `pnpm build` (pre-commit) must stay green.

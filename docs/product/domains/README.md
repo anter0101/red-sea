@@ -25,8 +25,8 @@ Each file in this folder is a **standalone execution guide** for one business do
 
 ## Repo layout
 
-- **Backend:** `redSea-backend-nestjs/src/app/modules/`
-- **Frontend:** `red-sea-frontend-nextjs/src/features/`
+- **Backend:** `backend/src/app/modules/`
+- **Frontend:** `frontend/src/features/`
 - **Journey UI feature name:** `trips` (routes under `/trips`, not `/journeys`)
 
 ## Related docs

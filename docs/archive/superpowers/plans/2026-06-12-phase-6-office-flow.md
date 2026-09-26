@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js App Router (RSC + client components), TanStack Query (base `useCreate`), React Hook Form + Zod, next-intl (RTL Arabic), Tailwind/shadcn UI, Jest + @testing-library/react.
 
-**Spec:** [docs/superpowers/specs/2026-06-12-phase-6-office-custody-requests-design.md](../specs/2026-06-12-phase-6-office-custody-requests-design.md) · **API:** [phase-6-api.md §3.1](../../../phase-6-api.md)
+**Spec:** [docs/superpowers/specs/2026-06-12-phase-6-office-custody-requests-design.md](../specs/2026-06-12-phase-6-office-custody-requests-design.md) · **API:** [phase-6-api.md §3.1](../../../../frontend/phase-6-api.md)
 
 ---
 
@@ -146,7 +146,7 @@ git commit -m "feat(office): add vehicle-mode enum and slug mapping"
 - Create: `src/features/office/types/office-journey-schema.ts` (schemas only in this task)
 - Test: `src/features/office/types/__tests__/inline-asset-schema.test.ts`
 
-These mirror the inline shapes in [phase-6-api.md §3.1](../../../phase-6-api.md).
+These mirror the inline shapes in [phase-6-api.md §3.1](../../../../frontend/phase-6-api.md).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -628,7 +628,7 @@ git commit -m "feat(office): add mode-conditional validation schema"
 - Create: `src/features/office/api/create-office-journey.ts`
 - Test: `src/features/office/api/__tests__/create-office-journey.test.tsx`
 
-Mirrors [accounting create.ts](../../../src/features/accounting/transactions/api/create.ts).
+Mirrors [accounting create.ts](../../../../frontend/src/features/accounting/transactions/api/create.ts).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1576,7 +1576,7 @@ git commit -m "feat(office): add office journey form with mode-conditional field
 
 ## Task 13: Wire inline-create into NOLON asset selects + the `[mode]` route
 
-Replace the three NOLON plain `<select>`s (car, trailer, driver) with `SelectWithActions` (existing component at [select-with-actions.tsx](../../../src/components/common/select-with-actions.tsx)) wired to the Task 10 dialogs. Selecting an existing item sets `carId`/`trailerId`/`driverId`; "+ New" opens the dialog and `onCreated` does `form.setValue('carInline', data)` (clearing the corresponding id), so the mapper sends the inline object.
+Replace the three NOLON plain `<select>`s (car, trailer, driver) with `SelectWithActions` (existing component at [select-with-actions.tsx](../../../../frontend/src/components/common/select-with-actions.tsx)) wired to the Task 10 dialogs. Selecting an existing item sets `carId`/`trailerId`/`driverId`; "+ New" opens the dialog and `onCreated` does `form.setValue('carInline', data)` (clearing the corresponding id), so the mapper sends the inline object.
 
 **Files:**
 
