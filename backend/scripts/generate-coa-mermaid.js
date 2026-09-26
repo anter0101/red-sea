@@ -74,7 +74,7 @@ function buildFlowchart() {
   return `${header}flowchart TB\n${nodeDecls.join('\n')}\n${edges.join('\n')}\n`;
 }
 
-const outDir = path.join(__dirname, '../docs/mermaid');
+const outDir = path.join(__dirname, '../../docs/accounting/mermaid');
 const outFile = path.join(outDir, 'chart-of-accounts.mmd');
 
 fs.mkdirSync(outDir, { recursive: true });

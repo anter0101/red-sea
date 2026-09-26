@@ -26,6 +26,9 @@ export class Transaction extends BaseEntity {
   })
   status: TransactionStatus;
 
+  @Column({ name: 'idempotency_key', type: 'varchar', length: 120, nullable: true, unique: true })
+  idempotencyKey?: string | null;
+
   @OneToMany(() => TransactionLine, (line) => line.transaction, { cascade: true })
   transactionLines?: TransactionLine[];
 }

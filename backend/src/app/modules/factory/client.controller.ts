@@ -19,6 +19,7 @@ import { AuthGuard, Roles, RolesGuard, AuthUser } from 'src/core/security';
 import { UserRole } from 'src/core/enums/user-role';
 import type { Request } from 'src/core/utils/request';
 
+import { AccountService } from '../account/account.service';
 import { ClientService } from './client.service';
 import { ClientDTO } from './dtos/client.dto';
 import { CreateClientDTO } from './dtos/create-client.dto';
@@ -44,7 +45,10 @@ import { ClientQueryDTO } from './dtos/query-client.dto';
 export class ClientController {
   private readonly logger = new Logger('ClientController');
 
-  constructor(private readonly clientService: ClientService) {}
+  constructor(
+    private readonly clientService: ClientService,
+    private readonly accountService: AccountService,
+  ) {}
 
   // ------------------------------------------------------------------------
   // GET ALL (paginated)
@@ -145,7 +149,9 @@ export class ClientController {
       );
 
     const entity = mapCreateClientDtoToEntity(dto);
-    return this.clientService.save(entity, user?.email);
+    const saved = await this.clientService.save(entity, user?.email);
+    await this.accountService.createClientAccounts(saved.id, saved.name, user?.email);
+    return saved;
   }
 
   // ------------------------------------------------------------------------

@@ -12,6 +12,7 @@ export class JourneyDelegationPrint extends BaseEntity {
   @Column({
     type: 'enum',
     enum: JourneyDelegationPrintStatus,
+    enumName: 'journey_delegation_prints_status_enum',
     default: JourneyDelegationPrintStatus.NOT_PRINTED,
   })
   status: JourneyDelegationPrintStatus;

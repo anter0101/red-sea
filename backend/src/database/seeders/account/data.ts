@@ -7,6 +7,7 @@ export interface AccountSeed {
   isLeaf: boolean;
   parentName?: string;
   openingBalance?: number;
+  systemKey?: string;
 }
 
 export const accounts: AccountSeed[] = [
@@ -171,6 +172,14 @@ export const accounts: AccountSeed[] = [
     parentName: 'الاصول المتداوله',
   },
   {
+    name: 'العملاء تحت التنفيذ',
+    type: AccountType.ASSET,
+    normalBalance: normalBalanceType.DEBIT,
+    isLeaf: false,
+    parentName: 'الاصول المتداوله',
+    systemKey: 'CLIENTS_IN_PROGRESS',
+  },
+  {
     name: 'مدينين وارصده مدينه اخرى',
     type: AccountType.ASSET,
     normalBalance: normalBalanceType.DEBIT,
@@ -183,6 +192,7 @@ export const accounts: AccountSeed[] = [
     normalBalance: normalBalanceType.DEBIT,
     isLeaf: true,
     parentName: 'مدينين وارصده مدينه اخرى',
+    systemKey: 'CUSTODY',
   },
   {
     name: 'سلف',
@@ -254,6 +264,22 @@ export const accounts: AccountSeed[] = [
     normalBalance: normalBalanceType.CREDIT,
     isLeaf: true,
     parentName: 'الالتزامات المتداوله',
+  },
+  {
+    name: 'مورد النقل',
+    type: AccountType.LIABILITY,
+    normalBalance: normalBalanceType.CREDIT,
+    isLeaf: false,
+    parentName: 'الالتزامات المتداوله',
+    systemKey: 'TRANSPORT_SUPPLIER',
+  },
+  {
+    name: 'مورد العهدة',
+    type: AccountType.LIABILITY,
+    normalBalance: normalBalanceType.CREDIT,
+    isLeaf: false,
+    parentName: 'الالتزامات المتداوله',
+    systemKey: 'CUSTODY_SUPPLIER',
   },
   {
     name: 'ا.دفع',
@@ -376,6 +402,14 @@ export const accounts: AccountSeed[] = [
     parentName: 'الإيرادات',
   },
   {
+    name: 'ايرادات تحت التنفيذ',
+    type: AccountType.REVENUE,
+    normalBalance: normalBalanceType.CREDIT,
+    isLeaf: false,
+    parentName: 'الإيرادات',
+    systemKey: 'REVENUE_IN_PROGRESS',
+  },
+  {
     name: 'مردودات الايرادات',
     type: AccountType.REVENUE,
     normalBalance: normalBalanceType.DEBIT,
@@ -445,6 +479,14 @@ export const accounts: AccountSeed[] = [
     normalBalance: normalBalanceType.DEBIT,
     isLeaf: true,
     parentName: 'المصروفات التشغيلية',
+  },
+  {
+    name: 'سيارات عقود النولون',
+    type: AccountType.EXPENSE,
+    normalBalance: normalBalanceType.DEBIT,
+    isLeaf: true,
+    parentName: 'المصروفات التشغيلية',
+    systemKey: 'NOLON_CONTRACT_CARS',
   },
 
   // ── Financing and tax leaves ─────────────────────────────────────────

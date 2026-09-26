@@ -58,6 +58,18 @@ export class Account extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   isSystem: boolean;
 
+  /** Stable lookup for seeded parents. Null on actor leaves. */
+  @Column({ name: 'system_key', type: 'varchar', length: 64, nullable: true, unique: true })
+  systemKey?: string | null;
+
+  /** CLIENT, BRANCH, TRANSPORT_SUPPLIER, or CUSTODY_SUPPLIER. */
+  @Column({ name: 'actor_type', type: 'varchar', length: 32, nullable: true })
+  actorType?: string | null;
+
+  /** Numeric id of the client, branch, or supplier row. */
+  @Column({ name: 'actor_id', type: 'int', nullable: true })
+  actorId?: number | null;
+
   @Column({
     name: 'opening_balance',
     type: 'decimal',

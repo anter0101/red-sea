@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
-import { useGetAllJourneys } from '@/features/trips/api/get-all/get-all-journeys';
+import { useGetUnprintedJourneys } from '@/features/delegation-print/api/get-unprinted';
 
 import { resolveSafeOfficeReturnTo } from '@/features/office/utils/office-journey-draft';
 
@@ -58,7 +58,7 @@ export default function OfficeRequestForm() {
   const searchParams = useSearchParams();
 
   const { createOfficeRequestMutation, isCreateOfficeRequestPending } = useCreateOfficeRequest();
-  const { journeys, isGetJourneysPending } = useGetAllJourneys();
+  const { unprintedJourneys, isUnprintedJourneysPending } = useGetUnprintedJourneys();
 
   const form = useForm<OfficeRequestFormValues>({
     resolver: zodResolver(officeRequestFormSchema),
@@ -128,20 +128,20 @@ export default function OfficeRequestForm() {
               name="journeyId"
               render={({ field }) => {
                 let journeyContent: React.ReactNode;
-                if (isGetJourneysPending) {
+                if (isUnprintedJourneysPending) {
                   journeyContent = (
                     <div className="px-3 py-2 text-sm text-muted-foreground">...</div>
                   );
-                } else if (journeys.length === 0) {
+                } else if (unprintedJourneys.length === 0) {
                   journeyContent = (
                     <div className="px-3 py-2 text-sm text-muted-foreground">
                       {t('form.noJourneys')}
                     </div>
                   );
                 } else {
-                  journeyContent = journeys.map((j: any) => (
-                    <SelectItem key={j.id} value={String(j.id)}>
-                      {j.delegateNumber ?? String(j.id)}
+                  journeyContent = unprintedJourneys.map((journey) => (
+                    <SelectItem key={journey.journeyId} value={String(journey.journeyId)}>
+                      {journey.delegateNumber ?? String(journey.journeyId)}
                     </SelectItem>
                   ));
                 }

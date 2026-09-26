@@ -2,13 +2,10 @@
 import InfoSection from '@/components/common/info-section';
 import EntityToggleTabs from '@/components/common/toggle-tabs';
 import { mapToInfoItems } from '@/utils/generic-field-mapper';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import ActivityToolbar from './transactions-toolbar';
 import TransactionsTable from './transactions-table';
 
 import { useMemo, useState } from 'react';
-import { useGetOneTrip } from '../api/get-one/get-one';
 import { useGetJourneyHistory } from '../api/get-one/get-journey-history';
 
 import { useGetAllTransactionsByJourney } from '../api/get-all/get-all-transactions';
@@ -28,11 +25,6 @@ import { useTableExport } from '@/hooks/use-table-export';
 import { JOURNEY_STATUS_LABELS } from '../constants/journey-status';
 
 export default function TripClientPage({ journeyId }: { journeyId: number }) {
-  const router = useRouter();
-  const { data: session } = useSession();
-  const isAdmin = session?.user?.role?.toUpperCase() === 'ADMIN';
-
-  const { tripResponse } = useGetOneTrip(journeyId);
   const { transactions } = useGetAllTransactionsByJourney(String(journeyId));
   const { tripInfo } = useGetOneInfo(journeyId);
   const { vehicleInfo } = useGetOneVehicle(journeyId);
@@ -59,18 +51,6 @@ export default function TripClientPage({ journeyId }: { journeyId: number }) {
     { id: 'history', label: 'سجل الحالة' },
   ];
 
-  const handleEditDelegate = () => {
-    router.push(`/trips/${journeyId}/update-delegate`);
-  };
-
-  const handleCreatePolicy = () => {
-    router.push(`/trips/${journeyId}/policy/create`);
-  };
-
-  const handleEditPolicy = () => {
-    router.push(`/trips/${journeyId}/policy/update`);
-  };
-
   const tripInfoItems = mapToInfoItems(tripInfo, tripInfoFields);
   const logisticsInfoItems = mapToInfoItems(tripInfo, logisticsInfoFields);
   const carInfoItems = mapToInfoItems(vehicleInfo, vehicleFields);
@@ -91,21 +71,9 @@ export default function TripClientPage({ journeyId }: { journeyId: number }) {
 
       {activeTab === 'trip-info' && (
         <div className="flex gap-2">
-          <InfoSection
-            title="بيانات الرحلة"
-            items={tripInfoItems}
-            onEdit={isAdmin ? () => handleEditDelegate() : undefined}
-            showEdit={isAdmin}
-          />
+          <InfoSection title="بيانات الرحلة" items={tripInfoItems} showEdit={false} />
 
-          <InfoSection
-            title="المعلومات اللوجستية"
-            items={logisticsInfoItems}
-            showCreate={isAdmin && !tripResponse?.policy?.id}
-            onCreate={isAdmin ? handleCreatePolicy : undefined}
-            showEdit={isAdmin && !!tripResponse?.policy?.id}
-            onEdit={isAdmin ? handleEditPolicy : undefined}
-          />
+          <InfoSection title="المعلومات اللوجستية" items={logisticsInfoItems} showEdit={false} />
         </div>
       )}
 

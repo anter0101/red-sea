@@ -22,6 +22,20 @@ import { mapJourneyDelegationPrintToDto } from './journey-delegation-print.mappe
 export class JourneyDelegationPrintController {
   constructor(private readonly journeyDelegationPrintService: JourneyDelegationPrintService) {}
 
+  @Get()
+  @Roles(UserRole.ADMIN, UserRole.DATA_ENTRY)
+  @ApiOperation({ summary: 'List journeys whose delegation has not been printed' })
+  @ApiResponse({ status: 200, type: [JourneyDelegationPrintDTO] })
+  async listUnprinted(): Promise<JourneyDelegationPrintDTO[]> {
+    const rows = await this.journeyDelegationPrintService.findUnprintedJourneys();
+    return rows.map((row) => ({
+      journeyId: row.journeyId,
+      delegateNumber: row.delegateNumber,
+      status: row.status,
+      canPrint: false,
+    }));
+  }
+
   @Get('/:journeyId')
   @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
   @ApiOperation({ summary: 'Get delegation print state for a journey' })

@@ -329,11 +329,7 @@ export class OfficeRequestController {
     switch (existing.type) {
       case OfficeRequestType.PRINT_DELEGATION:
         if (existing.journey?.id) {
-          await this.journeyDelegationPrintService.resetToNotPrinted(
-            existing.journey.id,
-            manager,
-            updater,
-          );
+          await this.journeyDelegationPrintService.grantPrint(existing.journey.id, manager, updater);
         }
         return;
 
@@ -513,6 +509,7 @@ export class OfficeRequestController {
       if (!journey) {
         throw new NotFoundException(`Journey with id ${dto.journeyId} not found`);
       }
+      await this.journeyDelegationPrintService.assertPrintRequestAllowed(dto.journeyId);
     } else if (dto.journeyId) {
       const journey = await this.journeyService.findById(dto.journeyId);
       if (!journey) {

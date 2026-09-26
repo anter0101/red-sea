@@ -6,6 +6,7 @@ import { journeyScopeToParams } from '@/features/trips/types/journey-list-scope'
 export type JourneysQueryParams = IQueryParams &
   JourneyListScope & {
     tripStatus?: string;
+    tripStatuses?: string;
   };
 
 export const useGetAllJourneys = (params?: JourneysQueryParams, scope?: JourneyListScope) => {

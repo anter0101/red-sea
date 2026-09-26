@@ -1,6 +1,11 @@
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AccountModule } from 'src/app/modules/account/account.module';
+import { Client } from 'src/app/modules/factory/client.entity';
+import { Branch } from 'src/app/modules/branch/branch.entity';
+import { Supplier } from 'src/app/modules/supplier/supplier.entity';
+import { Driver } from 'src/app/modules/driver/driver.entity';
 import { UserSeederModule } from './user/user-seeder.module';
 import { Seeder } from './seeder';
 import PostgresTypeorm from 'src/config/db-config';
@@ -27,6 +32,8 @@ import { CarSeederModule } from './car/car-seeder.module';
       useClass: PostgresTypeorm,
       inject: [PostgresTypeorm],
     }),
+    TypeOrmModule.forFeature([Client, Branch, Supplier, Driver]),
+    AccountModule,
     UserSeederModule,
     AreaSeederModule,
     PriceTypeSeederModule,

@@ -69,6 +69,29 @@ describe('journey-list-filters', () => {
     expect(qb.setParameter).toHaveBeenCalledWith('_jBranchId', 7);
   });
 
+  it('applyJourneyFilters matches any status in tripStatuses unless tripStatus is set', () => {
+    const many = createMockQb();
+    applyJourneyFilters(many, {
+      tripStatuses: ['DELEGATION_ISSUED', 'POLICY_COLLECTED'],
+    } as JourneyQueryDTO);
+    expect(many.andWhere).toHaveBeenCalledWith('journey.tripStatus IN (:..._jstatuses)', {
+      _jstatuses: ['DELEGATION_ISSUED', 'POLICY_COLLECTED'],
+    });
+
+    const one = createMockQb();
+    applyJourneyFilters(one, {
+      tripStatus: 'POLICY_COLLECTED',
+      tripStatuses: ['DELEGATION_ISSUED', 'POLICY_COLLECTED'],
+    } as JourneyQueryDTO);
+    expect(one.andWhere).toHaveBeenCalledWith('journey.tripStatus = :_jstatus', {
+      _jstatus: 'POLICY_COLLECTED',
+    });
+    expect(one.andWhere).not.toHaveBeenCalledWith(
+      'journey.tripStatus IN (:..._jstatuses)',
+      expect.anything(),
+    );
+  });
+
   it('applyJourneyFilters stacks role scope with query scope', () => {
     const qb = createMockQb();
     applyJourneyFilters(

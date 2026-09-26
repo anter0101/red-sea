@@ -2,6 +2,7 @@ import { BaseEntity } from 'src/core/utils/base.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { SupplierType } from './enums/supplier-type.enum';
 import { Government } from '../government/government.entity';
+import { Branch } from '../branch/branch.entity';
 
 @Entity('suppliers')
 export class Supplier extends BaseEntity {
@@ -21,6 +22,10 @@ export class Supplier extends BaseEntity {
   @ManyToOne(() => Government, { nullable: false, eager: true, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'government_id' })
   government: Government; // المحافظة
+
+  @ManyToOne(() => Branch, { nullable: true, eager: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'branch_id' })
+  branch?: Branch;
 
   @Column({ type: 'varchar', length: 20 })
   phone: string; // تليفون

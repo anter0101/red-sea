@@ -4,6 +4,7 @@ import { CreateSupplierDTO } from './dtos/create-supplier.dto';
 import { UpdateSupplierDTO } from './dtos/update-supplier.dto';
 import { BaseDTO } from 'src/core/utils/base.dto';
 import { Government } from '../government/government.entity';
+import { Branch } from '../branch/branch.entity';
 
 /**
  * Allowed keys for selective DTO mapping
@@ -85,6 +86,10 @@ export const mapCreateSupplierDtoToEntity = (dto: CreateSupplierDTO): Supplier =
 
   if (dto.governmentId !== undefined) {
     entity.government = { id: dto.governmentId } as Government;
+  }
+
+  if (dto.branchId !== undefined) {
+    entity.branch = { id: dto.branchId } as Branch;
   }
 
   if (dto.createdAt !== undefined) entity.createdAt = dto.createdAt;

@@ -11,4 +11,5 @@ export interface ISupplier extends IAuditFields {
   commercialRegister?: string;
   taxCard?: string;
   taxRegistrationNumber?: string;
+  branchId?: number;
 }

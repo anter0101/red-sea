@@ -6,7 +6,10 @@ import { Trailer } from '../trailer/trailer.entity';
 import { User } from '../user/user.entity';
 import { JourneyStatus } from 'src/core/enums/journey';
 import { Client } from '../factory/client.entity';
+import { Area } from '../area/area.entity';
+import { Government } from '../government/government.entity';
 import { Employee } from '../employee/employee.entity';
+import { Supplier } from '../supplier/supplier.entity';
 import { JourneyPolicy } from '../journey-goods/journey-policy.entity';
 import { JourneyTransaction } from '../journey-transaction/journey-transaction.entity';
 import { PackingType } from 'src/core/enums/packing-type';
@@ -76,6 +79,25 @@ export class Journey extends BaseEntity {
   @ManyToOne(() => Employee, { nullable: true, eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'custody_source_id' })
   custodySource?: Employee; // Source of custody
+
+  @ManyToOne(() => Area, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'delivery_area_id' })
+  deliveryArea?: Area;
+
+  @ManyToOne(() => Government, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'delivery_gov_id' })
+  deliveryGov?: Government;
+
+  @ManyToOne(() => Supplier, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'transport_supplier_id' })
+  transportSupplier?: Supplier;
+
+  @ManyToOne(() => Supplier, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'custody_supplier_id' })
+  custodySupplier?: Supplier;
+
+  @Column({ name: 'custody_supplier_amount', type: 'decimal', precision: 14, scale: 2, nullable: true })
+  custodySupplierAmount?: number;
 
   @OneToMany(() => JourneyPolicy, (policy) => policy.journey)
   journeyPolicies?: JourneyPolicy[];

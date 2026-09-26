@@ -55,7 +55,12 @@ import { CustodyStatus } from 'src/core/enums/custody-status';
 import { Custody } from '../custody/custody.entity';
 import { Driver } from '../driver/driver.entity';
 import { Employee } from '../employee/employee.entity';
-import { ACCOUNT_PARENT_CUSTODY, buildPersonAccountName } from '../account/person-account.constants';
+import { Area } from '../area/area.entity';
+import {
+  ACCOUNT_PARENT_CUSTODY,
+  PERSON_ACCOUNT_PARENTS,
+  buildPersonAccountName,
+} from '../account/person-account.constants';
 import { JourneyDelegationPrintService } from '../journey-delegation-print/journey-delegation-print.service';
 import { EmployeeCustodyBalanceDTO } from './dtos/employee-custody-balance.dto';
 import { JourneyRevenueService } from './journey-revenue.service';
@@ -190,6 +195,16 @@ export class JourneyController {
 
       const entity = mapCreateJourneyDtoToEntity(dto);
       entity.custodySource = emp;
+      if (dto.deliveryAreaId) {
+        const area = await manager.findOne(Area, {
+          where: { id: dto.deliveryAreaId },
+          relations: ['government'],
+        });
+        if (area) {
+          entity.deliveryArea = area;
+          entity.deliveryGov = area.government;
+        }
+      }
       const savedJourney = await this.journeyService.save(entity, user?.email, manager);
 
       if (dto.custodyAmount && dto.custodyAmount > 0) {
@@ -200,6 +215,18 @@ export class JourneyController {
         txEntity.amount = dto.custodyAmount;
         await this.journeyTransactionService.save(txEntity, user?.email, manager);
 
+        const driverName = buildPersonAccountName(
+          driver.user.firstName,
+          driver.user.lastName,
+          `Driver ${driver.id}`,
+        );
+        await this.accountService.createPersonSubAccounts(
+          driverName,
+          PERSON_ACCOUNT_PARENTS[UserRole.DRIVER]!,
+          user?.email,
+          manager,
+        );
+
         const empAccount = await this.accountService.findPersonSubAccount(
           buildPersonAccountName(emp.user.firstName, emp.user.lastName, `Employee ${emp.id}`),
           ACCOUNT_PARENT_CUSTODY,
@@ -207,11 +234,7 @@ export class JourneyController {
         );
 
         const driverAccount = await this.accountService.findPersonSubAccount(
-          buildPersonAccountName(
-            driver.user.firstName,
-            driver.user.lastName,
-            `Driver ${driver.id}`,
-          ),
+          driverName,
           ACCOUNT_PARENT_CUSTODY,
           manager,
         );

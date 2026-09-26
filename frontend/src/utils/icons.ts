@@ -71,7 +71,8 @@ export const sideMenuIcons: SideMenuItem[] = [
     alt: 'المكتب',
     href: '/office',
     subItems: [
-      { alt: 'اصدار تفويض', href: '/office' },
+      { alt: 'اصدار تفويض', href: '/office/issue' },
+      { alt: 'تسجيل بوليصة', href: '/office/policy' },
       { alt: 'العُهد', href: '/custody' },
       { alt: 'طلبات المكتب', href: '/office-requests' },
     ],

@@ -20,6 +20,7 @@ import { AuthGuard, Roles, RolesGuard, AuthUser } from 'src/core/security';
 import { UserRole } from 'src/core/enums/user-role';
 import type { Request } from 'src/core/utils/request';
 
+import { AccountService } from '../account/account.service';
 import { BranchService } from './branch.service';
 import { BranchDTO } from './dtos/branch.dto';
 import { CreateBranchDTO } from './dtos/create-branch.dto';
@@ -45,7 +46,10 @@ import { BranchQueryDTO } from './dtos/query-branch.dto';
 export class BranchController {
   private readonly logger = new Logger('BranchController');
 
-  constructor(private readonly branchService: BranchService) {}
+  constructor(
+    private readonly branchService: BranchService,
+    private readonly accountService: AccountService,
+  ) {}
 
   // ------------------------------------------------------------------------
   // GET ALL (paginated)
@@ -136,7 +140,9 @@ export class BranchController {
     }
 
     const entity = mapCreateBranchDtoToEntity(dto);
-    return this.branchService.save(entity, user?.email);
+    const saved = await this.branchService.save(entity, user?.email);
+    await this.accountService.createBranchAccount(saved.id, saved.name, user?.email);
+    return saved;
   }
 
   // ------------------------------------------------------------------------

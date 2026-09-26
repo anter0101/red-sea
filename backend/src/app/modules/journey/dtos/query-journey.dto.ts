@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { IsDateString, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { JourneyStatus } from 'src/core/enums/journey';
 import { PaginateDTO } from 'src/core/utils/paginate.dto';
@@ -18,6 +18,22 @@ export class JourneyQueryDTO extends PaginateDTO {
   @IsOptional()
   @IsEnum(JourneyStatus)
   tripStatus?: JourneyStatus;
+
+  @ApiProperty({
+    required: false,
+    enum: JourneyStatus,
+    isArray: true,
+    description: 'Match any of these statuses. Ignored when tripStatus is set.',
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value == null || value === '') return undefined;
+    const raw = Array.isArray(value) ? value : String(value).split(',');
+    const list = raw.map((item: unknown) => String(item).trim()).filter(Boolean);
+    return list.length ? list : undefined;
+  })
+  @IsEnum(JourneyStatus, { each: true })
+  tripStatuses?: JourneyStatus[];
 
   @ApiProperty({ required: false })
   @IsOptional()

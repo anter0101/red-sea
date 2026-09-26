@@ -70,7 +70,8 @@
   "types": {
     "GOODS": "Goods",
     "SERVICES": "Services",
-    "TRANSPORTATION": "Transportation"
+    "TRANSPORTATION": "Transportation",
+    "CUSTODY": "Custody"
   },
   "buttons": {
     "save": "Save",

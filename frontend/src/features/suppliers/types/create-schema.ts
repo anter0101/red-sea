@@ -27,6 +27,17 @@ export const SupplierSchema = (t: (key: string) => string) =>
       .string()
       .min(1, t('validation.tax-registration-required'))
       .max(50, t('validation.tax-registration-max')),
+
+    branchId: z.string().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.type === SupplierType.TRANSPORTATION && !value.branchId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['branchId'],
+        message: 'الفرع مطلوب لمورد النقل',
+      });
+    }
   });
 
 export type SupplierFormValues = z.infer<ReturnType<typeof SupplierSchema>>;

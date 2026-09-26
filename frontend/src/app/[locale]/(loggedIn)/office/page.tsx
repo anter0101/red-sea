@@ -1,5 +1,5 @@
-import VehicleModeSelection from '@/features/office/components/vehicle-mode-selection';
+import OfficeLanding from '@/features/office/components/office-landing';
 
 export default function OfficePage() {
-  return <VehicleModeSelection />;
+  return <OfficeLanding />;
 }

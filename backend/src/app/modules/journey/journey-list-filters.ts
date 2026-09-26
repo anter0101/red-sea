@@ -109,6 +109,8 @@ export function applyJourneyFilters(
 
   if (query.tripStatus) {
     qb.andWhere('journey.tripStatus = :_jstatus', { _jstatus: query.tripStatus });
+  } else if (query.tripStatuses?.length) {
+    qb.andWhere('journey.tripStatus IN (:..._jstatuses)', { _jstatuses: query.tripStatuses });
   }
 
   if (query.createdAtFrom) {

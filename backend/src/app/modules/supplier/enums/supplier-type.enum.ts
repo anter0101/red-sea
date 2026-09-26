@@ -2,4 +2,5 @@ export enum SupplierType {
   GOODS = 'GOODS',
   SERVICES = 'SERVICES',
   TRANSPORTATION = 'TRANSPORTATION',
+  CUSTODY = 'CUSTODY',
 }

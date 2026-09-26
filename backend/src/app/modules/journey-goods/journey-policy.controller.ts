@@ -29,6 +29,7 @@ import {
   mapUpdateJourneyPolicyDtoToEntity,
 } from './journey-policy.mapper';
 import { JourneyService } from '../journey/journey.service';
+import { Journey } from '../journey/journey.entity';
 import { JourneyRevenueService } from '../journey/journey-revenue.service';
 import { AreaService } from '../area/area.service';
 import { HeaderUtil } from 'src/core/utils/header-util';
@@ -37,6 +38,8 @@ import type { Request } from 'src/core/utils/request';
 import { JourneyPolicyQueryDTO } from './dtos/query-journey-policy.dto';
 import { EmployeeService } from '../employee/employee.service';
 import { JourneyAttachmentService } from '../journey-attachment/journey-attachment.service';
+import { PolicyLedgerService } from './policy-ledger.service';
+import { ApplyLedgerDTO } from './dtos/apply-ledger.dto';
 import { JourneyAttachmentType, JourneyStatus } from 'src/core/enums/journey';
 import { JourneyPolicyFormDTO } from './dtos/journey-policy-form.dto';
 import { withTransaction } from 'src/core/utils/transaction';
@@ -58,6 +61,7 @@ export class JourneyPolicyController {
     private readonly employeeService: EmployeeService,
     private readonly journeyAttachmentService: JourneyAttachmentService,
     private readonly journeyRevenueService: JourneyRevenueService,
+    private readonly policyLedgerService: PolicyLedgerService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -117,8 +121,31 @@ export class JourneyPolicyController {
   // ---------------------------
   // GET ONE
   // ---------------------------
+  @Get('journey/:id/ledger')
+  @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
+  @ApiOperation({ summary: 'Preview policy ledger lines before apply' })
+  async previewLedger(
+    @Param('id', ParseIntPipe) journeyId: number,
+    @Query() query: ApplyLedgerDTO,
+  ) {
+    return this.policyLedgerService.preview(journeyId, query);
+  }
+
+  @Post('journey/:id/ledger/apply')
+  @Roles(UserRole.ADMIN, UserRole.DATA_ENTRY)
+  @ApiOperation({ summary: 'Post the policy ledger set once' })
+  async applyLedger(
+    @Param('id', ParseIntPipe) journeyId: number,
+    @Body() body: ApplyLedgerDTO,
+    @AuthUser() user: any,
+  ) {
+    return withTransaction(this.dataSource, (manager) =>
+      this.policyLedgerService.apply(journeyId, body ?? {}, user?.email, manager),
+    );
+  }
+
   @Get('journey/:id')
-  @Roles(UserRole.ADMIN, UserRole.USER)
+  @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
   @ApiOperation({ summary: 'Get policy details for a journey' })
   @ApiResponse({ status: 200, description: 'Policy found', type: JourneyPolicyFormDTO })
   async getById(@Param('id', ParseIntPipe) id: number): Promise<JourneyPolicyFormDTO> {
@@ -146,12 +173,15 @@ export class JourneyPolicyController {
   // CREATE (same structure as JourneyController)
   // ---------------------------
   @Post('/')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.DATA_ENTRY)
   @ApiOperation({ summary: 'Create a new journey policy' })
   @ApiResponse({ status: 201, description: 'Policy created', type: JourneyPolicyDTO })
   async create(@Body() dto: CreateJourneyPolicyDTO, @AuthUser() user: any) {
     // 1. Validate FK relations
-    const journey = await this.journeyService.findById(dto.journeyId);
+    const journey = await this.journeyService.findByFields({
+      where: { id: dto.journeyId },
+      relations: ['deliveryArea', 'deliveryGov'],
+    });
     if (!journey) throw new NotFoundException(`Journey with id ${dto.journeyId} not found`);
 
     //cheack if it has policy already
@@ -161,9 +191,8 @@ export class JourneyPolicyController {
     if (existingPolicy)
       throw new BadRequestException(`Journey with id ${dto.journeyId} already has a policy`);
 
+    await this.applyDelegationContext(dto, journey, user?.id);
     await this.validatePolicyReferences(dto.journeyId, dto);
-
-    //
 
     // 2. Map to entity
     const entity = mapCreateJourneyPolicyDtoToEntity(dto);
@@ -199,7 +228,7 @@ export class JourneyPolicyController {
   // UPDATE (same style as JourneyController)
   // ---------------------------
   @Put('journey/:id')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.DATA_ENTRY)
   @ApiOperation({ summary: 'Update journey policy details' })
   @ApiResponse({ status: 200, description: 'Policy updated', type: JourneyPolicyDTO })
   async update(
@@ -214,7 +243,11 @@ export class JourneyPolicyController {
 
     if (!existing) throw new NotFoundException(`Policy with id ${id} not found`);
 
-    // Validate new FK references using the journey id from the found policy
+    const journey = await this.journeyService.findByFields({
+      where: { id: existing.journey.id },
+      relations: ['deliveryArea', 'deliveryGov'],
+    });
+    await this.applyDelegationContext(dto, journey ?? existing.journey, user?.id);
     await this.validatePolicyReferences(existing.journey.id, dto);
 
     const updated = await withTransaction(this.dataSource, async manager => {
@@ -298,5 +331,44 @@ export class JourneyPolicyController {
       const employee = await this.employeeService.findById(dto.employeeId);
       if (!employee) throw new NotFoundException(`Employee with id ${dto.employeeId} not found`);
     }
+  }
+
+  private async applyDelegationContext(
+    dto: CreateJourneyPolicyDTO | UpdateJourneyPolicyDTO,
+    journey: Journey,
+    userId?: number,
+  ): Promise<void> {
+    this.assertPolicyDateAfterDelegation(dto.policyDate, journey.delegateDate);
+
+    if (!userId) {
+      throw new BadRequestException('لا يوجد موظف مرتبط بهذا المستخدم');
+    }
+    const employee = await this.employeeService.findByFields({
+      where: { user: { id: userId } },
+    });
+    if (!employee) {
+      throw new BadRequestException('لا يوجد موظف مرتبط بهذا المستخدم');
+    }
+    dto.employeeId = employee.id;
+    if (journey.deliveryArea?.id) dto.deliveryAreaId = journey.deliveryArea.id;
+    if (journey.deliveryGov?.id) dto.deliveryGovId = journey.deliveryGov.id;
+  }
+
+  private assertPolicyDateAfterDelegation(
+    policyDate?: Date | string,
+    delegateDate?: Date | string,
+  ): void {
+    if (!policyDate || !delegateDate) return;
+    if (this.dayKey(policyDate) <= this.dayKey(delegateDate)) {
+      throw new BadRequestException('تاريخ البوليصة لازم يكون بعد تاريخ إصدار التفويض');
+    }
+  }
+
+  private dayKey(value: Date | string): string {
+    if (typeof value === 'string') return value.slice(0, 10);
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

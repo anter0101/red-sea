@@ -1,6 +1,6 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt } from 'class-validator';
+import { IsInt, IsOptional } from 'class-validator';
 import { SupplierDTO } from './supplier.dto';
 
 export class CreateSupplierDTO extends OmitType(SupplierDTO, [
@@ -13,4 +13,10 @@ export class CreateSupplierDTO extends OmitType(SupplierDTO, [
   @Type(() => Number)
   @IsInt()
   governmentId: number;
+
+  @ApiPropertyOptional({ description: 'Branch id. Required for transportation suppliers.' })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  branchId?: number;
 }

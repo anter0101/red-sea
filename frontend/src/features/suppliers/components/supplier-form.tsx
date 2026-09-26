@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
-import { useGetAllGovernments } from '@/apis/governments/get-all-governments';
+import { useGetAllBranches } from '@/features/branches/api/get-all';
 import { useCreateSupplier } from '@/features/suppliers/api/create';
 import { useEditSupplier } from '@/features/suppliers/api/update';
 import type { ISupplier } from '@/features/suppliers/types';
@@ -41,6 +41,7 @@ export const SupplierForm = ({ supplier }: SupplierFormProps) => {
   const router = useRouter();
 
   const { governments } = useGetAllGovernments();
+  const { branches } = useGetAllBranches({ page: 1, pageSize: 100 });
   const { editSupplierMutation, isEditSupplierPending } = useEditSupplier();
   const { createSupplierMutate, isCreateSupplierPending } = useCreateSupplier();
 
@@ -53,6 +54,7 @@ export const SupplierForm = ({ supplier }: SupplierFormProps) => {
       commercialRegister: supplier?.commercialRegister ?? '',
       taxCard: supplier?.taxCard ?? '',
       taxRegistrationNumber: supplier?.taxRegistrationNumber ?? '',
+      branchId: '',
     };
   }, [supplier]);
 
@@ -61,6 +63,7 @@ export const SupplierForm = ({ supplier }: SupplierFormProps) => {
     defaultValues,
     mode: 'onChange',
   });
+  const supplierType = form.watch('type');
 
   useEffect(() => {
     if (supplier) {
@@ -77,6 +80,7 @@ export const SupplierForm = ({ supplier }: SupplierFormProps) => {
       commercialRegister: data.commercialRegister,
       taxCard: data.taxCard,
       taxRegistrationNumber: data.taxRegistrationNumber,
+      branchId: data.branchId ? Number(data.branchId) : undefined,
     };
 
     if (supplier?.id) {
@@ -135,6 +139,33 @@ export const SupplierForm = ({ supplier }: SupplierFormProps) => {
               </FormItem>
             )}
           />
+
+          {supplierType === SupplierType.TRANSPORTATION && (
+            <FormField
+              control={form.control}
+              name="branchId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الفرع</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر الفرع" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {branches?.map((branch) => (
+                          <SelectItem key={branch.id} value={String(branch.id)}>
+                            {branch.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}

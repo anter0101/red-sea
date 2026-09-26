@@ -16,6 +16,8 @@ import { GeneratorTypes } from 'src/core/enums/generator-types';
 import { QueryAccountDTO, parseParentAccountIdQuery } from './dtos/query-account.dto';
 import { Employee } from '../employee/employee.entity';
 import { TransactionService } from '../transaction/transaction.service';
+import { clientRevenueAccountName } from './client-account.constants';
+import { AccountActorType, AccountSystemKey } from './account-system-keys';
 import {
   ACCOUNT_PARENT_CUSTODY,
   buildPersonAccountName,
@@ -574,6 +576,155 @@ export class AccountService {
     }
 
     return created;
+  }
+
+  /**
+   * Find-or-create the two chart leaves for a client, keyed by client id.
+   * A later rename does not rename these.
+   */
+  async createClientAccounts(
+    clientId: number,
+    clientName: string,
+    creator?: string,
+    manager?: EntityManager,
+  ): Promise<Account[]> {
+    const trimmed = clientName?.trim();
+    if (!trimmed || !clientId) {
+      throw new BadRequestException('Client id and name are required to create sub-accounts');
+    }
+
+    const asset = await this.ensureActorLeaf({
+      parentKey: AccountSystemKey.CLIENTS_IN_PROGRESS,
+      actorType: AccountActorType.CLIENT,
+      actorId: clientId,
+      name: trimmed,
+      creator,
+      manager,
+    });
+    const revenue = await this.ensureActorLeaf({
+      parentKey: AccountSystemKey.REVENUE_IN_PROGRESS,
+      actorType: AccountActorType.CLIENT,
+      actorId: clientId,
+      name: clientRevenueAccountName(trimmed),
+      creator,
+      manager,
+    });
+    return [asset, revenue];
+  }
+
+  async createBranchAccount(
+    branchId: number,
+    branchName: string,
+    creator?: string,
+    manager?: EntityManager,
+  ): Promise<Account> {
+    const trimmed = branchName?.trim();
+    if (!trimmed || !branchId) {
+      throw new BadRequestException('Branch id and name are required to create a sub-account');
+    }
+    return this.ensureActorLeaf({
+      parentKey: AccountSystemKey.CUSTODY,
+      actorType: AccountActorType.BRANCH,
+      actorId: branchId,
+      name: trimmed,
+      creator,
+      manager,
+    });
+  }
+
+  async createSupplierAccount(
+    supplierId: number,
+    supplierName: string,
+    kind: 'transport' | 'custody',
+    creator?: string,
+    manager?: EntityManager,
+  ): Promise<Account> {
+    const trimmed = supplierName?.trim();
+    if (!trimmed || !supplierId) {
+      throw new BadRequestException('Supplier id and name are required to create a sub-account');
+    }
+    return this.ensureActorLeaf({
+      parentKey:
+        kind === 'transport'
+          ? AccountSystemKey.TRANSPORT_SUPPLIER
+          : AccountSystemKey.CUSTODY_SUPPLIER,
+      actorType:
+        kind === 'transport'
+          ? AccountActorType.TRANSPORT_SUPPLIER
+          : AccountActorType.CUSTODY_SUPPLIER,
+      actorId: supplierId,
+      name: trimmed,
+      creator,
+      manager,
+    });
+  }
+
+  async findBySystemKey(key: AccountSystemKey, manager?: EntityManager): Promise<Account> {
+    const accountRepository = manager ? manager.getRepository(Account) : this.accountRepository;
+    const account = await accountRepository.findOne({
+      where: { systemKey: key },
+      relations: ['parentAccount'],
+    });
+    if (!account) {
+      throw new NotFoundException(`Account with system key ${key} not found`);
+    }
+    return account;
+  }
+
+  async findActorLeaf(
+    parentKey: AccountSystemKey,
+    actorType: AccountActorType,
+    actorId: number,
+    manager?: EntityManager,
+  ): Promise<Account | null> {
+    const accountRepository = manager ? manager.getRepository(Account) : this.accountRepository;
+    const parent = await this.findBySystemKey(parentKey, manager);
+    return accountRepository.findOne({
+      where: { parentAccount: { id: parent.id }, actorType, actorId },
+      relations: ['parentAccount'],
+    });
+  }
+
+  private async ensureActorLeaf(args: {
+    parentKey: AccountSystemKey;
+    actorType: AccountActorType;
+    actorId: number;
+    name: string;
+    creator?: string;
+    manager?: EntityManager;
+  }): Promise<Account> {
+    const accountRepository = args.manager
+      ? args.manager.getRepository(Account)
+      : this.accountRepository;
+    const parent = await this.findBySystemKey(args.parentKey, args.manager);
+
+    const existing = await accountRepository.findOne({
+      where: {
+        parentAccount: { id: parent.id },
+        actorType: args.actorType,
+        actorId: args.actorId,
+      },
+      relations: ['parentAccount'],
+    });
+    if (existing) return existing;
+
+    const byName = await accountRepository.findOne({
+      where: { name: args.name, parentAccount: { id: parent.id } },
+      relations: ['parentAccount'],
+    });
+    if (byName && byName.actorId == null) {
+      byName.actorType = args.actorType;
+      byName.actorId = args.actorId;
+      return accountRepository.save(byName);
+    }
+
+    const child = new Account();
+    child.name = args.name;
+    child.parentAccount = parent;
+    child.isLeaf = true;
+    child.actorType = args.actorType;
+    child.actorId = args.actorId;
+    return this.save(child, args.creator, args.manager);
   }
 
   async createEmployeeCustodyAccount(

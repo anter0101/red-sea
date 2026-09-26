@@ -45,11 +45,13 @@ export class AccountSeederService {
           updatedBy: 'system',
           openingBalance: seed.openingBalance ?? 0,
           openingBalanceLocked: typeof seed.openingBalance === 'number',
+          systemKey: seed.systemKey ?? null,
         });
       } else {
         // Repair isLeaf flag on re-seed
         account.isLeaf = seed.isLeaf;
         account.isSystem = true;
+        if (seed.systemKey) account.systemKey = seed.systemKey;
         if (typeof seed.openingBalance === 'number') {
           account.openingBalance = seed.openingBalance;
           account.openingBalanceLocked = true;

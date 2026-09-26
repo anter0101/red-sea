@@ -46,6 +46,9 @@ API notes that stayed next to the frontend app:
 
 [archive/superpowers](archive/superpowers) holds the phase-6 office and custody plans and specs. Those files are history. Unchecked boxes in them are not open work.
 
-## Next phase
+## Phases
 
-When a new phase is defined, put its spec under `docs/phases/`.
+| Doc | What it is |
+| --- | --- |
+| [Phase 1 — Journey financials](phases/01-journey-financials.md) | Expected and actual revenue, and the expense lines for nolon, contract, and company cars |
+| [Phase 2 — Policy review and posting](phases/02-policy-review-and-posting.md) | Build spec: internal account keys, actor leaves, and TRN1–TRN3 after Apply |

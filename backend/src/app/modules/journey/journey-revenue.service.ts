@@ -15,6 +15,7 @@ import {
 import {
   actualRevenueFrom,
   expectedRevenueFrom,
+  nolonExpenseRemainder,
   unitPriceFromSheet,
 } from './journey-revenue.calculator';
 
@@ -120,8 +121,10 @@ export class JourneyRevenueService {
       ownerShip === OwnerShipType.NOLON_CAR || ownerShip === OwnerShipType.CONTRACT_CAR;
 
     if (nolonAlreadyPostedAsFees) {
-      const nolon = Number(row.nolonPrice ?? 0);
-      if (nolon > 0) {
+      const sheetNolon = Number(row.nolonPrice ?? 0);
+      const custodyGiven = await this.custodyAlreadyGiven(journeyId, manager);
+      const nolon = nolonExpenseRemainder(sheetNolon, custodyGiven);
+      if (sheetNolon > 0) {
         await this.upsertExpense(
           journeyId,
           JourneyTransactionCategoryType.NOLON_FEES,
@@ -251,6 +254,17 @@ export class JourneyRevenueService {
       order: { policyDate: 'DESC', createdAt: 'DESC' },
     });
     return policy?.deliveryArea?.id ?? null;
+  }
+
+  private async custodyAlreadyGiven(
+    journeyId: number,
+    manager?: EntityManager,
+  ): Promise<number> {
+    const repo = manager ? manager.getRepository(JourneyTransaction) : this.transactionRepository;
+    const rows = await repo.find({
+      where: { journey: { id: journeyId }, category: JourneyTransactionCategoryType.CUSTODY },
+    });
+    return rows.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
   }
 
   private async upsertExpense(

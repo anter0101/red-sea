@@ -21,47 +21,53 @@ flowchart TB
   a20["المخزون | ASSET DEBIT | Leaf"]
   a21["عملاء | ASSET DEBIT | Leaf"]
   a22["ا.قبض | ASSET DEBIT | Leaf"]
-  a23["مدينين وارصده مدينه اخرى | ASSET DEBIT | Branch"]
-  a24["عهد | ASSET DEBIT | Leaf"]
-  a25["سلف | ASSET DEBIT | Leaf"]
-  a26["ضرائب منبع | ASSET DEBIT | Leaf"]
-  a27["تامينات لدى الغير | ASSET DEBIT | Leaf"]
-  a28["موردين د.مقدمه | ASSET DEBIT | Leaf"]
+  a23["العملاء تحت التنفيذ | ASSET DEBIT | Branch"]
+  a24["مدينين وارصده مدينه اخرى | ASSET DEBIT | Branch"]
+  a25["عهد | ASSET DEBIT | Leaf"]
+  a26["سلف | ASSET DEBIT | Leaf"]
+  a27["ضرائب منبع | ASSET DEBIT | Leaf"]
+  a28["تامينات لدى الغير | ASSET DEBIT | Leaf"]
+  a29["موردين د.مقدمه | ASSET DEBIT | Leaf"]
   a2["الخصوم | LIABILITY CREDIT | Branch"]
-  a29["الالتزامات الغير متداوله | LIABILITY CREDIT | Branch"]
-  a30["قروض | LIABILITY CREDIT | Leaf"]
-  a31["التزامات ضريبيه مؤجله | LIABILITY CREDIT | Leaf"]
-  a32["الالتزامات المتداوله | LIABILITY CREDIT | Branch"]
-  a33["موردين | LIABILITY CREDIT | Leaf"]
-  a34["ا.دفع | LIABILITY CREDIT | Leaf"]
-  a35["دائنين وارصده دائنه اخرى | LIABILITY CREDIT | Branch"]
-  a36["ضريبه مرتبات | LIABILITY CREDIT | Leaf"]
-  a37["ضريبه الخصم والاضافه | LIABILITY CREDIT | Leaf"]
-  a38["المساهمه التكافليه | LIABILITY CREDIT | Leaf"]
-  a39["ضريبه الدخل | LIABILITY CREDIT | Leaf"]
-  a40["تامينات للغير | LIABILITY CREDIT | Leaf"]
+  a30["الالتزامات الغير متداوله | LIABILITY CREDIT | Branch"]
+  a31["قروض | LIABILITY CREDIT | Leaf"]
+  a32["التزامات ضريبيه مؤجله | LIABILITY CREDIT | Leaf"]
+  a33["الالتزامات المتداوله | LIABILITY CREDIT | Branch"]
+  a34["موردين | LIABILITY CREDIT | Leaf"]
+  a35["مورد النقل | LIABILITY CREDIT | Branch"]
+  a36["مورد العهدة | LIABILITY CREDIT | Branch"]
+  a37["ا.دفع | LIABILITY CREDIT | Leaf"]
+  a38["دائنين وارصده دائنه اخرى | LIABILITY CREDIT | Branch"]
+  a39["رواتب | LIABILITY CREDIT | Leaf"]
+  a40["ضريبه مرتبات | LIABILITY CREDIT | Leaf"]
+  a41["ضريبه الخصم والاضافه | LIABILITY CREDIT | Leaf"]
+  a42["المساهمه التكافليه | LIABILITY CREDIT | Leaf"]
+  a43["ضريبه الدخل | LIABILITY CREDIT | Leaf"]
+  a44["تامينات للغير | LIABILITY CREDIT | Leaf"]
   a3["حقوق الملكية | EQUITY CREDIT | Branch"]
-  a41["راس المال وحقوق الملكيه | EQUITY CREDIT | Branch"]
-  a42["راس المال | EQUITY CREDIT | Leaf"]
-  a43["جارى الشركاء | EQUITY CREDIT | Leaf"]
-  a44["ارباح / خسائر مرحله | EQUITY CREDIT | Leaf"]
-  a45["ارباح / خسائر العام | EQUITY CREDIT | Leaf"]
-  a46["مجمع الاهلاك | EQUITY CREDIT | Leaf"]
-  a47["احتياطيات | EQUITY CREDIT | Leaf"]
+  a45["راس المال وحقوق الملكيه | EQUITY CREDIT | Branch"]
+  a46["راس المال | EQUITY CREDIT | Leaf"]
+  a47["جارى الشركاء | EQUITY CREDIT | Leaf"]
+  a48["ارباح / خسائر مرحله | EQUITY CREDIT | Leaf"]
+  a49["ارباح / خسائر العام | EQUITY CREDIT | Leaf"]
+  a50["مجمع الاهلاك | EQUITY CREDIT | Leaf"]
+  a51["احتياطيات | EQUITY CREDIT | Leaf"]
   a4["الإيرادات | REVENUE CREDIT | Branch"]
-  a48["الايرادات | REVENUE CREDIT | Leaf"]
-  a49["مردودات الايرادات | REVENUE DEBIT | Leaf"]
+  a52["الايرادات | REVENUE CREDIT | Leaf"]
+  a53["ايرادات تحت التنفيذ | REVENUE CREDIT | Branch"]
+  a54["مردودات الايرادات | REVENUE DEBIT | Leaf"]
   a5["المصروفات | EXPENSE DEBIT | Branch"]
-  a50["تكلفة المبيعات | EXPENSE DEBIT | Branch"]
-  a53["مشتريات | EXPENSE DEBIT | Leaf"]
-  a54["مردودات مشتريات | EXPENSE CREDIT | Leaf"]
-  a51["المصروفات التشغيلية | EXPENSE DEBIT | Branch"]
-  a55["م.التشغيل | EXPENSE DEBIT | Leaf"]
-  a56["م.عموميه | EXPENSE DEBIT | Leaf"]
-  a57["م.اهلاك | EXPENSE DEBIT | Leaf"]
-  a52["المصروفات التمويلية والضريبية | EXPENSE DEBIT | Branch"]
-  a58["م.تمويليه | EXPENSE DEBIT | Leaf"]
-  a59["م.ضريبه الدخل | EXPENSE DEBIT | Leaf"]
+  a55["تكلفة المبيعات | EXPENSE DEBIT | Branch"]
+  a58["مشتريات | EXPENSE DEBIT | Leaf"]
+  a59["مردودات مشتريات | EXPENSE CREDIT | Leaf"]
+  a56["المصروفات التشغيلية | EXPENSE DEBIT | Branch"]
+  a60["م.التشغيل | EXPENSE DEBIT | Leaf"]
+  a61["م.عموميه | EXPENSE DEBIT | Leaf"]
+  a62["م.اهلاك | EXPENSE DEBIT | Leaf"]
+  a63["سيارات عقود النولون | EXPENSE DEBIT | Leaf"]
+  a57["المصروفات التمويلية والضريبية | EXPENSE DEBIT | Branch"]
+  a64["م.تمويليه | EXPENSE DEBIT | Leaf"]
+  a65["م.ضريبه الدخل | EXPENSE DEBIT | Leaf"]
   a1 --> a6
   a6 --> a7
   a7 --> a8
@@ -80,39 +86,45 @@ flowchart TB
   a17 --> a21
   a17 --> a22
   a17 --> a23
-  a23 --> a24
-  a23 --> a25
-  a23 --> a26
-  a23 --> a27
-  a23 --> a28
-  a2 --> a29
-  a29 --> a30
-  a29 --> a31
-  a2 --> a32
-  a32 --> a33
-  a32 --> a34
-  a32 --> a35
-  a35 --> a36
-  a35 --> a37
-  a35 --> a38
-  a35 --> a39
-  a35 --> a40
-  a3 --> a41
-  a41 --> a42
-  a41 --> a43
-  a41 --> a44
-  a41 --> a45
-  a41 --> a46
-  a41 --> a47
-  a4 --> a48
-  a4 --> a49
-  a5 --> a50
-  a50 --> a53
-  a50 --> a54
-  a5 --> a51
-  a51 --> a55
-  a51 --> a56
-  a51 --> a57
-  a5 --> a52
-  a52 --> a58
-  a52 --> a59
+  a17 --> a24
+  a24 --> a25
+  a24 --> a26
+  a24 --> a27
+  a24 --> a28
+  a24 --> a29
+  a2 --> a30
+  a30 --> a31
+  a30 --> a32
+  a2 --> a33
+  a33 --> a34
+  a33 --> a35
+  a33 --> a36
+  a33 --> a37
+  a33 --> a38
+  a38 --> a39
+  a38 --> a40
+  a38 --> a41
+  a38 --> a42
+  a38 --> a43
+  a38 --> a44
+  a3 --> a45
+  a45 --> a46
+  a45 --> a47
+  a45 --> a48
+  a45 --> a49
+  a45 --> a50
+  a45 --> a51
+  a4 --> a52
+  a4 --> a53
+  a4 --> a54
+  a5 --> a55
+  a55 --> a58
+  a55 --> a59
+  a5 --> a56
+  a56 --> a60
+  a56 --> a61
+  a56 --> a62
+  a56 --> a63
+  a5 --> a57
+  a57 --> a64
+  a57 --> a65

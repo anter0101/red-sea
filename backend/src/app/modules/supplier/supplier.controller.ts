@@ -19,6 +19,7 @@ import { AuthGuard, Roles, RolesGuard, AuthUser } from 'src/core/security';
 import { UserRole } from 'src/core/enums/user-role';
 import type { Request } from 'src/core/utils/request';
 
+import { AccountService } from '../account/account.service';
 import { SupplierService } from './supplier.service';
 import { GovernmentService } from '../government/government.service';
 import { SupplierDTO } from './dtos/supplier.dto';
@@ -49,6 +50,7 @@ export class SupplierController {
   constructor(
     private readonly supplierService: SupplierService,
     private readonly governmentService: GovernmentService,
+    private readonly accountService: AccountService,
   ) {}
 
   // ------------------------------------------------------------------------
@@ -182,8 +184,19 @@ export class SupplierController {
         `Supplier with tax registration number ${dto.taxRegistrationNumber} already exists`,
       );
 
+    if (dto.type === SupplierType.TRANSPORTATION && !dto.branchId) {
+      throw new BadRequestException('A transportation supplier must belong to a branch');
+    }
+
     const entity = mapCreateSupplierDtoToEntity(dto);
-    return this.supplierService.save(entity, user?.email);
+    const saved = await this.supplierService.save(entity, user?.email);
+    if (saved.type === SupplierType.TRANSPORTATION) {
+      await this.accountService.createSupplierAccount(saved.id, saved.name, 'transport', user?.email);
+    }
+    if (saved.type === SupplierType.CUSTODY) {
+      await this.accountService.createSupplierAccount(saved.id, saved.name, 'custody', user?.email);
+    }
+    return saved;
   }
 
   // ------------------------------------------------------------------------

@@ -107,7 +107,7 @@ export class CreateJourneyDTO extends OmitType(JourneyDTO, [
 
   @ApiPropertyOptional({
     description:
-      'Optional delivery area id used to seed expectedRevenue at create (policy area remains source of truth for actual)',
+      'Delivery area chosen when the delegation is issued. Stored on the journey and copied onto the policy.',
   })
   @IsOptional()
   @IsInt()
