@@ -7,6 +7,7 @@ export type JourneysQueryParams = IQueryParams &
   JourneyListScope & {
     tripStatus?: string;
     tripStatuses?: string;
+    invoiced?: boolean;
   };
 
 export const useGetAllJourneys = (params?: JourneysQueryParams, scope?: JourneyListScope) => {

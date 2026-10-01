@@ -13,7 +13,7 @@ import { PackingType } from 'src/core/enums/packing-type';
 export class JourneyDTO extends BaseDTO {
   @ApiPropertyOptional({
     description: 'Delegation number (auto-generated on create)',
-    example: 'JRN-202609021',
+    example: 'TRIP-202609021',
   })
   @IsOptional()
   @IsString()

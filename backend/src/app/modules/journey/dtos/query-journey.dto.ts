@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsDateString, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { JourneyStatus } from 'src/core/enums/journey';
 import { PaginateDTO } from 'src/core/utils/paginate.dto';
 
@@ -18,6 +18,16 @@ export class JourneyQueryDTO extends PaginateDTO {
   @IsOptional()
   @IsEnum(JourneyStatus)
   tripStatus?: JourneyStatus;
+
+  @ApiProperty({ required: false, description: 'true: already on an invoice. false: not invoiced yet.' })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === true || value === 'true') return true;
+    if (value === false || value === 'false') return false;
+    return undefined;
+  })
+  @IsBoolean()
+  invoiced?: boolean;
 
   @ApiProperty({
     required: false,

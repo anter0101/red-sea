@@ -16,6 +16,7 @@ export const modules = {
   office: 'المكتب',
   custody: 'العُهد',
   'office-requests': 'طلبات المكتب',
+  invoices: 'الفواتير',
 } as const;
 
 // Detail page labels for dynamic ID segments (e.g., /drivers/[id])
@@ -31,6 +32,7 @@ export const moduleDetails = {
   suppliers: 'تفاصيل المورد',
   employees: 'تفاصيل الموظف',
   gps: 'تفاصيل الجهاز',
+  invoices: 'تفاصيل الفاتورة',
 } as const;
 
 // Nested route labels for special pages

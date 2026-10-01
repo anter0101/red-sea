@@ -52,6 +52,7 @@ import { CustodyModule } from './modules/custody/custody.module';
 import { OfficeRequestModule } from './modules/office-request/office-request.module';
 import { JourneyDelegationPrintModule } from './modules/journey-delegation-print/journey-delegation-print.module';
 import { I18nModule } from '../i18n/i18n.module';
+import { InvoiceModule } from './modules/invoice/invoice.module';
 
 @Module({
   imports: [
@@ -118,6 +119,7 @@ import { I18nModule } from '../i18n/i18n.module';
     FinancialStatsModule,
     CustodyModule,
     OfficeRequestModule,
+    InvoiceModule,
     JourneyDelegationPrintModule,
     I18nModule,
   ],

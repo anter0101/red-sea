@@ -64,6 +64,8 @@ export function buildJourneyListQuery(
     .addSelect('journey.delegateNumber', 'delegateNumber')
     .addSelect('journey.delegateDate', 'delegateDate')
     .addSelect('journey.tripStatus', 'tripStatus')
+    .addSelect('client.id', 'clientId')
+    .addSelect('client.name', 'clientName')
     .addSelect('journey.packingType', 'packingType')
     .addSelect('driver.id', 'driverId')
     .addSelect("CONCAT(driverUser.firstName, ' ', driverUser.lastName)", 'driverName')
@@ -180,7 +182,15 @@ export function buildJourneyListQuery(
     .addSelect('NULL', 'notes')
     .addSelect('NULL', 'collectionStatus')
     .addSelect('NULL', 'electronicInvoiceNo')
-    .addSelect('NULL', 'preliminaryInvoiceNo')
+    .addSelect(
+      `(SELECT inv.code
+        FROM invoice_journeys ij
+        INNER JOIN invoices inv ON inv.id = ij.invoice_id
+        WHERE ij.journey_id = "journey"."id" AND ij.deleted_at IS NULL
+        ORDER BY ij.id DESC
+        LIMIT 1)`,
+      'preliminaryInvoiceNo',
+    )
     .addSelect('NULL', 'loadingWaitingTime')
     .addSelect('NULL', 'loadingDuration')
     .addSelect('0', 'fuelConsumptionPer1000km');
@@ -192,6 +202,7 @@ export function buildJourneyListQuery(
     .addGroupBy('car.id')
     .addGroupBy('trailer.id')
     .addGroupBy('client.id')
+    .addGroupBy('client.name')
     .addGroupBy('journeyPolicy.id')
     .addGroupBy('deliveryArea.id')
     .addGroupBy('deliveryGov.id')
@@ -202,7 +213,8 @@ export function buildJourneyListQuery(
 
   const orderExpr = (sortField && SORT_MAP[sortField]) || 'journey.id';
   const direction: 'ASC' | 'DESC' = sortField ? sortOrder : 'DESC';
-  qb.orderBy(orderExpr, direction).skip(page * pageSize).take(pageSize);
+  // limit/offset still emit SQL when the query has joins. skip/take do not, and getRawMany never applies them later.
+  qb.orderBy(orderExpr, direction).offset(page * pageSize).limit(pageSize);
 
   return qb;
 }

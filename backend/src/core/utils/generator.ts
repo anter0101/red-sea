@@ -32,7 +32,8 @@ export const generateUniqueCode = async <T extends Record<string, any>>(
     [GeneratorTypes.ACCOUNT]: 'A',
     [GeneratorTypes.TRANSACTION]: 'TRN',
     [GeneratorTypes.CLIENT]: 'CL',
-    [GeneratorTypes.JOURNEY]: 'JRN',
+    [GeneratorTypes.JOURNEY]: 'TRIP',
+    [GeneratorTypes.INVOICE]: 'INV',
   };
 
   if (!prefixMap[type]) throw new BadRequestException('Unknown generator type');
@@ -115,7 +116,7 @@ export const generateUniqueUsername = async <T extends Record<string, any>>(
 };
 
 /**
- * Generate a unique journey / delegation number (same pattern as other entity codes).
+ * Generate a unique trip number (same pattern as other entity codes).
  */
 export const generateUniqueJourneyNumber = async <T extends Record<string, any>>(
   repository: Repository<T>,

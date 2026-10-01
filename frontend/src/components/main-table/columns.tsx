@@ -29,6 +29,8 @@ export type TripRow = {
   delegateNumber: string;
   delegateDate: string;
   tripStatus: string;
+  clientId?: number | null;
+  clientName?: string | null;
 
   fuelLiters: number | null;
   fuelConsumptionPer1000km: number;
@@ -119,6 +121,7 @@ export const columns: ColumnDef<TripRow>[] = [
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
+        disabled={!row.getCanSelect()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
       />

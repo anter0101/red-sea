@@ -26,6 +26,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     custodyMessages,
     officeRequestsMessages,
     physicalAttachmentsMessages,
+    tripsMessages,
+    invoicesMessages,
   ] = await Promise.all([
     import(`../../messages/${locale}/common.json`),
     import(`../../messages/${locale}/auth.json`),
@@ -43,6 +45,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../../messages/${locale}/custody.json`),
     import(`../../messages/${locale}/office-requests.json`),
     import(`../../messages/${locale}/physical-attachments.json`),
+    import(`../../messages/${locale}/trips.json`),
+    import(`../../messages/${locale}/invoices.json`),
   ]);
 
   return {
@@ -64,6 +68,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
       custody: custodyMessages.default,
       officeRequests: officeRequestsMessages.default,
       physicalAttachments: physicalAttachmentsMessages.default,
+      trips: tripsMessages.default,
+      invoices: invoicesMessages.default,
     },
   };
 });

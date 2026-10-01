@@ -161,8 +161,9 @@ export const accounts: AccountSeed[] = [
     name: 'عملاء',
     type: AccountType.ASSET,
     normalBalance: normalBalanceType.DEBIT,
-    isLeaf: true,
+    isLeaf: false,
     parentName: 'الاصول المتداوله',
+    systemKey: 'CLIENTS',
   },
   {
     name: 'ا.قبض',
@@ -207,6 +208,7 @@ export const accounts: AccountSeed[] = [
     normalBalance: normalBalanceType.DEBIT,
     isLeaf: true,
     parentName: 'مدينين وارصده مدينه اخرى',
+    systemKey: 'WITHHOLDING_TAX',
   },
   {
     name: 'تامينات لدى الغير',
@@ -317,6 +319,14 @@ export const accounts: AccountSeed[] = [
     parentName: 'دائنين وارصده دائنه اخرى',
   },
   {
+    name: 'ضريبة القيمة المضافة',
+    type: AccountType.LIABILITY,
+    normalBalance: normalBalanceType.CREDIT,
+    isLeaf: true,
+    parentName: 'دائنين وارصده دائنه اخرى',
+    systemKey: 'VAT_PAYABLE',
+  },
+  {
     name: 'المساهمه التكافليه',
     type: AccountType.LIABILITY,
     normalBalance: normalBalanceType.CREDIT,
@@ -408,6 +418,14 @@ export const accounts: AccountSeed[] = [
     isLeaf: false,
     parentName: 'الإيرادات',
     systemKey: 'REVENUE_IN_PROGRESS',
+  },
+  {
+    name: 'ايرادات تم تنفيذها',
+    type: AccountType.REVENUE,
+    normalBalance: normalBalanceType.CREDIT,
+    isLeaf: false,
+    parentName: 'الإيرادات',
+    systemKey: 'REVENUE_DONE',
   },
   {
     name: 'مردودات الايرادات',

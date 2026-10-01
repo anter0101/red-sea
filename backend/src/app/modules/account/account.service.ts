@@ -16,7 +16,10 @@ import { GeneratorTypes } from 'src/core/enums/generator-types';
 import { QueryAccountDTO, parseParentAccountIdQuery } from './dtos/query-account.dto';
 import { Employee } from '../employee/employee.entity';
 import { TransactionService } from '../transaction/transaction.service';
-import { clientRevenueAccountName } from './client-account.constants';
+import {
+  clientDoneRevenueAccountName,
+  clientRevenueAccountName,
+} from './client-account.constants';
 import { AccountActorType, AccountSystemKey } from './account-system-keys';
 import {
   ACCOUNT_PARENT_CUSTODY,
@@ -579,7 +582,7 @@ export class AccountService {
   }
 
   /**
-   * Find-or-create the two chart leaves for a client, keyed by client id.
+   * Find-or-create the four chart leaves for a client, keyed by client id.
    * A later rename does not rename these.
    */
   async createClientAccounts(
@@ -593,7 +596,7 @@ export class AccountService {
       throw new BadRequestException('Client id and name are required to create sub-accounts');
     }
 
-    const asset = await this.ensureActorLeaf({
+    const inProgress = await this.ensureActorLeaf({
       parentKey: AccountSystemKey.CLIENTS_IN_PROGRESS,
       actorType: AccountActorType.CLIENT,
       actorId: clientId,
@@ -601,7 +604,7 @@ export class AccountService {
       creator,
       manager,
     });
-    const revenue = await this.ensureActorLeaf({
+    const revenueInProgress = await this.ensureActorLeaf({
       parentKey: AccountSystemKey.REVENUE_IN_PROGRESS,
       actorType: AccountActorType.CLIENT,
       actorId: clientId,
@@ -609,7 +612,23 @@ export class AccountService {
       creator,
       manager,
     });
-    return [asset, revenue];
+    const client = await this.ensureActorLeaf({
+      parentKey: AccountSystemKey.CLIENTS,
+      actorType: AccountActorType.CLIENT,
+      actorId: clientId,
+      name: trimmed,
+      creator,
+      manager,
+    });
+    const revenueDone = await this.ensureActorLeaf({
+      parentKey: AccountSystemKey.REVENUE_DONE,
+      actorType: AccountActorType.CLIENT,
+      actorId: clientId,
+      name: clientDoneRevenueAccountName(trimmed),
+      creator,
+      manager,
+    });
+    return [inProgress, revenueInProgress, client, revenueDone];
   }
 
   async createBranchAccount(

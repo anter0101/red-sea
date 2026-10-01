@@ -7,4 +7,5 @@ export enum GeneratorTypes {
   TRANSACTION = 'TRANSACTION',
   CLIENT = 'CLIENT',
   JOURNEY = 'JOURNEY',
+  INVOICE = 'INVOICE',
 }

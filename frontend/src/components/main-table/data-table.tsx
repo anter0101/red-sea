@@ -25,6 +25,9 @@ import type {
   ColumnFiltersState,
   ColumnOrderState,
   Header,
+  OnChangeFn,
+  Row,
+  RowSelectionState,
 } from '@tanstack/react-table';
 import {
   flexRender,
@@ -33,6 +36,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 
+import { cn } from '@/lib/utils';
 import { useGetGridByPageKey } from './api/get-one';
 import { useUpdateGrid } from './api/update';
 
@@ -42,6 +46,11 @@ interface DataTableProps<TData, TValue> {
   filterKey?: string;
   pageKey?: string;
   onRowDoubleClick?: (row: TData) => void;
+  enableRowSelection?: boolean | ((row: Row<TData>) => boolean);
+  rowSelection?: RowSelectionState;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  getRowId?: (originalRow: TData, index: number, parent?: Row<TData>) => string;
+  getRowClassName?: (row: Row<TData>) => string | undefined;
 }
 
 function SortableHeader<TData, TValue>({ header }: { header: Header<TData, TValue> }) {
@@ -71,6 +80,11 @@ export function DataTable<TData, TValue>({
   filterKey,
   pageKey,
   onRowDoubleClick,
+  enableRowSelection,
+  rowSelection,
+  onRowSelectionChange,
+  getRowId,
+  getRowClassName,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
@@ -121,15 +135,19 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     // Parent pages own server pagination; show all rows passed in.
     manualPagination: true,
+    enableRowSelection,
+    getRowId,
     state: {
       columnFilters,
       columnOrder,
+      ...(rowSelection ? { rowSelection } : {}),
     },
     onColumnFiltersChange: setColumnFilters,
     onColumnOrderChange: setColumnOrder,
+    ...(onRowSelectionChange ? { onRowSelectionChange } : {}),
   });
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -196,7 +214,10 @@ export function DataTable<TData, TValue>({
                     <TableRow
                       key={row.id}
                       onDoubleClick={() => onRowDoubleClick?.(row.original)}
-                      className={onRowDoubleClick ? 'cursor-pointer hover:bg-muted' : ''}
+                      className={cn(
+                        onRowDoubleClick && 'cursor-pointer',
+                        getRowClassName?.(row) ?? (onRowDoubleClick ? 'hover:bg-muted' : ''),
+                      )}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>

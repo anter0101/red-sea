@@ -107,6 +107,22 @@ export function applyJourneyFilters(
     qb.setParameter('_jterm', `%${query.search}%`);
   }
 
+  if (query.invoiced === true) {
+    qb.andWhere(
+      `EXISTS (
+        SELECT 1 FROM invoice_journeys ij
+        WHERE ij.journey_id = journey.id AND ij.deleted_at IS NULL
+      )`,
+    );
+  } else if (query.invoiced === false) {
+    qb.andWhere(
+      `NOT EXISTS (
+        SELECT 1 FROM invoice_journeys ij
+        WHERE ij.journey_id = journey.id AND ij.deleted_at IS NULL
+      )`,
+    );
+  }
+
   if (query.tripStatus) {
     qb.andWhere('journey.tripStatus = :_jstatus', { _jstatus: query.tripStatus });
   } else if (query.tripStatuses?.length) {
