@@ -19,6 +19,10 @@ type VehicleChassisOverviewProps = {
   /** When user scrolls the diagram, notify which axle is in focus. */
   onVisibleAxleChange?: (axleIndex: number) => void;
   hint?: string;
+  /** Show every axle at once. Used by the print sheet so the diagram is not clipped in a scroll box. */
+  layout?: 'scroll' | 'full';
+  /** Print layout: checkbox and tire serial beside each slot, without the cab decoration. */
+  plain?: boolean;
 };
 
 export default function VehicleChassisOverview({
@@ -32,6 +36,8 @@ export default function VehicleChassisOverview({
   onSelect,
   onVisibleAxleChange,
   hint,
+  layout = 'scroll',
+  plain = false,
 }: VehicleChassisOverviewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const axleRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -97,15 +103,51 @@ export default function VehicleChassisOverview({
     return () => window.clearTimeout(timer);
   }, [selected?.axleIndex]);
 
+  if (plain) {
+    return (
+      <div className="bg-white text-black" dir="ltr">
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: axleCount }).map((_, axleIndex) => (
+            <AxleRow
+              key={`overview-axle-${axleIndex}`}
+              ref={(node) => setAxleRef(axleIndex, node)}
+              axleIndex={axleIndex}
+              title={getAxleTitle(axleIndex)}
+              positions={getPositionsForAxle(axleIndex)}
+              selected={selected}
+              getSlotState={getSlotState}
+              getPositionLabel={getPositionLabel}
+              onSelect={onSelect}
+              annotated
+              plain
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-full min-h-0 flex-col rounded-xl border bg-slate-50/80" dir="ltr">
+    <div
+      className={cn(
+        'flex flex-col rounded-xl border bg-slate-50/80',
+        layout === 'full' ? 'h-auto' : 'h-full min-h-0',
+      )}
+      dir="ltr"
+    >
       {hint ? (
         <p className="shrink-0 border-b px-3 py-2 text-center text-sm text-muted-foreground">
           {hint}
         </p>
       ) : null}
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4">
+      <div
+        ref={scrollRef}
+        className={cn(
+          'p-3 sm:p-4',
+          layout === 'full' ? 'overflow-visible' : 'min-h-0 flex-1 overflow-y-auto overscroll-contain',
+        )}
+      >
         <div
           className={cn(
             'relative mx-auto flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border-2 border-slate-300 bg-gradient-to-b from-slate-100 to-slate-200 px-3 py-4 shadow-sm',

@@ -1,10 +1,12 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CheckCircle2, Loader2, Pencil, Plus, Printer, Trash2 } from 'lucide-react';
+import type { ColumnDef } from '@tanstack/react-table';
+import { Loader2, Pencil, Plus, Printer, Trash2 } from 'lucide-react';
+import { useReactToPrint } from 'react-to-print';
 
+import { DataTable } from '@/components/main-table/data-table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,13 +18,18 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { useGetCarById } from '@/features/cars/apis/get-by-id';
+import { useGetTrailerById } from '@/features/trailers/apis/get-by-id';
+import { EMPTY_DISPLAY } from '@/lib/empty-display';
+import { formatPlateLettersForDisplay } from '@/lib/plate-letters';
 
 import { useDeletePhysicalAttachment } from '../api/delete';
 import { useGetPhysicalAttachments } from '../api/get-list';
-import { useUpdatePhysicalAttachment } from '../api/update';
 import type { IPhysicalAttachment, VehicleType } from '../types';
 
+import AttachmentChecklistDialog from './attachment-checklist-dialog';
 import PhysicalAttachmentFormDialog from './physical-attachment-form-dialog';
+import { PrintableCheck } from './printable-check';
 
 type Props = {
   vehicleType: VehicleType;
@@ -34,36 +41,114 @@ function formatDate(value?: string | null) {
   return value.slice(0, 10);
 }
 
+function formatDateTime(value?: string | null) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value.slice(0, 16).replace('T', ' ');
+  return date.toLocaleString('en-GB', { hour12: false });
+}
+
 function formatPrice(value?: number | string | null) {
-  if (value == null || value === '') return null;
+  if (value == null || value === '') return '—';
   const num = typeof value === 'number' ? value : Number(value);
-  if (!Number.isFinite(num)) return null;
+  if (!Number.isFinite(num)) return '—';
   return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function formatPlate(vehicle?: { plateNumber?: string; plateLetters?: string }) {
+  const letters = formatPlateLettersForDisplay(vehicle?.plateLetters);
+  return [vehicle?.plateNumber?.trim(), letters === EMPTY_DISPLAY ? '' : letters].filter(Boolean).join(' ');
 }
 
 export default function PhysicalAttachmentsPanel({ vehicleType, vehicleId }: Props) {
   const t = useTranslations('physicalAttachments');
-  const { data: session } = useSession();
   const printRef = useRef<HTMLDivElement>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<IPhysicalAttachment | null>(null);
   const [pendingDelete, setPendingDelete] = useState<IPhysicalAttachment | null>(null);
+  const [checking, setChecking] = useState<IPhysicalAttachment | null>(null);
 
   const { data, isLoading, isError } = useGetPhysicalAttachments(vehicleType, vehicleId);
   const { mutate: deleteAttachment, isPending: isDeleting } = useDeletePhysicalAttachment();
-  const { mutate: updateAttachment, isPending: isUpdating } = useUpdatePhysicalAttachment();
+  const { car } = useGetCarById(vehicleType === 'car' ? vehicleId : null);
+  const { trailer } = useGetTrailerById(vehicleType === 'trailer' ? vehicleId : null);
 
   const items = data?.data ?? [];
+  const vehicle = vehicleType === 'car' ? car : trailer;
+  const axles = vehicle?.axles ?? [];
+  const axleCount = vehicle?.axleCount || axles.length;
 
   const openCreate = () => {
     setEditing(null);
     setFormOpen(true);
   };
 
-  const openEdit = (item: IPhysicalAttachment) => {
-    setEditing(item);
-    setFormOpen(true);
-  };
+  const columns = useMemo<ColumnDef<IPhysicalAttachment>[]>(
+    () => [
+      {
+        id: 'name',
+        accessorKey: 'name',
+        header: t('columns.name'),
+      },
+      {
+        id: 'date',
+        accessorKey: 'date',
+        header: t('columns.date'),
+        cell: ({ row }) => formatDate(row.original.date),
+      },
+      {
+        id: 'status',
+        header: t('columns.status'),
+        cell: ({ row }) => (row.original.confirmedOk ? t('status.checked') : t('status.unchecked')),
+      },
+      {
+        id: 'lastCheck',
+        header: t('columns.lastCheck'),
+        cell: ({ row }) => formatDateTime(row.original.confirmedAt),
+      },
+      {
+        id: 'price',
+        accessorKey: 'price',
+        header: t('columns.price'),
+        cell: ({ row }) => formatPrice(row.original.price),
+      },
+      {
+        id: 'actions',
+        header: t('columns.actions'),
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={(event) => {
+                event.stopPropagation();
+                setEditing(row.original);
+                setFormOpen(true);
+              }}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              {t('actions.edit')}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="text-destructive hover:text-destructive"
+              onClick={(event) => {
+                event.stopPropagation();
+                setPendingDelete(row.original);
+              }}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              {t('actions.delete')}
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [t],
+  );
 
   const confirmDelete = () => {
     if (!pendingDelete) return;
@@ -72,34 +157,12 @@ export default function PhysicalAttachmentsPanel({ vehicleType, vehicleId }: Pro
     });
   };
 
-  const confirmOk = (item: IPhysicalAttachment) => {
-    updateAttachment({
-      id: item.id,
-      data: {
-        confirmedOk: true,
-        confirmedBy: session?.user?.email ?? session?.user?.name ?? 'user',
-        confirmedAt: new Date().toISOString(),
-      },
-    });
-  };
-
-  const handlePrint = () => {
-    const content = printRef.current;
-    if (!content) return;
-    const win = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700');
-    if (!win) return;
-    win.document.write(`<!doctype html><html dir="rtl"><head><title>${t('print.title')}</title>
-      <style>
-        body{font-family:sans-serif;padding:24px}
-        h1{font-size:18px;margin-bottom:16px}
-        table{width:100%;border-collapse:collapse}
-        th,td{border:1px solid #ccc;padding:8px;text-align:right;font-size:13px}
-        th{background:#f5f5f5}
-      </style></head><body>${content.innerHTML}</body></html>`);
-    win.document.close();
-    win.focus();
-    win.print();
-  };
+  const printDate = new Date().toLocaleDateString('en-GB');
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: ['طباعة فحص', formatPlate(vehicle) || vehicle?.code, printDate].filter(Boolean).join(' '),
+    pageStyle: '@page { size: A4; margin: 12mm; }',
+  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -109,13 +172,7 @@ export default function PhysicalAttachmentsPanel({ vehicleType, vehicleId }: Pro
           <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handlePrint}
-            disabled={items.length === 0}
-            className="gap-2"
-          >
+          <Button type="button" variant="outline" onClick={() => handlePrint()} className="gap-2">
             <Printer className="h-4 w-4" />
             {t('actions.print')}
           </Button>
@@ -139,114 +196,33 @@ export default function PhysicalAttachmentsPanel({ vehicleType, vehicleId }: Pro
         </div>
       )}
 
-      {!isLoading && !isError && items.length === 0 && (
-        <div className="rounded-md border border-dashed p-10 text-center text-sm text-muted-foreground">
-          {t('empty')}
-        </div>
+      {!isLoading && !isError && (
+        <DataTable
+          columns={columns}
+          data={items}
+          pageKey="physical-attachments"
+          onRowClick={setChecking}
+        />
       )}
 
-      {!isLoading && !isError && items.length > 0 && (
-        <ul className="divide-y rounded-md border bg-background">
-          {items.map((item) => (
-            <li key={item.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-muted">
-                {item.photoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.photoUrl}
-                    alt={item.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="px-2 text-center text-xs text-muted-foreground">
-                    {t('no-photo')}
-                  </span>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-foreground">{item.name}</p>
-                <p className="text-sm text-muted-foreground">{formatDate(item.date)}</p>
-                {formatPrice(item.price) != null ? (
-                  <p className="mt-1 text-sm font-medium text-foreground">
-                    {t('fields.price')}: {formatPrice(item.price)}
-                  </p>
-                ) : null}
-                {item.description ? (
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                    {item.description}
-                  </p>
-                ) : null}
-                {item.confirmedOk ? (
-                  <p className="mt-1 text-sm text-green-700">
-                    {t('confirmed')} — {item.confirmedBy ?? ''} {formatDate(item.confirmedAt)}
-                  </p>
-                ) : null}
-              </div>
-              <div className="flex shrink-0 flex-wrap items-center gap-2">
-                {!item.confirmedOk && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => confirmOk(item)}
-                    disabled={isUpdating}
-                    className="gap-1"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    {t('actions.confirm-ok')}
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => openEdit(item)}
-                  className="gap-1"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                  {t('actions.edit')}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setPendingDelete(item)}
-                  className="gap-1 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  {t('actions.delete')}
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div ref={printRef} className="hidden">
-        <h1>{t('print.title')}</h1>
-        <table>
-          <thead>
-            <tr>
-              <th>{t('fields.name')}</th>
-              <th>{t('fields.date')}</th>
-              <th>{t('fields.price')}</th>
-              <th>{t('fields.description')}</th>
-              <th>{t('print.status')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id}>
-                <td>{item.name}</td>
-                <td>{formatDate(item.date)}</td>
-                <td>{formatPrice(item.price) ?? '—'}</td>
-                <td>{item.description ?? '—'}</td>
-                <td>{item.confirmedOk ? t('confirmed') : t('print.pending')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="hidden" aria-hidden>
+        <PrintableCheck
+          ref={printRef}
+          vehicleType={vehicleType}
+          vehicleCode={vehicle?.code}
+          plate={formatPlate(vehicle)}
+          printDate={printDate}
+          items={items}
+          axles={axles}
+          axleCount={axleCount}
+          formatDateTime={formatDateTime}
+        />
       </div>
+
+      <AttachmentChecklistDialog
+        attachment={checking}
+        onOpenChange={(open) => !open && setChecking(null)}
+      />
 
       <PhysicalAttachmentFormDialog
         open={formOpen}

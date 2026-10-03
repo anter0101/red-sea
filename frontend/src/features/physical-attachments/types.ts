@@ -16,6 +16,14 @@ export interface IPhysicalAttachment {
   createdBy?: string;
 }
 
+export interface IPhysicalAttachmentCheck {
+  id: number;
+  physicalAttachmentId: number;
+  checked: boolean;
+  recordedAt: string;
+  recordedBy: string;
+}
+
 export interface ICreatePhysicalAttachmentPayload {
   name: string;
   date: string;
@@ -46,6 +54,4 @@ export const physicalAttachmentFormSchema = (t: (key: string) => string) =>
     photo: z.custom<File | string | undefined>().optional(),
   });
 
-export type PhysicalAttachmentFormValues = z.infer<
-  ReturnType<typeof physicalAttachmentFormSchema>
->;
+export type PhysicalAttachmentFormValues = z.infer<ReturnType<typeof physicalAttachmentFormSchema>>;

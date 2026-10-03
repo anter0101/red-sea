@@ -28,6 +28,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     physicalAttachmentsMessages,
     tripsMessages,
     invoicesMessages,
+    maintenanceMessages,
   ] = await Promise.all([
     import(`../../messages/${locale}/common.json`),
     import(`../../messages/${locale}/auth.json`),
@@ -47,6 +48,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../../messages/${locale}/physical-attachments.json`),
     import(`../../messages/${locale}/trips.json`),
     import(`../../messages/${locale}/invoices.json`),
+    import(`../../messages/${locale}/maintenance.json`),
   ]);
 
   return {
@@ -70,6 +72,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       physicalAttachments: physicalAttachmentsMessages.default,
       trips: tripsMessages.default,
       invoices: invoicesMessages.default,
+      maintenance: maintenanceMessages.default,
     },
   };
 });

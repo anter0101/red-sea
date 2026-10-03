@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { PhysicalAttachment } from './physical-attachment.entity';
+import { PhysicalAttachmentCheck } from './physical-attachment-check.entity';
 import { QueryPhysicalAttachmentDTO } from './dtos/query-physical-attachment.dto';
 import { applyQueryFilters } from 'src/core/utils/query-builder.util';
 import { getStringColumns } from 'src/core/utils/entity-meta.util';
@@ -11,6 +12,8 @@ export class PhysicalAttachmentService {
   constructor(
     @InjectRepository(PhysicalAttachment)
     private readonly repo: Repository<PhysicalAttachment>,
+    @InjectRepository(PhysicalAttachmentCheck)
+    private readonly checkRepo: Repository<PhysicalAttachmentCheck>,
   ) {}
 
   async findById(id: number): Promise<PhysicalAttachment | undefined> {
@@ -32,9 +35,7 @@ export class PhysicalAttachmentService {
     return await this.repo.find(options);
   }
 
-  async findAndCount(
-    query?: QueryPhysicalAttachmentDTO,
-  ): Promise<[PhysicalAttachment[], number]> {
+  async findAndCount(query?: QueryPhysicalAttachmentDTO): Promise<[PhysicalAttachment[], number]> {
     if (!query) return await this.repo.findAndCount({ relations: ['car', 'trailer'] });
 
     const qb = this.repo
@@ -81,5 +82,36 @@ export class PhysicalAttachmentService {
 
   async delete(id: number): Promise<void> {
     await this.repo.delete(id);
+  }
+
+  async listChecks(attachmentId: number): Promise<PhysicalAttachmentCheck[]> {
+    return this.checkRepo.find({
+      where: { attachment: { id: attachmentId } },
+      relations: ['attachment'],
+      order: { recordedAt: 'DESC' },
+    });
+  }
+
+  async recordCheck(
+    attachment: PhysicalAttachment,
+    checked: boolean,
+    recordedBy: string,
+  ): Promise<PhysicalAttachmentCheck> {
+    const now = new Date();
+    const row = this.checkRepo.create({
+      attachment,
+      checked,
+      recordedAt: now,
+      recordedBy,
+    });
+    const saved = await this.checkRepo.save(row);
+
+    attachment.confirmedOk = checked;
+    attachment.confirmedBy = recordedBy;
+    attachment.confirmedAt = now;
+    await this.update(attachment, recordedBy);
+
+    saved.attachment = attachment;
+    return saved;
   }
 }

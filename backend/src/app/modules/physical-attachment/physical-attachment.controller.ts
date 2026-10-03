@@ -33,6 +33,24 @@ import {
 } from './physical-attachment.mapper';
 import { Car } from '../car/car.entity';
 import { Trailer } from '../trailer/trailer.entity';
+import {
+  CreatePhysicalAttachmentCheckDTO,
+  PhysicalAttachmentCheckDTO,
+} from './dtos/physical-attachment-check.dto';
+import { PhysicalAttachmentCheck } from './physical-attachment-check.entity';
+
+function mapCheckToDto(
+  row: PhysicalAttachmentCheck,
+  attachmentId: number,
+): PhysicalAttachmentCheckDTO {
+  return {
+    id: row.id,
+    physicalAttachmentId: row.attachment?.id ?? attachmentId,
+    checked: row.checked,
+    recordedAt: row.recordedAt,
+    recordedBy: row.recordedBy,
+  };
+}
 
 @Controller('api/physical-attachments')
 @ApiBearerAuth()
@@ -63,10 +81,41 @@ export class PhysicalAttachmentController {
     return results.map((a) => mapPhysicalAttachmentToDtoSelective(a));
   }
 
+  @Get('/:id/checks')
+  @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
+  @ApiOperation({ summary: 'List status history for a physical attachment' })
+  @ApiResponse({ status: 200, type: PhysicalAttachmentCheckDTO, isArray: true })
+  async listChecks(@Param('id', ParseIntPipe) id: number): Promise<PhysicalAttachmentCheckDTO[]> {
+    const existing = await this.attachmentService.findById(id);
+    if (!existing) throw new NotFoundException(`Physical attachment with id ${id} not found`);
+    const rows = await this.attachmentService.listChecks(id);
+    return rows.map((row) => mapCheckToDto(row, id));
+  }
+
+  @Post('/:id/checks')
+  @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
+  @ApiOperation({ summary: 'Record a checked or unchecked status for a physical attachment' })
+  @ApiResponse({ status: 201, type: PhysicalAttachmentCheckDTO })
+  async recordCheck(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreatePhysicalAttachmentCheckDTO,
+    @AuthUser() user: any,
+  ): Promise<PhysicalAttachmentCheckDTO> {
+    const existing = await this.attachmentService.findById(id);
+    if (!existing) throw new NotFoundException(`Physical attachment with id ${id} not found`);
+    const recordedBy = user?.email ?? user?.name ?? 'user';
+    const saved = await this.attachmentService.recordCheck(existing, dto.checked, recordedBy);
+    return mapCheckToDto(saved, id);
+  }
+
   @Get('/:id')
   @Roles(UserRole.ADMIN, UserRole.USER)
   @ApiOperation({ summary: 'Get physical attachment by ID' })
-  @ApiResponse({ status: 200, description: 'Physical attachment found', type: PhysicalAttachmentDTO })
+  @ApiResponse({
+    status: 200,
+    description: 'Physical attachment found',
+    type: PhysicalAttachmentDTO,
+  })
   async getById(@Param('id', ParseIntPipe) id: number): Promise<Partial<PhysicalAttachmentDTO>> {
     const existing = await this.attachmentService.findById(id);
     if (!existing) throw new NotFoundException(`Physical attachment with id ${id} not found`);

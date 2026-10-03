@@ -33,6 +33,24 @@ import {
 } from './maintenance.mapper';
 import { Car } from '../car/car.entity';
 import { Trailer } from '../trailer/trailer.entity';
+import { MaintenanceType } from 'src/core/enums/maintenance-type';
+import { TireSelection } from './tire-selection';
+
+function applyTireSelections(
+  dto: { type?: MaintenanceType; tireSelections?: TireSelection[] | null },
+  currentType?: MaintenanceType,
+) {
+  if (dto.type === undefined && dto.tireSelections === undefined) return;
+
+  const type = dto.type ?? currentType;
+  if (type !== MaintenanceType.TIRE_CHANGE) {
+    dto.tireSelections = null;
+    return;
+  }
+  if (!dto.tireSelections?.length) {
+    throw new BadRequestException('Select at least one tire to change');
+  }
+}
 
 @Controller('api/maintenances')
 @ApiBearerAuth()
@@ -87,6 +105,7 @@ export class MaintenanceController {
       if (!trailer) throw new NotFoundException(`Trailer with id ${dto.trailerId} not found`);
     }
 
+    applyTireSelections(dto);
     const mapped = mapCreateMaintenanceDtoToEntity(dto);
     const saved = await this.maintenanceService.save(mapped, user?.email);
     return mapMaintenanceToDtoSelective(saved);
@@ -105,6 +124,7 @@ export class MaintenanceController {
     if (!existing) throw new NotFoundException(`Maintenance with id ${id} not found`);
 
     dto.id = id;
+    applyTireSelections(dto, existing.type);
     const mapped = mapUpdateMaintenanceDtoToEntity(dto);
     const merged = Object.assign(existing, mapped);
     const updated = await this.maintenanceService.update(merged, user?.email);

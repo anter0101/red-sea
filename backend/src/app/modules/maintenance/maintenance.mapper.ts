@@ -9,6 +9,8 @@ import { Trailer } from '../trailer/trailer.entity';
 const allowedKeys: ReadonlyArray<keyof MaintenanceDTO | keyof BaseDTO> = [
   'id',
   'maintenanceDate',
+  'type',
+  'tireSelections',
   'description',
   'cost',
   'notes',
@@ -63,6 +65,8 @@ export const mapCreateMaintenanceDtoToEntity = (dto: CreateMaintenanceDTO): Main
     entity.trailer.id = dto.trailerId;
   }
   entity.maintenanceDate = dto.maintenanceDate;
+  entity.type = dto.type;
+  entity.tireSelections = dto.tireSelections ?? null;
   entity.description = dto.description;
   entity.cost = dto.cost;
   entity.notes = dto.notes;
@@ -73,6 +77,8 @@ export const mapUpdateMaintenanceDtoToEntity = (dto: UpdateMaintenanceDTO): Main
   const entity = new Maintenance();
   if (dto.id !== undefined) entity.id = dto.id;
   if (dto.maintenanceDate !== undefined) entity.maintenanceDate = dto.maintenanceDate;
+  if (dto.type !== undefined) entity.type = dto.type;
+  if (dto.tireSelections !== undefined) entity.tireSelections = dto.tireSelections;
   if (dto.description !== undefined) entity.description = dto.description;
   if (dto.cost !== undefined) entity.cost = dto.cost;
   if (dto.notes !== undefined) entity.notes = dto.notes;

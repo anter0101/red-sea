@@ -89,10 +89,7 @@ export default function PhysicalAttachmentFormDialog({
       name: attachment?.name ?? '',
       date: toDateInputValue(attachment?.date),
       description: attachment?.description ?? '',
-      price:
-        attachment?.price != null && attachment.price !== ''
-          ? String(attachment.price)
-          : '',
+      price: attachment?.price != null && attachment.price !== '' ? String(attachment.price) : '',
       photo: attachment?.photoUrl ?? undefined,
     });
   }, [open, attachment, form]);
@@ -275,7 +272,11 @@ export default function PhysicalAttachmentFormDialog({
                 {t('actions.cancel')}
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? t('actions.saving') : isEdit ? t('actions.update') : t('actions.create')}
+                {isPending
+                  ? t('actions.saving')
+                  : isEdit
+                    ? t('actions.update')
+                    : t('actions.create')}
               </Button>
             </DialogFooter>
           </form>

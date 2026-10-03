@@ -6,6 +6,18 @@
   "error": "Could not load attachments.",
   "empty": "No physical attachments yet. Add the first one.",
   "confirmed": "Confirmed OK",
+  "status": {
+    "checked": "Checked",
+    "unchecked": "Unchecked"
+  },
+  "columns": {
+    "name": "Name",
+    "date": "Date",
+    "status": "Status",
+    "lastCheck": "Last check",
+    "price": "Price",
+    "actions": "Actions"
+  },
   "fields": {
     "name": "Name",
     "date": "Date",
@@ -27,13 +39,32 @@
     "create": "Create",
     "update": "Update",
     "saving": "Saving…",
-    "print": "Print checklist",
-    "confirm-ok": "Confirm OK"
+    "print": "Print check",
+    "confirm-ok": "Confirm OK",
+    "save-status": "Save status"
+  },
+  "checklist": {
+    "title": "Attachment check",
+    "status": "Status",
+    "history": "Check history",
+    "time": "Time",
+    "user": "User",
+    "empty-history": "No check history yet"
   },
   "print": {
-    "title": "Physical attachments checklist",
+    "title": "Print check",
     "status": "Status",
-    "pending": "Pending confirmation"
+    "pending": "Pending confirmation",
+    "unchecked": "Unchecked attachments",
+    "empty-unchecked": "No unchecked attachments",
+    "axles": "Axle drawing",
+    "filled": "Tire fitted",
+    "empty": "Empty slot",
+    "check": "Check",
+    "vehicle": "Vehicle",
+    "plate": "Plate",
+    "print-date": "Print date",
+    "notes": "Notes"
   },
   "delete": {
     "title": "Delete attachment?",

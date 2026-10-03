@@ -46,6 +46,7 @@ interface DataTableProps<TData, TValue> {
   filterKey?: string;
   pageKey?: string;
   onRowDoubleClick?: (row: TData) => void;
+  onRowClick?: (row: TData) => void;
   enableRowSelection?: boolean | ((row: Row<TData>) => boolean);
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
@@ -80,6 +81,7 @@ export function DataTable<TData, TValue>({
   filterKey,
   pageKey,
   onRowDoubleClick,
+  onRowClick,
   enableRowSelection,
   rowSelection,
   onRowSelectionChange,
@@ -213,10 +215,12 @@ export function DataTable<TData, TValue>({
                   table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
+                      onClick={() => onRowClick?.(row.original)}
                       onDoubleClick={() => onRowDoubleClick?.(row.original)}
                       className={cn(
-                        onRowDoubleClick && 'cursor-pointer',
-                        getRowClassName?.(row) ?? (onRowDoubleClick ? 'hover:bg-muted' : ''),
+                        (onRowClick || onRowDoubleClick) && 'cursor-pointer',
+                        getRowClassName?.(row) ??
+                          (onRowClick || onRowDoubleClick ? 'hover:bg-muted' : ''),
                       )}
                     >
                       {row.getVisibleCells().map((cell) => (

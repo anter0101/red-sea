@@ -1,0 +1,71 @@
+{
+  "title": "Maintenance",
+  "subtitle": "Vehicle maintenance log",
+  "loading": "Loading...",
+  "error": "Could not load maintenance records",
+  "empty": "No maintenance records",
+  "axle-header": "Axle {number}",
+  "axle-short": "A{number}",
+  "tire-hint": "Click a tire to see its current data and update it",
+  "tire-pick": "Click a tire on the drawing",
+  "no-tires": "This vehicle has no tires on record",
+  "tires-count": "{count} tires",
+  "types": {
+    "OIL_CHANGE": "Oil change",
+    "TIRE_CHANGE": "Tire change",
+    "BRAKES": "Brakes",
+    "GENERAL": "General service",
+    "OTHER": "Other"
+  },
+  "positions": {
+    "left-outer": "Left outer",
+    "left-inner": "Left inner",
+    "right-outer": "Right outer",
+    "right-inner": "Right inner"
+  },
+  "columns": {
+    "date": "Date",
+    "type": "Type",
+    "description": "Description",
+    "cost": "Cost",
+    "tires": "Tires",
+    "actions": "Actions"
+  },
+  "fields": {
+    "type": "Maintenance type",
+    "date": "Maintenance date",
+    "description": "Description",
+    "cost": "Cost (optional)",
+    "notes": "Notes (optional)"
+  },
+  "form": {
+    "add-title": "Add maintenance",
+    "edit-title": "Edit maintenance",
+    "type-placeholder": "Choose a maintenance type"
+  },
+  "actions": {
+    "add": "Add maintenance",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "delete": {
+    "title": "Delete maintenance",
+    "description": "Are you sure you want to delete this maintenance record?"
+  },
+  "tire-editor": {
+    "previous": "Current data",
+    "next": "New data",
+    "serial": "Serial number",
+    "type": "Tire type",
+    "thickness": "Thickness",
+    "installed": "Installation date",
+    "empty": "—",
+    "remove": "Remove from change"
+  },
+  "validation": {
+    "tires-required": "Select at least one tire",
+    "tire-fields": "Enter the new serial number, type, and thickness"
+  }
+}
