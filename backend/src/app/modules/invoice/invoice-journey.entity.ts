@@ -16,4 +16,25 @@ export class InvoiceJourney extends BaseEntity {
 
   @Column({ name: 'revenue_amount', type: 'decimal', precision: 14, scale: 2 })
   revenueAmount: number;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  governorate?: string | null;
+
+  @Column({ name: 'received_company', type: 'varchar', length: 255, nullable: true })
+  receivedCompany?: string | null;
+
+  @Column({ name: 'packing_type', type: 'varchar', length: 50, nullable: true })
+  packingType?: string | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  destination?: string | null;
+
+  @Column({ name: 'journey_date', type: 'date', nullable: true })
+  journeyDate?: string | null;
+
+  @Column({ type: 'decimal', precision: 14, scale: 4, nullable: true })
+  quantity?: number | null;
+
+  @Column({ name: 'unit_price', type: 'decimal', precision: 14, scale: 2, nullable: true })
+  unitPrice?: number | null;
 }

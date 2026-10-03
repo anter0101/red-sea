@@ -14,6 +14,20 @@ export class Invoice extends BaseEntity {
   @JoinColumn({ name: 'client_id' })
   client: Client;
 
+  /** Snapshot of the client name printed as المطلوب من. */
+  @Column({ name: 'client_name', type: 'varchar', length: 255, nullable: true })
+  clientName?: string | null;
+
+  /** Snapshot of the company header at issue time. */
+  @Column({ name: 'company_name', type: 'varchar', length: 255, nullable: true })
+  companyName?: string | null;
+
+  @Column({ name: 'tax_card', type: 'varchar', length: 50, nullable: true })
+  taxCard?: string | null;
+
+  @Column({ name: 'commercial_register', type: 'varchar', length: 50, nullable: true })
+  commercialRegister?: string | null;
+
   @Column({ type: 'date' })
   date: string;
 

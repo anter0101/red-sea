@@ -17,6 +17,7 @@ export const modules = {
   custody: 'العُهد',
   'office-requests': 'طلبات المكتب',
   invoices: 'الفواتير',
+  settings: 'إعدادات الشركة',
 } as const;
 
 // Detail page labels for dynamic ID segments (e.g., /drivers/[id])
@@ -49,6 +50,7 @@ export const nestedRoutes = {
   'nolon-car': 'سيارات بالناولون',
   'contract-car': 'سيارات تعاقد',
   'company-car': 'سيارات الشركة',
+  company: 'إعدادات الشركة',
 } as const;
 
 export const actions = {

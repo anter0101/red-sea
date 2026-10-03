@@ -29,6 +29,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     tripsMessages,
     invoicesMessages,
     maintenanceMessages,
+    companySettingsMessages,
   ] = await Promise.all([
     import(`../../messages/${locale}/common.json`),
     import(`../../messages/${locale}/auth.json`),
@@ -49,6 +50,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../../messages/${locale}/trips.json`),
     import(`../../messages/${locale}/invoices.json`),
     import(`../../messages/${locale}/maintenance.json`),
+    import(`../../messages/${locale}/company-settings.json`),
   ]);
 
   return {
@@ -73,6 +75,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       trips: tripsMessages.default,
       invoices: invoicesMessages.default,
       maintenance: maintenanceMessages.default,
+      companySettings: companySettingsMessages.default,
     },
   };
 });

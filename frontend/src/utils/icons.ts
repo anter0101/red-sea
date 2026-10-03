@@ -65,6 +65,7 @@ export const sideMenuIcons: SideMenuItem[] = [
       { alt: 'المعاملات', href: '/accounting/transactions' },
       { alt: 'التقارير', href: '/accounting/transaction-lines' },
       { alt: 'الفواتير', href: '/invoices' },
+      { alt: 'إعدادات الشركة', href: '/settings/company' },
     ],
   },
   {

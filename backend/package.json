@@ -13,6 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "seed": "ts-node -r tsconfig-paths/register src/seed.ts",
     "seed:vehicles": "ts-node -r tsconfig-paths/register src/seed-drivers-trailers.ts",
+    "seed:invoice-cycle": "ts-node -r tsconfig-paths/register src/seed-invoice-cycle.ts",
     "generate:errors-i18n": "node scripts/generate-errors-json.js",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

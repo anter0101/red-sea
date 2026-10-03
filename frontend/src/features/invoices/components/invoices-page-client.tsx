@@ -12,6 +12,7 @@ import { usePaginationParams } from '@/hooks/use-pagination-params';
 import { usePageKey } from '@/utils/use-page-key';
 import { useGetAllInvoices } from '../api/get-all';
 import type { InvoiceView } from '../types';
+import { InvoicePrintButton } from './invoice-print-button';
 import { formatMoney } from './money';
 
 export default function InvoicesPageClient() {
@@ -61,6 +62,15 @@ export default function InvoicesPageClient() {
       cell: ({ row }) => formatMoney(row.original.netAmount),
     },
     { id: 'journeyCount', accessorKey: 'journeyCount', header: t('journeys') },
+    {
+      id: 'print',
+      header: t('print'),
+      cell: ({ row }) => (
+        <div className="flex justify-center">
+          <InvoicePrintButton invoice={row.original} />
+        </div>
+      ),
+    },
   ];
 
   return (

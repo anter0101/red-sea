@@ -37,6 +37,6 @@ import { PolicyLedgerService } from './policy-ledger.service';
   ],
   controllers: [JourneyPolicyController],
   providers: [JourneyPolicyService, PolicyLedgerService],
-  exports: [JourneyPolicyService],
+  exports: [JourneyPolicyService, PolicyLedgerService],
 })
 export class JourneyPolicyModule {}

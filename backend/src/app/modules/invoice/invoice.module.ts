@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountModule } from '../account/account.module';
+import { CompanySettings } from '../company-settings/company-settings.entity';
 import { Journey } from '../journey/journey.entity';
 import { Transaction } from '../transaction/transaction.entity';
 import { TransactionModule } from '../transaction/transaction.module';
@@ -11,7 +12,7 @@ import { InvoiceService } from './invoice.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Invoice, InvoiceJourney, Journey, Transaction]),
+    TypeOrmModule.forFeature([Invoice, InvoiceJourney, Journey, Transaction, CompanySettings]),
     AccountModule,
     TransactionModule,
   ],

@@ -25,6 +25,13 @@ export interface InvoiceJourneyRow {
   delegateNumber: string | null;
   policyNo: string | null;
   revenueAmount: number;
+  governorate: string | null;
+  receivedCompany: string | null;
+  packingType: string | null;
+  destination: string | null;
+  journeyDate: string | null;
+  quantity: number | null;
+  unitPrice: number;
 }
 
 export interface InvoiceView {
@@ -33,6 +40,9 @@ export interface InvoiceView {
   date: string;
   clientId: number | null;
   clientName: string | null;
+  companyName: string | null;
+  taxCard: string | null;
+  commercialRegister: string | null;
   taxEnabled: boolean;
   vatPercentage: number;
   withholdingPercentage: number;

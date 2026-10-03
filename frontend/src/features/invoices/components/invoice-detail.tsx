@@ -16,14 +16,14 @@ export default function InvoiceDetail({ id }: { id: number }) {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: data?.code ?? `invoice-${id}`,
-    pageStyle: '@page { size: A4; margin: 12mm; }',
+    pageStyle: '@page { size: A4 landscape; margin: 10mm; }',
   });
 
   if (isPending) return <p className="p-4 text-center">جاري التحميل...</p>;
   if (isError || !data) return <p className="p-4 text-center">{t('empty')}</p>;
 
   return (
-    <div className="pageContainer mx-auto max-w-3xl space-y-4" dir="rtl">
+    <div className="pageContainer mx-auto max-w-6xl space-y-4" dir="rtl">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">
           {t('detail')} {data.code}

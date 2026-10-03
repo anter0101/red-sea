@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, In, QueryFailedError, Repository } from 'typeorm';
 import { AccountService } from '../account/account.service';
 import { AccountActorType, AccountSystemKey } from '../account/account-system-keys';
+import { DEFAULT_COMPANY_SETTINGS } from '../company-settings/company-settings.service';
+import { CompanySettings } from '../company-settings/company-settings.entity';
 import { Client } from '../factory/client.entity';
 import { Journey } from '../journey/journey.entity';
 import { JourneyStatus } from 'src/core/enums/journey';
@@ -31,6 +33,13 @@ export interface InvoiceJourneyView {
   delegateNumber: string | null;
   policyNo: string | null;
   revenueAmount: number;
+  governorate: string | null;
+  receivedCompany: string | null;
+  packingType: string | null;
+  destination: string | null;
+  journeyDate: string | null;
+  quantity: number | null;
+  unitPrice: number;
 }
 
 export interface InvoiceView {
@@ -39,6 +48,9 @@ export interface InvoiceView {
   date: string;
   clientId: number | null;
   clientName: string | null;
+  companyName: string | null;
+  taxCard: string | null;
+  commercialRegister: string | null;
   taxEnabled: boolean;
   vatPercentage: number;
   withholdingPercentage: number;
@@ -62,6 +74,8 @@ export class InvoiceService {
     private readonly journeyRepository: Repository<Journey>,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    @InjectRepository(CompanySettings)
+    private readonly companySettingsRepository: Repository<CompanySettings>,
     private readonly accountService: AccountService,
     private readonly transactionService: TransactionService,
   ) {}
@@ -86,6 +100,10 @@ export class InvoiceService {
     const invoiceRepo = manager.getRepository(Invoice);
     const invoice = invoiceRepo.create({
       client: { id: dto.clientId } as Client,
+      clientName: loaded.clientName,
+      companyName: loaded.company.name,
+      taxCard: loaded.company.taxCard,
+      commercialRegister: loaded.company.commercialRegister,
       date: new Date().toISOString().slice(0, 10),
       taxEnabled: dto.taxEnabled,
       vatPercentage: dto.vatPercentage,
@@ -102,13 +120,21 @@ export class InvoiceService {
       saved = await invoiceRepo.save(invoice);
       const rowRepo = manager.getRepository(InvoiceJourney);
       await rowRepo.save(
-        loaded.ids.map((id) =>
-          rowRepo.create({
+        loaded.ids.map((id) => {
+          const line = loaded.lines.get(id);
+          return rowRepo.create({
             invoice: { id: saved.id } as Invoice,
             journey: { id } as Journey,
-            revenueAmount: loaded.amounts.get(id),
-          }),
-        ),
+            revenueAmount: line?.revenueAmount ?? loaded.amounts.get(id),
+            governorate: line?.governorate ?? null,
+            receivedCompany: line?.receivedCompany ?? null,
+            packingType: line?.packingType ?? null,
+            destination: line?.destination ?? null,
+            journeyDate: line?.journeyDate ?? null,
+            quantity: line?.quantity ?? null,
+            unitPrice: line?.unitPrice ?? null,
+          });
+        }),
       );
     } catch (error) {
       if (isUniqueViolation(error)) {
@@ -180,9 +206,10 @@ export class InvoiceService {
       qb.andWhere('client.id = :clientId', { clientId: query.clientId });
     }
     if (query.search?.trim()) {
-      qb.andWhere('(invoice.code ILIKE :term OR client.name ILIKE :term)', {
-        term: `%${query.search.trim()}%`,
-      });
+      qb.andWhere(
+        '(invoice.code ILIKE :term OR invoice.clientName ILIKE :term OR client.name ILIKE :term)',
+        { term: `%${query.search.trim()}%` },
+      );
     }
 
     const [rows, count] = await qb.getManyAndCount();
@@ -203,7 +230,14 @@ export class InvoiceService {
 
     const journeys = await journeyRepo.find({
       where: { id: In(ids) },
-      relations: ['client'],
+      relations: [
+        'client',
+        'deliveryGov',
+        'deliveryArea',
+        'journeyPolicies',
+        'journeyPolicies.deliveryGov',
+        'journeyPolicies.deliveryArea',
+      ],
     });
     const errors: string[] = [];
     if (journeys.length !== ids.length) {
@@ -248,6 +282,12 @@ export class InvoiceService {
     }
 
     const clientName = journeys[0]?.client?.name ?? '';
+    const lines = new Map<number, InvoiceLineSnapshot>();
+    for (const journey of journeys) {
+      const amount = amounts.get(journey.id);
+      if (amount == null) continue;
+      lines.set(journey.id, lineSnapshot(journey, amount));
+    }
     const totals = invoiceTotals({
       revenue,
       taxEnabled: dto.taxEnabled,
@@ -255,7 +295,21 @@ export class InvoiceService {
       withholdingPercentage: Number(dto.withholdingPercentage),
     });
     const accounts = await this.accountsFor(dto.clientId, clientName, undefined, manager);
-    return { ids, amounts, totals, accounts, clientName };
+    const company = await this.companyHeader(manager);
+    return { ids, amounts, lines, totals, accounts, clientName, company };
+  }
+
+  private async companyHeader(manager?: EntityManager) {
+    const repo = manager
+      ? manager.getRepository(CompanySettings)
+      : this.companySettingsRepository;
+    const [row] = await repo.find({ order: { id: 'ASC' }, take: 1 });
+    if (!row) return DEFAULT_COMPANY_SETTINGS;
+    return {
+      name: row.name,
+      taxCard: row.taxCard,
+      commercialRegister: row.commercialRegister,
+    };
   }
 
   private async accountsFor(
@@ -320,24 +374,45 @@ export class InvoiceService {
     const repo = manager ? manager.getRepository(Invoice) : this.invoiceRepository;
     return repo.findOne({
       where: { id },
-      relations: ['client', 'journeys', 'journeys.journey', 'journeys.journey.journeyPolicies', 'transaction'],
+      relations: ['client', 'journeys', 'journeys.journey', 'transaction'],
     });
   }
+}
+
+interface InvoiceLineSnapshot {
+  governorate: string | null;
+  receivedCompany: string | null;
+  packingType: string | null;
+  destination: string | null;
+  journeyDate: string | null;
+  quantity: number | null;
+  unitPrice: number;
+  revenueAmount: number;
 }
 
 function toView(invoice: Invoice): InvoiceView {
   const journeys = (invoice.journeys ?? []).map((row) => ({
     journeyId: row.journey?.id,
     delegateNumber: row.journey?.delegateNumber ?? null,
-    policyNo: latestPolicyNo(row.journey),
+    policyNo: null,
     revenueAmount: Number(row.revenueAmount ?? 0),
+    governorate: row.governorate ?? null,
+    receivedCompany: row.receivedCompany ?? null,
+    packingType: row.packingType ?? null,
+    destination: row.destination ?? null,
+    journeyDate: sheetDate(row.journeyDate),
+    quantity: row.quantity == null ? null : Number(row.quantity),
+    unitPrice: Number(row.unitPrice ?? 0),
   }));
   return {
     id: invoice.id,
     code: invoice.code,
     date: invoice.date ? String(invoice.date).slice(0, 10) : '',
     clientId: invoice.client?.id ?? null,
-    clientName: invoice.client?.name ?? null,
+    clientName: invoice.clientName ?? invoice.client?.name ?? null,
+    companyName: invoice.companyName ?? null,
+    taxCard: invoice.taxCard ?? null,
+    commercialRegister: invoice.commercialRegister ?? null,
     taxEnabled: invoice.taxEnabled,
     vatPercentage: Number(invoice.vatPercentage ?? 0),
     withholdingPercentage: Number(invoice.withholdingPercentage ?? 0),
@@ -351,11 +426,47 @@ function toView(invoice: Invoice): InvoiceView {
   };
 }
 
-function latestPolicyNo(journey?: Journey | null): string | null {
-  const policies = (journey?.journeyPolicies ?? []).filter((policy) => !policy.deletedAt && policy.policyNo);
+function lineSnapshot(journey: Journey, revenueAmount: number): InvoiceLineSnapshot {
+  const policy = latestPolicy(journey);
+  const quantity = journey.quantity == null ? null : Number(journey.quantity);
+  return {
+    governorate: journey.deliveryGov?.name ?? policy?.deliveryGov?.name ?? null,
+    receivedCompany: journey.receivedCompany ?? null,
+    packingType: journey.packingType ?? null,
+    destination: journey.deliveryArea?.name ?? policy?.deliveryArea?.name ?? journey.direction ?? null,
+    journeyDate: sheetDate(policy?.tripDate ?? policy?.loadingDate ?? journey.delegateDate),
+    quantity,
+    unitPrice: unitPrice(quantity, journey.expectedRevenue, revenueAmount),
+    revenueAmount,
+  };
+}
+
+function latestPolicy(journey?: Journey | null) {
+  const policies = (journey?.journeyPolicies ?? []).filter((policy) => !policy.deletedAt);
   if (!policies.length) return null;
-  const latest = [...policies].sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0];
-  return latest?.policyNo ?? null;
+  return [...policies].sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0];
+}
+
+function sheetDate(value?: Date | string | null): string | null {
+  if (!value) return null;
+  if (typeof value === 'string') return value.slice(0, 10);
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${value.getFullYear()}-${month}-${day}`;
+}
+
+function unitPrice(
+  quantity?: number | null,
+  expectedRevenue?: number | null,
+  revenueAmount?: number,
+): number {
+  const qty = Number(quantity);
+  if (Number.isFinite(qty) && qty > 0) {
+    const expected = Number(expectedRevenue);
+    if (Number.isFinite(expected) && expected > 0) return roundMoney(expected / qty);
+    return roundMoney(Number(revenueAmount ?? 0) / qty);
+  }
+  return roundMoney(Number(revenueAmount ?? 0));
 }
 
 function isUniqueViolation(error: unknown): boolean {

@@ -53,6 +53,7 @@ import { OfficeRequestModule } from './modules/office-request/office-request.mod
 import { JourneyDelegationPrintModule } from './modules/journey-delegation-print/journey-delegation-print.module';
 import { I18nModule } from '../i18n/i18n.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
+import { CompanySettingsModule } from './modules/company-settings/company-settings.module';
 
 @Module({
   imports: [
@@ -120,6 +121,7 @@ import { InvoiceModule } from './modules/invoice/invoice.module';
     CustodyModule,
     OfficeRequestModule,
     InvoiceModule,
+    CompanySettingsModule,
     JourneyDelegationPrintModule,
     I18nModule,
   ],
