@@ -1,11 +1,14 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import type { Resolver } from 'react-hook-form';
+import { useGetAllAreasByGovernment } from '@/apis/areas/get-all-areas';
+import { useGetAllGovernments } from '@/apis/governments/get-all-governments';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -16,13 +19,21 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import client from '@/lib/client';
 
 import { useCreateTripPolicy } from '../api/create/create-policy';
 import { useEditTripPolicy } from '../api/update/update-policy';
 import { useGetOnePolicy } from '../api/get-one/get-one-policy';
 import { useGetOneTrip } from '../api/get-one/get-one';
 import { tripPolicySchema, type TripPolicyFormValues } from '../types/activity-schema';
-import type { ITripPolicyRes } from '../types/policy';
+import type { ITripPolicyInfo, ITripPolicyRes } from '../types/policy';
 
 interface PolicyFormProps {
   journeyId: number;
@@ -50,6 +61,9 @@ const DEFAULT_VALUES: TripPolicyFormValues = {
   tripDate: '',
   tripDistance: undefined,
   policyFile: '',
+  transportSupplierId: '',
+  custodySupplierId: '',
+  custodySupplierAmount: undefined,
 };
 
 function nextDay(isoDate: string): string {
@@ -68,6 +82,8 @@ function toOptionalNumber(value?: string | number | null): number | undefined {
 /* -------------------------- Map API → Form Values ------------------------- */
 function mapPolicyToFormValues(policy: ITripPolicyRes): TripPolicyFormValues {
   return {
+    deliveryGovId: policy.deliveryGov?.id != null ? String(policy.deliveryGov.id) : '',
+    deliveryAreaId: policy.deliveryArea?.id != null ? String(policy.deliveryArea.id) : '',
     policyNo: policy.policyNo ?? '',
     policyDate: policy.policyDate ?? '',
     loadingPermitNo: policy.loadingPermitNo ?? '',
@@ -107,6 +123,20 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
     resolver: zodResolver(tripPolicySchema) as Resolver<TripPolicyFormValues>,
     defaultValues: DEFAULT_VALUES,
   });
+  const deliveryGovId = form.watch('deliveryGovId');
+  const { governments } = useGetAllGovernments();
+  const { areas } = useGetAllAreasByGovernment(deliveryGovId || null);
+  const ownerShip = tripResponse?.car?.ownerShip;
+  const needsTransportSupplier = ownerShip === 'NOLON_CAR' || ownerShip === 'CONTRACT_CAR';
+  const suppliers = useQuery({
+    queryKey: ['ledger-suppliers'],
+    queryFn: async () => {
+      const res = await client.get('/api/suppliers', { params: { page: 1, pageSize: 100 } });
+      const rows = res.data?.data ?? res.data ?? [];
+      return (Array.isArray(rows) ? rows : []) as Array<{ id: number; name: string; type?: string }>;
+    },
+    enabled: needsTransportSupplier,
+  });
 
   /* --------------------------- Reset Form Logic --------------------------- */
 
@@ -134,13 +164,33 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
       return;
     }
 
+    if (needsTransportSupplier && !toOptionalNumber(data.transportSupplierId)) {
+      toast.error('مورد النقل مطلوب للنولون والعقد');
+      return;
+    }
+
     const payload: ITripPolicyInfo = {
-      ...data,
       journeyId: normalizedJourneyId,
+      deliveryGovId: toOptionalNumber(data.deliveryGovId),
+      deliveryAreaId: toOptionalNumber(data.deliveryAreaId),
+      employeeId: toOptionalNumber(data.employeeId),
+      policyNo: data.policyNo,
+      policyDate: data.policyDate,
+      loadingPermitNo: data.loadingPermitNo,
+      loadingDate: data.loadingDate,
       bookWeight: data.bookWeight,
       actualWeight: data.actualWeight,
       deliveryWeight: data.deliveryWeight,
       shortageQty: data.shortageQty,
+      entryTimeFactory: data.entryTimeFactory,
+      exitTimeFactory: data.exitTimeFactory,
+      archiveNo: data.archiveNo,
+      tripDate: data.tripDate,
+      tripDistance: data.tripDistance,
+      policyFile: data.policyFile,
+      transportSupplierId: toOptionalNumber(data.transportSupplierId),
+      custodySupplierId: toOptionalNumber(data.custodySupplierId),
+      custodySupplierAmount: data.custodySupplierAmount,
     };
     if (isEditMode) {
       editTripPolicyMutation(
@@ -199,6 +249,66 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
               <FormControl>
                 <Input type="date" min={minPolicyDate} {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="deliveryGovId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>محافظة التسليم</FormLabel>
+              <Select
+                value={field.value || undefined}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  form.setValue('deliveryAreaId', '');
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="اختر المحافظة" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {governments?.map((gov) => (
+                    <SelectItem key={gov.id} value={String(gov.id)}>
+                      {gov.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="deliveryAreaId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>منطقة التسليم</FormLabel>
+              <Select
+                value={field.value || undefined}
+                onValueChange={field.onChange}
+                disabled={!deliveryGovId || !areas?.length}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="اختر المنطقة" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {areas?.map((area) => (
+                    <SelectItem key={area.id} value={String(area.id)}>
+                      {area.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -417,6 +527,83 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
             </FormItem>
           )}
         />
+
+        {needsTransportSupplier && (
+          <>
+            <FormField
+              control={form.control}
+              name="transportSupplierId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>مورد النقل</FormLabel>
+                  <Select value={field.value || undefined} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر مورد النقل" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {suppliers.data
+                        ?.filter((row) => row.type === 'TRANSPORTATION')
+                        .map((row) => (
+                          <SelectItem key={row.id} value={String(row.id)}>
+                            {row.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="custodySupplierId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>مورد العهدة</FormLabel>
+                  <Select value={field.value || undefined} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختياري" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {suppliers.data
+                        ?.filter((row) => row.type === 'CUSTODY')
+                        .map((row) => (
+                          <SelectItem key={row.id} value={String(row.id)}>
+                            {row.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="custodySupplierAmount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>مبلغ مورد العهدة</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={field.value ?? ''}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
 
         {/* Submit Button */}
         <div className="flex justify-end gap-2 pt-4">

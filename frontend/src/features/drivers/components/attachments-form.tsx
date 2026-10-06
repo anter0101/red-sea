@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Trash } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { isAxiosError } from 'axios';
+import { Loader2, Trash } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
@@ -15,7 +18,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useRouter } from '@/i18n/navigation';
+import { UserAttachmentType } from '@/enums/users/user-attachment-type';
+import { useCreate } from '@/hooks/base/create';
+import { uploadFile } from '@/hooks/uploadS3/upload-file';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useCreateDriverStore } from '../store/create-driver.store';
@@ -24,13 +29,24 @@ import createDriverSchema from '../types/create-schema';
 export default function DriverAttachmentsForm({
   onNext,
   onPrevious,
+  userId,
 }: {
   onNext: () => void;
   onPrevious: () => void;
+  userId?: number | null;
 }) {
   const t = useTranslations('drivers');
-  const router = useRouter();
-  const { setForm, goToStep } = useCreateDriverStore();
+  const { goToStep } = useCreateDriverStore();
+  const [isUploading, setIsUploading] = useState(false);
+  const { mutateAsync: createAttachment, isPending } = useCreate<
+    unknown,
+    Error,
+    { userId: number; url: string; type: string }
+  >({
+    endPoint: '/api/user-attachments',
+    queryKey: ['drivers'],
+    onSuccess: () => undefined,
+  });
 
   const attachmentsSchema = createDriverSchema(t).pick({
     drivingLicenseImage: true,
@@ -56,10 +72,38 @@ export default function DriverAttachmentsForm({
     },
   });
 
-  const onSubmit = (data: AttachmentsFormValues) => {
-    setForm(data);
-    goToStep(2);
-    router.push('/drivers/create/salary');
+  const onSubmit = async (data: AttachmentsFormValues) => {
+    const selected = fieldsConfig.flatMap((field) => {
+      const file = data[field.name];
+      return file instanceof File ? [{ file, type: field.type }] : [];
+    });
+
+    if (selected.length === 0) {
+      goToStep(2);
+      onNext();
+      return;
+    }
+
+    if (!userId) {
+      toast.error(t('attachments.upload-error'));
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      for (const item of selected) {
+        const url = await uploadFile(item.file);
+        await createAttachment({ userId, url, type: item.type });
+      }
+      goToStep(2);
+      onNext();
+    } catch (error) {
+      if (!isAxiosError(error)) {
+        toast.error(t('attachments.upload-error'));
+      }
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   type AttachmentFieldName =
@@ -71,25 +115,41 @@ export default function DriverAttachmentsForm({
     | 'socialInsuranceImage'
     | 'militaryServiceStatusImage';
 
-  const fieldsConfig: Array<{ name: AttachmentFieldName; labelKey: string }> = [
-    { name: 'drivingLicenseImage', labelKey: 'fields.driving-license-image' },
-    { name: 'nationalIdImage', labelKey: 'fields.national-id-image' },
+  const fieldsConfig: Array<{ name: AttachmentFieldName; labelKey: string; type: string }> = [
+    {
+      name: 'drivingLicenseImage',
+      labelKey: 'fields.driving-license-image',
+      type: UserAttachmentType.DRIVERLICENSE,
+    },
+    {
+      name: 'nationalIdImage',
+      labelKey: 'fields.national-id-image',
+      type: UserAttachmentType.PERSONALID,
+    },
     {
       name: 'criminalRecordCheckImage',
       labelKey: 'fields.criminal-record-check-image',
+      type: UserAttachmentType.CREMINALRECORD,
     },
     {
       name: 'securityClearanceImage',
       labelKey: 'fields.security-clearance-image',
+      type: UserAttachmentType.SECURITYCLEARANCE,
     },
     {
       name: 'medicalInsuranceImage',
       labelKey: 'fields.medical-insurance-image',
+      type: UserAttachmentType.MEDICALINSURANCE,
     },
-    { name: 'socialInsuranceImage', labelKey: 'fields.social-insurance-image' },
+    {
+      name: 'socialInsuranceImage',
+      labelKey: 'fields.social-insurance-image',
+      type: UserAttachmentType.INSURANCE,
+    },
     {
       name: 'militaryServiceStatusImage',
       labelKey: 'fields.military-service-status-image',
+      type: UserAttachmentType.MILITITARYSTATUS,
     },
   ];
 
@@ -158,10 +218,9 @@ export default function DriverAttachmentsForm({
             <Button
               type="submit"
               className="px-8 bg-blue-600 hover:bg-blue-700"
-              onClick={() => {
-                onNext();
-              }}
+              disabled={isUploading || isPending}
             >
+              {isUploading || isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               {t('buttons.next')}
             </Button>
           </div>

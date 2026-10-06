@@ -72,14 +72,14 @@ export default function ArishDeliveryPricesTable({ clientId }: ArishDeliveryPric
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-right">المحافظة</TableHead>
-            <TableHead className="text-right">منطقة التفريغ</TableHead>
+            <TableHead>المحافظة</TableHead>
+            <TableHead>منطقة التفريغ</TableHead>
             {packingTypes.map((type) => (
-              <TableHead key={type} className="text-right">
+              <TableHead key={type}>
                 {packingTypeLabels[type]}
               </TableHead>
             ))}
-            <TableHead className="text-right">نولون</TableHead>
+            <TableHead>نولون</TableHead>
           </TableRow>
         </TableHeader>
 

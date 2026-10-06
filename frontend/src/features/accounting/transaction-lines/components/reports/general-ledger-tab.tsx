@@ -162,25 +162,25 @@ export default function GeneralLedgerTab() {
         {isLoading ? (
           <div className="p-8 text-center text-muted-foreground">جاري التحميل...</div>
         ) : (
-          <Table className="text-right">
+          <Table>
             <TableHeader className="bg-slate-50 border-b">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {tTab('table.date')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {tTab('table.reference')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {tTab('table.description')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {tTab('table.debit')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {tTab('table.credit')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {tTab('table.balance')}
                 </TableHead>
               </TableRow>

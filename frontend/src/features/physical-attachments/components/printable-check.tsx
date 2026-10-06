@@ -79,7 +79,7 @@ export const PrintableCheck = forwardRef<HTMLDivElement, Props>(function Printab
         <Meta label={t('print.print-date')} value={printDate} />
       </div>
 
-      <table className="mt-4 w-full border-collapse border border-black text-right">
+      <table className="mt-4 w-full border-collapse border border-black text-center">
         <thead>
           <tr className="bg-neutral-100">
             <th className="w-12 border border-black px-2 py-1.5 font-semibold">#</th>

@@ -36,7 +36,7 @@ const LATEST_POLICY_TRIP_DATE = `(
   LIMIT 1
 )`;
 
-const JOURNEY_REVENUE = `COALESCE("journey"."actualRevenue", "journey"."expectedRevenue", 0)`;
+const JOURNEY_REVENUE = `COALESCE("journey"."actualRevenue", 0)`;
 
 const JOURNEY_EXPENSES = `COALESCE((
   SELECT SUM(trx.amount)

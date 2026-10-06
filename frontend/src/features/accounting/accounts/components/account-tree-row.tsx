@@ -111,7 +111,7 @@ export default function AccountTreeRow({
             : '-'}
         </TableCell>
         <TableCell className="align-middle">
-          <div className="flex gap-1">
+          <div className="flex justify-center gap-1">
             <Button
               variant="ghost"
               size="icon"

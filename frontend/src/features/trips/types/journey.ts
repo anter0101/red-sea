@@ -25,6 +25,7 @@ export interface ICar {
   model: string;
   plate: string;
   manufacturer: string;
+  ownerShip?: string;
 }
 
 export interface ITrailer {

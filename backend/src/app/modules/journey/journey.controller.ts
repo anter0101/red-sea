@@ -63,7 +63,6 @@ import {
 } from '../account/person-account.constants';
 import { JourneyDelegationPrintService } from '../journey-delegation-print/journey-delegation-print.service';
 import { EmployeeCustodyBalanceDTO } from './dtos/employee-custody-balance.dto';
-import { JourneyRevenueService } from './journey-revenue.service';
 
 @Controller('api/journeys')
 @ApiBearerAuth()
@@ -89,7 +88,6 @@ export class JourneyController {
     private readonly custodyService: CustodyService,
     private readonly dataSource: DataSource,
     private readonly journeyDelegationPrintService: JourneyDelegationPrintService,
-    private readonly journeyRevenueService: JourneyRevenueService,
   ) { }
 
   private resolveListScope(req: Request): JourneyListScope | undefined {
@@ -261,16 +259,6 @@ export class JourneyController {
         user?.email,
       );
 
-      if (dto.deliveryAreaId) {
-        await this.journeyRevenueService.applyExpected(
-          savedJourney.id,
-          dto.deliveryAreaId,
-          new Date(),
-          user?.email,
-          manager,
-        );
-      }
-
       return savedJourney;
     });
 
@@ -346,20 +334,6 @@ export class JourneyController {
 
       const updatedEntity = mapUpdateJourneyDtoToEntity(dto, existing);
       const savedJourney = await this.journeyService.update(updatedEntity, user?.email);
-
-      const shouldRefreshExpected =
-        dto.deliveryAreaId !== undefined ||
-        dto.quantity !== undefined ||
-        dto.packingType !== undefined ||
-        dto.clientId !== undefined;
-      if (shouldRefreshExpected) {
-        await this.journeyRevenueService.applyExpectedForJourney(
-          savedJourney.id,
-          dto.deliveryAreaId,
-          user?.email,
-          manager,
-        );
-      }
 
       // Handle custody advance transaction on update
       if (dto.custodyAmount !== undefined) {

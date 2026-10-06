@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'react-toastify';
 import { Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
@@ -17,6 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { uploadFile } from '@/hooks/uploadS3/upload-file';
 import { useBulkAssignOwners } from '@/features/cars/apis/bulk-assign-owners';
 import { useGetOwners } from '@/features/cars/apis/get-owners';
 import AddPartnerDialog from '@/features/cars/components/add-partner-dialog';
@@ -44,6 +46,7 @@ const OwnershipForm = ({ onNext, onPrevious, carId, car }: OwnershipFormProps) =
   } = useGetOwners();
   const [isAddPartnerOpen, setIsAddPartnerOpen] = useState(false);
   const [partnerSelectOpenIndex, setPartnerSelectOpenIndex] = useState<number | null>(null);
+  const [uploadingContractIndex, setUploadingContractIndex] = useState<number | null>(null);
 
   const getFormValuesFromCar = useMemo((): ISharePartnersValues => {
     const ownerships = car?.Ownerships || [];
@@ -288,15 +291,38 @@ const OwnershipForm = ({ onNext, onPrevious, carId, car }: OwnershipFormProps) =
                           <Dropzone
                             accept={{ 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] }}
                             maxFiles={1}
-                            onDrop={(acceptedFiles) => {
-                              if (acceptedFiles.length > 0) {
-                                contractField.onChange(acceptedFiles[0].name);
+                            disabled={uploadingContractIndex === index}
+                            onDrop={async (acceptedFiles) => {
+                              const file = acceptedFiles[0];
+                              if (!file) return;
+                              setUploadingContractIndex(index);
+                              try {
+                                const url = await uploadFile(file);
+                                contractField.onChange(url);
+                              } catch {
+                                toast.error(t('documents.upload-error'));
+                              } finally {
+                                setUploadingContractIndex(null);
                               }
                             }}
                           >
                             <DropzoneEmptyState />
                             <DropzoneContent />
                           </Dropzone>
+                          {typeof contractField.value === 'string' && contractField.value ? (
+                            <a
+                              href={
+                                contractField.value.startsWith('http')
+                                  ? contractField.value
+                                  : undefined
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-primary underline truncate"
+                            >
+                              {contractField.value.split('/').pop()}
+                            </a>
+                          ) : null}
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -339,12 +365,17 @@ const OwnershipForm = ({ onNext, onPrevious, carId, car }: OwnershipFormProps) =
                 type="button"
                 variant="outline"
                 onClick={onPrevious}
-                disabled={isBulkAssignOwnersPending}
+                disabled={isBulkAssignOwnersPending || uploadingContractIndex !== null}
               >
                 {t('buttons.previous')}
               </Button>
-              <Button type="submit" disabled={isBulkAssignOwnersPending}>
-                {isBulkAssignOwnersPending ? t('buttons.loading') : t('buttons.next')}
+              <Button
+                type="submit"
+                disabled={isBulkAssignOwnersPending || uploadingContractIndex !== null}
+              >
+                {isBulkAssignOwnersPending || uploadingContractIndex !== null
+                  ? t('buttons.loading')
+                  : t('buttons.next')}
               </Button>
             </div>
           </form>

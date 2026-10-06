@@ -161,15 +161,11 @@ export function buildJourneyListQuery(
       `MAX(CASE WHEN trx.category = '${JourneyTransactionCategoryType.CARD_FEES}' THEN trx.description END)`,
       'cardName',
     )
-    .addSelect('journey.expectedRevenue', 'expectedRevenue')
     .addSelect('journey.actualRevenue', 'actualRevenue')
-    .addSelect(
-      `COALESCE("journey"."actualRevenue", "journey"."expectedRevenue", 0)`,
-      'totalRevenue',
-    )
+    .addSelect(`COALESCE("journey"."actualRevenue", 0)`, 'totalRevenue')
     .addSelect(
       `(
-          COALESCE("journey"."actualRevenue", "journey"."expectedRevenue", 0)
+          COALESCE("journey"."actualRevenue", 0)
           - COALESCE((
             SELECT SUM(trx.amount)
             FROM journey_transactions trx

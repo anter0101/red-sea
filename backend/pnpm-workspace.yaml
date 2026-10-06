@@ -1,6 +1,6 @@
 allowBuilds:
-  '@parcel/watcher': set this to true or false
-  '@scarf/scarf': set this to true or false
-  bcrypt: set this to true or false
-  msgpackr-extract: set this to true or false
-  unrs-resolver: set this to true or false
+  '@parcel/watcher': true
+  '@scarf/scarf': false
+  bcrypt: true
+  msgpackr-extract: true
+  unrs-resolver: true

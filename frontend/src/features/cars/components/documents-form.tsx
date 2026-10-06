@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Trash } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { isAxiosError } from 'axios';
+import { Loader2, Trash } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -14,6 +17,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { useCreate } from '@/hooks/base/create';
+import { uploadFile } from '@/hooks/uploadS3/upload-file';
 import type { ICar } from '@/types';
 
 interface DocumentsFormProps {
@@ -29,8 +34,26 @@ interface DocumentsFormValues {
   otherFiles?: File;
 }
 
+type DocumentFieldName = 'licenseImage' | 'taxCardImage' | 'otherFiles';
+
+const fieldsConfig: Array<{ name: DocumentFieldName; labelKey: string; type: string }> = [
+  { name: 'licenseImage', labelKey: 'documents.license-image', type: 'LICENSE' },
+  { name: 'taxCardImage', labelKey: 'documents.tax-card-image', type: 'TAX_ID' },
+  { name: 'otherFiles', labelKey: 'documents.other-files', type: 'OTHER' },
+];
+
 const DocumentsForm = ({ onNext, onPrevious, carId, car }: DocumentsFormProps) => {
   const t = useTranslations('cars');
+  const [isUploading, setIsUploading] = useState(false);
+  const { mutateAsync: createAttachment, isPending } = useCreate<
+    unknown,
+    Error,
+    { carId: number; type: string; url: string }
+  >({
+    endPoint: '/api/car-attachments',
+    queryKey: ['cars', String(carId ?? '')],
+    onSuccess: () => undefined,
+  });
 
   const form = useForm<DocumentsFormValues>({
     defaultValues: {
@@ -40,19 +63,37 @@ const DocumentsForm = ({ onNext, onPrevious, carId, car }: DocumentsFormProps) =
     },
   });
 
-  const onSubmit = (data: DocumentsFormValues) => {
-    console.log('Documents form data:', data);
-    // TODO: Implement file upload API
-    onNext();
+  const onSubmit = async (data: DocumentsFormValues) => {
+    const selected = fieldsConfig.flatMap((field) => {
+      const file = data[field.name];
+      return file ? [{ file, type: field.type }] : [];
+    });
+
+    if (selected.length === 0) {
+      onNext();
+      return;
+    }
+
+    if (!carId) {
+      toast.error(t('documents.upload-error'));
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      for (const item of selected) {
+        const url = await uploadFile(item.file);
+        await createAttachment({ carId, type: item.type, url });
+      }
+      onNext();
+    } catch (error) {
+      if (!isAxiosError(error)) {
+        toast.error(t('documents.upload-error'));
+      }
+    } finally {
+      setIsUploading(false);
+    }
   };
-
-  type DocumentFieldName = 'licenseImage' | 'taxCardImage' | 'otherFiles';
-
-  const fieldsConfig: Array<{ name: DocumentFieldName; labelKey: string }> = [
-    { name: 'licenseImage', labelKey: 'documents.license-image' },
-    { name: 'taxCardImage', labelKey: 'documents.tax-card-image' },
-    { name: 'otherFiles', labelKey: 'documents.other-files' },
-  ];
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -112,7 +153,12 @@ const DocumentsForm = ({ onNext, onPrevious, carId, car }: DocumentsFormProps) =
             <Button type="button" variant="outline" className="px-8" onClick={onPrevious}>
               {t('buttons.previous')}
             </Button>
-            <Button type="submit" className="px-8 bg-primary hover:bg-primary/90">
+            <Button
+              type="submit"
+              className="px-8 bg-primary hover:bg-primary/90"
+              disabled={isUploading || isPending}
+            >
+              {isUploading || isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               {t('buttons.save')}
             </Button>
           </div>

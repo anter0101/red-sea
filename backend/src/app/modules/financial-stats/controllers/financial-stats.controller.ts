@@ -10,6 +10,7 @@ import { LedgerService } from '../services/ledger.service';
 import { TrialBalanceService } from '../services/trial-balance.service';
 import { IncomeStatementService } from '../services/income-statement.service';
 import { BalanceSheetService } from '../services/balance-sheet.service';
+import { DashboardSummaryService } from '../services/dashboard-summary.service';
 
 import {
   mapLedgerReport,
@@ -23,12 +24,14 @@ import {
   TrialBalanceReportDTO,
   IncomeStatementReportDTO,
   BalanceSheetReportDTO,
+  AccountingDashboardDTO,
 } from '../dtos/financial-stats.response.dto';
 
 import { LedgerQueryDTO } from '../dtos/ledger-query.dto';
 import { TrialBalanceQueryDTO } from '../dtos/trial-balance-query.dto';
 import { IncomeStatementQueryDTO } from '../dtos/income-statement-query.dto';
 import { BalanceSheetQueryDTO } from '../dtos/balance-sheet-query.dto';
+import { DateRangeDTO } from '../dtos/date-range.dto';
 
 @Controller('api/accounting/reports')
 @ApiBearerAuth()
@@ -41,6 +44,7 @@ export class FinancialStatsController {
     private readonly trialBalanceService: TrialBalanceService,
     private readonly incomeStatementService: IncomeStatementService,
     private readonly balanceSheetService: BalanceSheetService,
+    private readonly dashboardSummaryService: DashboardSummaryService,
   ) {}
 
   // ─── General Ledger (paginated — can be 15k–180k rows) ────────────────────
@@ -124,5 +128,18 @@ export class FinancialStatsController {
   @ApiOkResponse({ type: BalanceSheetReportDTO })
   async getBalanceSheet(@Query() query: BalanceSheetQueryDTO): Promise<BalanceSheetReportDTO> {
     return mapBalanceSheetReport(await this.balanceSheetService.getBalanceSheet(query));
+  }
+
+  @Get('/dashboard')
+  @Roles(UserRole.ADMIN, UserRole.USER)
+  @ApiOperation({
+    summary: 'Accounting totals for the home screen',
+    description:
+      'Revenue, cost, and net profit are the income statement for dateFrom–dateTo. ' +
+      'Clients is the closing balance of عملاء. Suppliers is the closing balance of مورد النقل and مورد العهدة, through dateTo.',
+  })
+  @ApiOkResponse({ type: AccountingDashboardDTO })
+  async getDashboard(@Query() query: DateRangeDTO): Promise<AccountingDashboardDTO> {
+    return Object.assign(new AccountingDashboardDTO(), await this.dashboardSummaryService.getSummary(query));
   }
 }

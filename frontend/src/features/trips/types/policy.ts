@@ -66,4 +66,8 @@ export interface ITripPolicyInfo {
   tripDistance?: number; // مسافة الرحلة
 
   policyFile?: string; // ملف البوليصة
+
+  transportSupplierId?: number;
+  custodySupplierId?: number;
+  custodySupplierAmount?: number;
 }

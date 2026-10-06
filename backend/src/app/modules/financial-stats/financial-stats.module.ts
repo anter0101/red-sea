@@ -9,6 +9,7 @@ import { LedgerService } from './services/ledger.service';
 import { TrialBalanceService } from './services/trial-balance.service';
 import { IncomeStatementService } from './services/income-statement.service';
 import { BalanceSheetService } from './services/balance-sheet.service';
+import { DashboardSummaryService } from './services/dashboard-summary.service';
 
 @Module({
   imports: [
@@ -18,6 +19,12 @@ import { BalanceSheetService } from './services/balance-sheet.service';
     TypeOrmModule.forFeature([Account, TransactionLine]),
   ],
   controllers: [FinancialStatsController],
-  providers: [LedgerService, TrialBalanceService, IncomeStatementService, BalanceSheetService],
+  providers: [
+    LedgerService,
+    TrialBalanceService,
+    IncomeStatementService,
+    BalanceSheetService,
+    DashboardSummaryService,
+  ],
 })
 export class FinancialStatsModule {}

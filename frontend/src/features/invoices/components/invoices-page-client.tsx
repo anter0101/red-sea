@@ -14,6 +14,7 @@ import { useGetAllInvoices } from '../api/get-all';
 import type { InvoiceView } from '../types';
 import { InvoicePrintButton } from './invoice-print-button';
 import { formatMoney } from './money';
+import { ServicesClaimPrintButton } from './services-claim-print-button';
 
 export default function InvoicesPageClient() {
   const t = useTranslations('invoices');
@@ -27,7 +28,9 @@ export default function InvoicesPageClient() {
       id: 'code',
       accessorKey: 'code',
       header: t('code'),
-      cell: ({ row }) => <CodeLink href={`/invoices/${row.original.id}`}>{row.original.code}</CodeLink>,
+      cell: ({ row }) => (
+        <CodeLink href={`/invoices/${row.original.id}`}>{row.original.code}</CodeLink>
+      ),
     },
     { id: 'clientName', accessorKey: 'clientName', header: t('client') },
     { id: 'date', accessorKey: 'date', header: t('date') },
@@ -63,6 +66,15 @@ export default function InvoicesPageClient() {
     },
     { id: 'journeyCount', accessorKey: 'journeyCount', header: t('journeys') },
     {
+      id: 'printServicesClaim',
+      header: t('printServicesClaim'),
+      cell: ({ row }) => (
+        <div className="flex justify-center">
+          <ServicesClaimPrintButton invoice={row.original} />
+        </div>
+      ),
+    },
+    {
       id: 'print',
       header: t('print'),
       cell: ({ row }) => (
@@ -71,6 +83,7 @@ export default function InvoicesPageClient() {
         </div>
       ),
     },
+    
   ];
 
   return (

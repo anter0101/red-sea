@@ -81,7 +81,6 @@ export interface IInfo {
     eInvoiceNo: string | null;
     archiveNo?: number | null;
     totalCost: number | null;
-    expectedRevenue: number | null;
     actualRevenue: number | null;
     totalProfit: number | null;
     direction: string | null;

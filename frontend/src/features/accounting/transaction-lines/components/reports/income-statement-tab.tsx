@@ -167,11 +167,11 @@ export default function IncomeStatementTab() {
         {isLoading ? (
           <div className="p-8 text-center text-muted-foreground">جاري التحميل...</div>
         ) : (
-          <Table className="text-right">
+          <Table>
             <TableHeader className="bg-slate-50 border-b">
               <TableRow className="hover:bg-transparent">
                 <TableHead
-                  className="text-right font-bold text-white bg-[#118A7E] h-12 text-lg"
+                  className="font-bold text-white bg-[#118A7E] h-12 text-lg"
                   colSpan={2}
                 >
                   {tTab('revenue')}
@@ -234,7 +234,7 @@ export default function IncomeStatementTab() {
             <TableHeader className="bg-slate-50 border-b border-t">
               <TableRow className="hover:bg-transparent">
                 <TableHead
-                  className="text-right font-bold text-white bg-[#d64545] h-12 text-lg"
+                  className="font-bold text-white bg-[#d64545] h-12 text-lg"
                   colSpan={2}
                 >
                   {tTab('expenses')}

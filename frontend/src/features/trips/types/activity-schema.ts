@@ -19,6 +19,9 @@ export const tripPolicySchema = z.object({
   tripDate: z.string().optional(), // تاريخ الرحلة
   tripDistance: z.coerce.number().min(0).optional(), // مسافة الرحلة
   policyFile: z.string().optional(), // ملف البوليصة
+  transportSupplierId: z.string().optional(),
+  custodySupplierId: z.string().optional(),
+  custodySupplierAmount: z.coerce.number().min(0).optional(),
 });
 
 export type TripPolicyFormValues = z.infer<typeof tripPolicySchema>;

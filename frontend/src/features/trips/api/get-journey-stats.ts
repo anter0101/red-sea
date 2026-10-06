@@ -29,7 +29,7 @@ export type JourneyStatsParams = IQueryParams &
   };
 
 export const useGetJourneyStats = (params?: JourneyStatsParams) => {
-  const { page: _page, pageSize: _pageSize, limit: _limit, ...rest } = params ?? {};
+  const { page: _page, pageSize: _pageSize, ...rest } = params ?? {};
   const scopeParams = journeyScopeToParams(params);
   const filteredParams = Object.fromEntries(
     Object.entries({ ...rest, ...scopeParams }).filter(([, value]) => value !== undefined),

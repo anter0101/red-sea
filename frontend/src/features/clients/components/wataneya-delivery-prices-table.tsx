@@ -72,13 +72,13 @@ export default function WataneyaDeliveryPricesTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-right">المحافظة</TableHead>
-            <TableHead className="text-right">منطقة التفريغ</TableHead>
-            <TableHead className="text-right">مطالبة</TableHead>
-            <TableHead className="text-right">نقل بالطن</TableHead>
-            <TableHead className="text-right">ض ق م</TableHead>
-            <TableHead className="text-right">اجمالي</TableHead>
-            <TableHead className="text-right">نولون</TableHead>
+            <TableHead>المحافظة</TableHead>
+            <TableHead>منطقة التفريغ</TableHead>
+            <TableHead>مطالبة</TableHead>
+            <TableHead>نقل بالطن</TableHead>
+            <TableHead>ض ق م</TableHead>
+            <TableHead>اجمالي</TableHead>
+            <TableHead>نولون</TableHead>
           </TableRow>
         </TableHeader>
 

@@ -178,6 +178,7 @@
     "license-image": "Car License",
     "tax-card-image": "Tax Card",
     "other-files": "Other Files",
+    "upload-error": "Failed to upload the file",
     "notes": "Notes",
     "notes-placeholder": "Enter any additional notes..."
   },

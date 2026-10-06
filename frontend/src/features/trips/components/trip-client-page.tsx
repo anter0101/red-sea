@@ -95,7 +95,7 @@ export default function TripClientPage({ journeyId }: { journeyId: number }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-right">
+                  <tr className="border-b text-center">
                     <th className="p-2">من</th>
                     <th className="p-2">إلى</th>
                     <th className="p-2">بواسطة</th>

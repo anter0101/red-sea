@@ -26,6 +26,7 @@ import { usePageKey } from '@/utils/use-page-key';
 import { useGetAllJourneys } from '@/features/trips/api/get-all/get-all-journeys';
 import {
   JOURNEY_STATUS_COLORS,
+  JOURNEY_STATUS_TEXT_COLORS,
   JOURNEY_STATUS_LABELS,
   JOURNEY_STATUS_OPTIONS,
 } from '@/features/trips/constants/journey-status';
@@ -90,8 +91,11 @@ function policyColumns(onOpen: (journeyId: number) => void): ColumnDef<TripRow>[
         const status = row.original.tripStatus;
         return (
           <Badge
-            className="px-4 py-1 text-black"
-            style={{ backgroundColor: JOURNEY_STATUS_COLORS[status] ?? '#EEE' }}
+            className="px-4 py-1"
+            style={{
+              backgroundColor: JOURNEY_STATUS_COLORS[status] ?? '#EEE',
+              color: JOURNEY_STATUS_TEXT_COLORS[status] ?? '#111827',
+            }}
           >
             {JOURNEY_STATUS_LABELS[status] ?? status}
           </Badge>

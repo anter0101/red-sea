@@ -227,3 +227,23 @@ export class BalanceSheetReportDTO {
   })
   isBalancedPriorYear?: boolean;
 }
+
+export class AccountingDashboardDTO {
+  @ApiProperty({ description: 'Posted revenue in the period', example: 12395 })
+  revenue: number;
+  @ApiProperty({ description: 'Posted expenses in the period', example: 6000 })
+  cost: number;
+  @ApiProperty({ description: 'revenue − cost', example: 6395 })
+  netProfit: number;
+  @ApiProperty({
+    description: 'Closing balance of عملاء (CLIENTS) at dateTo. What clients still owe.',
+    example: 12023.15,
+  })
+  clients: number;
+  @ApiProperty({
+    description:
+      'Closing balance of مورد النقل and مورد العهدة at dateTo. What we still owe suppliers.',
+    example: 6000,
+  })
+  suppliers: number;
+}

@@ -9,18 +9,19 @@ import { MimeTypeMap } from 'src/core/enums/mime-type';
 export class UploadService {
   private readonly s3Client: S3Client;
   private readonly bucket: string;
-  private readonly endpoint?: string;
-  private readonly publicBaseUrl?: string;
+  private readonly publicEndpoint?: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.endpoint = this.configService.get<string>('AWS_ENDPOINT'); // optional for MinIO
+    const internalEndpoint = this.configService.get<string>('AWS_ENDPOINT');
+    // Browser must reach this host. The signature includes it, so it cannot be rewritten later.
+    this.publicEndpoint =
+      this.configService.get<string>('AWS_PUBLIC_ENDPOINT') || internalEndpoint;
     const region = this.configService.getOrThrow<string>('AWS_REGION', { infer: true });
     this.bucket = this.configService.getOrThrow<string>('BUCKET_NAME');
-    this.publicBaseUrl = this.configService.get<string>('AWS_PUBLIC_URL');
 
     this.s3Client = new S3Client({
       region,
-      endpoint: this.endpoint || undefined,
+      endpoint: this.publicEndpoint || undefined,
       credentials: {
         accessKeyId: this.configService.getOrThrow('AWS_ACCESS_KEY_ID'),
         secretAccessKey: this.configService.getOrThrow('AWS_SECRET_ACCESS_KEY'),
@@ -40,7 +41,6 @@ export class UploadService {
       Bucket: this.bucket,
       Key: key,
       ContentType: dto.type,
-      Metadata: { 'expected-ext': ext },
     });
 
     const uploadUrl = await getSignedUrl(this.s3Client, command, { expiresIn });
@@ -51,13 +51,11 @@ export class UploadService {
   }
 
   private buildFileUrl(key: string): string {
-    if (this.publicBaseUrl) {
-      return `${this.publicBaseUrl.replace(/\/$/, '')}/${key}`;
+    const encodedKey = key.split('/').map(encodeURIComponent).join('/');
+    if (this.publicEndpoint) {
+      return `${this.publicEndpoint.replace(/\/$/, '')}/${this.bucket}/${encodedKey}`;
     }
-    if (this.endpoint) {
-      return `${this.endpoint.replace(/\/$/, '')}/${this.bucket}/${key}`;
-    }
-    return `https://${this.bucket}.s3.amazonaws.com/${key}`;
+    return `https://${this.bucket}.s3.amazonaws.com/${encodedKey}`;
   }
 
   private getExtensionFromMime(mimeType: string): string {
@@ -68,7 +66,14 @@ export class UploadService {
 
   private generateObjectKey(filename: string, ext: string): string {
     const timestamp = Date.now();
-    return `uploads/${ext}/${timestamp}_${filename}`;
+    const base = filename.replace(/\.[^.]+$/, '');
+    const safeBase =
+      base
+        .replace(/[^a-zA-Z0-9._-]+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '')
+        .slice(0, 40) || 'file';
+    return `uploads/${ext}/${timestamp}_${safeBase}.${ext}`;
   }
 
   private getExpiresInBasedOnFileSize(size: number): number {

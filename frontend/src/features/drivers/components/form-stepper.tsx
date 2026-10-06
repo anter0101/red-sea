@@ -43,9 +43,9 @@ export function ExampleMultiStepForm({ id }: { id?: number | null }) {
     {
       content: (
         <DriverAttachmentsForm
+          userId={driver?.user?.id}
           onNext={() => setCurrentStep((prev) => prev + 1)}
           onPrevious={() => setCurrentStep((prev) => (prev > 0 ? prev - 1 : 0))}
-          // driver={driver}
         />
       ),
     },

@@ -5,9 +5,12 @@ import { AccountService } from '../account/account.service';
 import { AccountActorType, AccountSystemKey } from '../account/account-system-keys';
 import { DEFAULT_COMPANY_SETTINGS } from '../company-settings/company-settings.service';
 import { CompanySettings } from '../company-settings/company-settings.entity';
+import { DeliveryPrice } from '../delivery-price/delivery-price.entity';
 import { Client } from '../factory/client.entity';
 import { Journey } from '../journey/journey.entity';
+import { JourneyPolicy } from '../journey-goods/journey-policy.entity';
 import { JourneyStatus } from 'src/core/enums/journey';
+import { PricingSheetKind } from 'src/core/enums/pricing-sheet-kind';
 import { Transaction, TransactionStatus } from '../transaction/transaction.entity';
 import { EntryType, TransactionLine } from '../transaction-line/transaction-line.entity';
 import { TransactionService } from '../transaction/transaction.service';
@@ -40,6 +43,8 @@ export interface InvoiceJourneyView {
   journeyDate: string | null;
   quantity: number | null;
   unitPrice: number;
+  /** مطالبة rate (delivery_prices.basePrice). Null when no sheet row matches. */
+  claimUnitPrice: number | null;
 }
 
 export interface InvoiceView {
@@ -48,6 +53,7 @@ export interface InvoiceView {
   date: string;
   clientId: number | null;
   clientName: string | null;
+  pricingSheetKind: PricingSheetKind | null;
   companyName: string | null;
   taxCard: string | null;
   commercialRegister: string | null;
@@ -76,6 +82,8 @@ export class InvoiceService {
     private readonly transactionRepository: Repository<Transaction>,
     @InjectRepository(CompanySettings)
     private readonly companySettingsRepository: Repository<CompanySettings>,
+    @InjectRepository(DeliveryPrice)
+    private readonly deliveryPriceRepository: Repository<DeliveryPrice>,
     private readonly accountService: AccountService,
     private readonly transactionService: TransactionService,
   ) {}
@@ -181,7 +189,7 @@ export class InvoiceService {
     );
 
     const full = await this.findEntity(saved.id, manager);
-    return toView(full!);
+    return this.present(full!, manager);
   }
 
   async findAndCount(query: QueryInvoiceDTO): Promise<[InvoiceView[], number]> {
@@ -218,7 +226,7 @@ export class InvoiceService {
 
   async findById(id: number): Promise<InvoiceView | undefined> {
     const invoice = await this.findEntity(id);
-    return invoice ? toView(invoice) : undefined;
+    return invoice ? this.present(invoice) : undefined;
   }
 
   private async prepare(dto: CreateInvoiceDTO, manager?: EntityManager) {
@@ -370,11 +378,78 @@ export class InvoiceService {
     return roundMoney(rows.reduce((sum, row) => sum + Number(row.amount ?? 0), 0));
   }
 
+  private async present(invoice: Invoice, manager?: EntityManager): Promise<InvoiceView> {
+    return toView(invoice, await this.claimRates(invoice, manager));
+  }
+
+  /** مطالبة rate per journey, looked up like the sheet row used for revenue. */
+  private async claimRates(
+    invoice: Invoice,
+    manager?: EntityManager,
+  ): Promise<Map<number, number>> {
+    const rates = new Map<number, number>();
+    if (!invoice.client?.id) return rates;
+    const kind = invoice.client.pricingSheetKind ?? PricingSheetKind.ARISH;
+    for (const row of invoice.journeys ?? []) {
+      const journey = row.journey;
+      if (!journey?.id) continue;
+      const policy = latestPolicy(journey);
+      const areaId = policy?.deliveryArea?.id ?? journey.deliveryArea?.id;
+      const onDate = priceDate(policy, sheetDate(row.journeyDate));
+      if (!areaId || !onDate) continue;
+      const rate = await this.claimRate(
+        invoice.client.id,
+        areaId,
+        onDate,
+        kind,
+        journey.packingType,
+        manager,
+      );
+      if (rate == null) continue;
+      rates.set(journey.id, rate);
+    }
+    return rates;
+  }
+
+  private async claimRate(
+    clientId: number,
+    areaId: number,
+    onDate: string,
+    kind: PricingSheetKind,
+    packingType: string | null | undefined,
+    manager?: EntityManager,
+  ): Promise<number | null> {
+    const repo = manager ? manager.getRepository(DeliveryPrice) : this.deliveryPriceRepository;
+    const qb = repo
+      .createQueryBuilder('price')
+      .leftJoin('price.priceType', 'priceType')
+      .where('price.client_id = :clientId', { clientId })
+      .andWhere('price.area_id = :areaId', { areaId })
+      .andWhere(':onDate BETWEEN price.validFrom AND price.validTo', { onDate })
+      .orderBy('price.validFrom', 'DESC');
+    if (kind === PricingSheetKind.ARISH && packingType) {
+      qb.andWhere('(priceType.name = :packingType OR priceType.id IS NULL)', { packingType });
+    }
+    const row = await qb.getOne();
+    if (!row || row.basePrice == null) return null;
+    const rate = Number(row.basePrice);
+    if (!Number.isFinite(rate)) return null;
+    return roundMoney(rate);
+  }
+
   private async findEntity(id: number, manager?: EntityManager): Promise<Invoice | null> {
     const repo = manager ? manager.getRepository(Invoice) : this.invoiceRepository;
     return repo.findOne({
       where: { id },
-      relations: ['client', 'journeys', 'journeys.journey', 'transaction'],
+      relations: [
+        'client',
+        'journeys',
+        'journeys.journey',
+        'journeys.journey.deliveryArea',
+        'journeys.journey.journeyPolicies',
+        'journeys.journey.journeyPolicies.deliveryArea',
+        'transaction',
+      ],
     });
   }
 }
@@ -390,26 +465,32 @@ interface InvoiceLineSnapshot {
   revenueAmount: number;
 }
 
-function toView(invoice: Invoice): InvoiceView {
-  const journeys = (invoice.journeys ?? []).map((row) => ({
-    journeyId: row.journey?.id,
-    delegateNumber: row.journey?.delegateNumber ?? null,
-    policyNo: null,
-    revenueAmount: Number(row.revenueAmount ?? 0),
-    governorate: row.governorate ?? null,
-    receivedCompany: row.receivedCompany ?? null,
-    packingType: row.packingType ?? null,
-    destination: row.destination ?? null,
-    journeyDate: sheetDate(row.journeyDate),
-    quantity: row.quantity == null ? null : Number(row.quantity),
-    unitPrice: Number(row.unitPrice ?? 0),
-  }));
+function toView(invoice: Invoice, claimRates = new Map<number, number>()): InvoiceView {
+  const journeys = (invoice.journeys ?? []).map((row) => {
+    const journeyId = row.journey?.id;
+    return {
+      journeyId,
+      delegateNumber: row.journey?.delegateNumber ?? null,
+      policyNo: null,
+      revenueAmount: Number(row.revenueAmount ?? 0),
+      governorate: row.governorate ?? null,
+      receivedCompany: row.receivedCompany ?? null,
+      packingType: row.packingType ?? null,
+      destination: row.destination ?? null,
+      journeyDate: sheetDate(row.journeyDate),
+      quantity: row.quantity == null ? null : Number(row.quantity),
+      unitPrice: Number(row.unitPrice ?? 0),
+      claimUnitPrice:
+        journeyId != null && claimRates.has(journeyId) ? claimRates.get(journeyId)! : null,
+    };
+  });
   return {
     id: invoice.id,
     code: invoice.code,
     date: invoice.date ? String(invoice.date).slice(0, 10) : '',
     clientId: invoice.client?.id ?? null,
     clientName: invoice.clientName ?? invoice.client?.name ?? null,
+    pricingSheetKind: invoice.client?.pricingSheetKind ?? null,
     companyName: invoice.companyName ?? null,
     taxCard: invoice.taxCard ?? null,
     commercialRegister: invoice.commercialRegister ?? null,
@@ -436,7 +517,7 @@ function lineSnapshot(journey: Journey, revenueAmount: number): InvoiceLineSnaps
     destination: journey.deliveryArea?.name ?? policy?.deliveryArea?.name ?? journey.direction ?? null,
     journeyDate: sheetDate(policy?.tripDate ?? policy?.loadingDate ?? journey.delegateDate),
     quantity,
-    unitPrice: unitPrice(quantity, journey.expectedRevenue, revenueAmount),
+    unitPrice: unitPrice(quantity, revenueAmount),
     revenueAmount,
   };
 }
@@ -447,6 +528,13 @@ function latestPolicy(journey?: Journey | null) {
   return [...policies].sort((a, b) => (b.id ?? 0) - (a.id ?? 0))[0];
 }
 
+function priceDate(policy: JourneyPolicy | null, fallback: string | null): string | null {
+  const raw = (policy?.tripDate ?? policy?.policyDate) as Date | string | null | undefined;
+  if (raw instanceof Date) return raw.toISOString().slice(0, 10);
+  if (typeof raw === 'string' && raw) return raw.slice(0, 10);
+  return fallback ? fallback.slice(0, 10) : null;
+}
+
 function sheetDate(value?: Date | string | null): string | null {
   if (!value) return null;
   if (typeof value === 'string') return value.slice(0, 10);
@@ -455,18 +543,11 @@ function sheetDate(value?: Date | string | null): string | null {
   return `${value.getFullYear()}-${month}-${day}`;
 }
 
-function unitPrice(
-  quantity?: number | null,
-  expectedRevenue?: number | null,
-  revenueAmount?: number,
-): number {
+function unitPrice(quantity?: number | null, revenueAmount?: number): number {
   const qty = Number(quantity);
-  if (Number.isFinite(qty) && qty > 0) {
-    const expected = Number(expectedRevenue);
-    if (Number.isFinite(expected) && expected > 0) return roundMoney(expected / qty);
-    return roundMoney(Number(revenueAmount ?? 0) / qty);
-  }
-  return roundMoney(Number(revenueAmount ?? 0));
+  const revenue = Number(revenueAmount ?? 0);
+  if (Number.isFinite(qty) && qty > 0) return roundMoney(revenue / qty);
+  return roundMoney(revenue);
 }
 
 function isUniqueViolation(error: unknown): boolean {

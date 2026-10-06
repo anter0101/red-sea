@@ -7,9 +7,9 @@ export const useEditProduct = (productId?: string | number) => {
   const t = useTranslations('common');
 
   const { mutate: editProductMutation, isPending: isEditProductLoading } = usePut<
-    ProductPayload,
+    ProductResponse,
     Error,
-    ProductResponse
+    ProductPayload
   >({
     endPoint: `/api/warehouses/${productId}`,
     queryKey: ['warehouses'],

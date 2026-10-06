@@ -82,8 +82,6 @@ export interface OfficeJourneyFormValues {
   packingType: string;
   cementGrade: string;
   quantity: string;
-  deliveryGovId: string;
-  deliveryAreaId: string;
   custodyAmount: string;
 }
 
@@ -100,8 +98,6 @@ export const emptyOfficeJourneyValues: OfficeJourneyFormValues = {
   packingType: '',
   cementGrade: '',
   quantity: '',
-  deliveryGovId: '',
-  deliveryAreaId: '',
   custodyAmount: '',
 };
 
@@ -123,7 +119,6 @@ export interface CreateOfficeJourneyPayload {
   packingType?: string;
   cementGrade?: string;
   quantity?: number;
-  deliveryAreaId?: number;
   custodyAmount?: number;
 }
 
@@ -155,7 +150,6 @@ export function buildOfficeJourneyPayload(
   if (values.packingType) payload.packingType = values.packingType;
   if (values.cementGrade) payload.cementGrade = values.cementGrade;
   if (values.quantity) payload.quantity = Number(values.quantity);
-  if (values.deliveryAreaId) payload.deliveryAreaId = Number(values.deliveryAreaId);
   if (values.custodyAmount) payload.custodyAmount = Number(values.custodyAmount);
 
   return payload;
@@ -181,8 +175,6 @@ export function makeOfficeJourneySchema(maxCustody: number) {
       packingType: z.string(),
       cementGrade: z.string(),
       quantity: z.string(),
-      deliveryGovId: z.string(),
-      deliveryAreaId: z.string(),
       custodyAmount: z
         .string()
         .refine((v) => !v || Number(v) <= maxCustody, `لا يمكن أن يتجاوز ${maxCustody}`),

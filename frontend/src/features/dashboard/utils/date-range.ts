@@ -1,8 +1,16 @@
 export type DashboardRangePreset = 'today' | 'week' | 'month';
 
+function toLocalDateString(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 export function getDashboardDateRange(preset: DashboardRangePreset): {
   createdAtFrom: string;
   createdAtTo: string;
+  dateFrom: string;
+  dateTo: string;
 } {
   const to = new Date();
   to.setHours(23, 59, 59, 999);
@@ -20,6 +28,8 @@ export function getDashboardDateRange(preset: DashboardRangePreset): {
   return {
     createdAtFrom: from.toISOString(),
     createdAtTo: to.toISOString(),
+    dateFrom: toLocalDateString(from),
+    dateTo: toLocalDateString(to),
   };
 }
 

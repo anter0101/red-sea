@@ -26,7 +26,7 @@ export class JourneyStatsDTO {
   totalBookWeight?: number;
 
   @ApiPropertyOptional({
-    description: 'Sum of COALESCE(actualRevenue, expectedRevenue, 0) for matching journeys',
+    description: 'Sum of actualRevenue for matching journeys',
   })
   totalRevenue?: number;
 

@@ -162,6 +162,7 @@
     "license-image": "رخصة المقطورة",
     "tax-card-image": "البطاقة الضريبية",
     "other-files": "ملفات أخرى",
+    "upload-error": "فشل رفع الملف",
     "notes": "ملحوظات",
     "notes-placeholder": "أدخل أي ملحوظات إضافية..."
   },

@@ -288,7 +288,6 @@ export class JourneyService {
       'delegateNumber', "journey"."delegateNumber",
       'packingType', "journey"."packingType",
       'quantity', "journey"."quantity",
-      'expectedRevenue', "journey"."expectedRevenue",
       'actualRevenue', "journey"."actualRevenue",
       'cementGrade', "journey"."cementGrade",
       'sellingOrderNo', "journey"."sellingOrderNo",
@@ -305,7 +304,7 @@ export class JourneyService {
       'dqm', null,                    -- ض. ق. م. (not exists)
 
       'totalProfit',
-        COALESCE("journey"."actualRevenue", "journey"."expectedRevenue", 0)
+        COALESCE("journey"."actualRevenue", 0)
         - COALESCE(
           (
             SELECT SUM(trx.amount)
@@ -350,7 +349,7 @@ export class JourneyService {
       'weightLedger', "policy"."bookWeight",      -- الوزن الدفتري
       'weightActual', "policy"."actualWeight",   -- الوزن الفعلي
       'weightDelivered', "policy"."deliveryWeight", -- وزن التسليم
-      'revenue', COALESCE("journey"."actualRevenue", "journey"."expectedRevenue", 0),                           -- إجمالي الايراد
+      'revenue', COALESCE("journey"."actualRevenue", 0),                           -- إجمالي الايراد
       'ats', null                                 -- آ. ت. ص. (not exists)
     ) AS policyInfo`,
     ])
@@ -416,7 +415,8 @@ export class JourneyService {
       'id', car.id,
       'plate', CONCAT(car.plateNumber, ' - ', car.plateLetters),
       'manufacturer', car.manufacturer,
-      'model', car.model
+      'model', car.model,
+      'ownerShip', car."ownerShip"
     ) AS car
     `,
 

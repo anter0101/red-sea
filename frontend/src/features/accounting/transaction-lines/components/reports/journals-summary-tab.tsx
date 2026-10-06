@@ -126,26 +126,26 @@ export default function JournalsSummaryTab() {
             {t('tabs.journals-summary')}...
           </div>
         ) : (
-          <Table className="text-right">
+          <Table>
             <TableHeader className="bg-slate-50 border-b">
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-12 text-center"></TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {t('journals-summary.type')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {t('journals-summary.transactions-count')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {t('journals-summary.total-debit')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {t('journals-summary.total-credit')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">
+                <TableHead className="font-semibold text-slate-700">
                   {t('journals-summary.net-balance')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">التاريخ</TableHead>
+                <TableHead className="font-semibold text-slate-700">التاريخ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

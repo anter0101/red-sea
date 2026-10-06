@@ -7,9 +7,9 @@ export const useCreateProduct = () => {
   const t = useTranslations('common');
 
   const { mutate: createProductMutation, isPending: isCreateProductPending } = useCreate<
-    ProductPayload,
+    ProductResponse,
     Error,
-    ProductResponse
+    ProductPayload
   >({
     endPoint: '/api/warehouses',
     queryKey: ['warehouses'],

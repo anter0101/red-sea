@@ -11,7 +11,13 @@ export const JOURNEY_STATUS_LABELS: Record<string, string> = {
 };
 
 export const JOURNEY_STATUS_COLORS: Record<string, string> = {
-  DELEGATION_ISSUED: 'var(--BG-Color, #e2e2e2)',
-  POLICY_COLLECTED: 'var(--Light-Blue-BG-Color, #148d34)',
-  INVOICE_ISSUED: 'var(--Available-Green-Color, #282bd8)',
+  DELEGATION_ISSUED: '#E5E7EB',
+  POLICY_COLLECTED: '#2563EB',
+  INVOICE_ISSUED: '#16A34A',
+};
+
+export const JOURNEY_STATUS_TEXT_COLORS: Record<string, string> = {
+  DELEGATION_ISSUED: '#111827',
+  POLICY_COLLECTED: '#FFFFFF',
+  INVOICE_ISSUED: '#FFFFFF',
 };

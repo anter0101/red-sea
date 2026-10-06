@@ -116,7 +116,7 @@ export default function PhysicalAttachmentsPanel({ vehicleType, vehicleId }: Pro
         id: 'actions',
         header: t('columns.actions'),
         cell: ({ row }) => (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center justify-center gap-1">
             <Button
               type="button"
               size="sm"

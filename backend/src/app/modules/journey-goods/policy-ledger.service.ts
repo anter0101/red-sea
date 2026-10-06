@@ -178,7 +178,7 @@ export class PolicyLedgerService {
       await this.accountService.createClientAccounts(clientId, journey.client.name, undefined, manager);
     }
 
-    const revenue = Number(journey.actualRevenue ?? journey.expectedRevenue ?? 0);
+    const revenue = Number(journey.actualRevenue ?? 0);
     const lines: Array<LedgerPreviewLine & { debit: Account; credit: Account }> = [];
 
     if (clientId && revenue > 0) {

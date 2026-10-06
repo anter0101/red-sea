@@ -42,6 +42,7 @@ export function DriverAssistantFormStepper({ id }: { id?: number | null }) {
     {
       content: (
         <DriverAssistantAttachmentsForm
+          userId={user?.id}
           onNext={() => setCurrentStep((prev) => prev + 1)}
           onPrevious={() => setCurrentStep((prev) => (prev > 0 ? prev - 1 : 0))}
         />

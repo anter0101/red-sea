@@ -39,7 +39,7 @@ export default function TransactionsTable({ data, onEdit }: TransactionsTablePro
           <TableHead>{t('table.description')}</TableHead>
 
           <TableHead className="w-32 text-center">{t('table.status')}</TableHead>
-          <TableHead className="text-left">{t('table.actions')}</TableHead>
+          <TableHead>{t('table.actions')}</TableHead>}
         </TableRow>
       </TableHeader>
 
@@ -70,7 +70,7 @@ export default function TransactionsTable({ data, onEdit }: TransactionsTablePro
                 </Badge>
               </TableCell>
               <TableCell>
-                <div className="flex gap-2 justify-end">
+                <div className="flex gap-2 justify-center">
                   {item.status === 'DRAFT' ? (
                     <Button
                       variant="ghost"

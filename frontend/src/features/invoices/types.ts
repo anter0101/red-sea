@@ -32,6 +32,7 @@ export interface InvoiceJourneyRow {
   journeyDate: string | null;
   quantity: number | null;
   unitPrice: number;
+  claimUnitPrice: number | null;
 }
 
 export interface InvoiceView {
@@ -40,6 +41,7 @@ export interface InvoiceView {
   date: string;
   clientId: number | null;
   clientName: string | null;
+  pricingSheetKind: string | null;
   companyName: string | null;
   taxCard: string | null;
   commercialRegister: string | null;

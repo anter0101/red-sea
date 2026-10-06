@@ -3,6 +3,8 @@
 import { useMemo, useState } from 'react';
 
 import { useDashboardModuleCounts } from '@/features/dashboard/api/use-module-counts';
+import { useGetAccountingDashboard } from '@/features/dashboard/api/get-accounting-dashboard';
+import { AccountingKpiStrip } from '@/features/dashboard/components/accounting-kpi-strip';
 import { AttentionQueue } from '@/features/dashboard/components/attention-queue';
 import { DashboardToolbar } from '@/features/dashboard/components/dashboard-toolbar';
 import { JourneyPipeline } from '@/features/dashboard/components/journey-pipeline';
@@ -22,7 +24,14 @@ export default function AdminHomePage() {
   const [range, setRange] = useState<DashboardRangePreset>('today');
   const dateParams = useMemo(() => getDashboardDateRange(range), [range]);
 
-  const journeyQuery = useGetJourneyStats(dateParams);
+  const journeyQuery = useGetJourneyStats({
+    createdAtFrom: dateParams.createdAtFrom,
+    createdAtTo: dateParams.createdAtTo,
+  });
+  const accountingQuery = useGetAccountingDashboard({
+    dateFrom: dateParams.dateFrom,
+    dateTo: dateParams.dateTo,
+  });
   const driversQuery = useGetDriverStats();
   const assistantsQuery = useGetDriverAssistantStats();
   const carsQuery = useGetCarStats();
@@ -38,6 +47,8 @@ export default function AdminHomePage() {
   return (
     <div className="flex flex-col gap-8 p-4 md:p-6 max-w-[1400px] mx-auto w-full">
       <DashboardToolbar range={range} onRangeChange={setRange} />
+
+      <AccountingKpiStrip totals={accountingQuery.data} isLoading={accountingQuery.isPending} />
 
       <OpsKpiStrip
         journeyStats={journeyQuery.data}

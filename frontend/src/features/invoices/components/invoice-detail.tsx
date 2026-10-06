@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useGetInvoice } from '../api/get-one';
 import { formatMoney } from './money';
 import { PrintableInvoice } from './printable-invoice';
+import { ServicesClaimPrintButton } from './services-claim-print-button';
 
 export default function InvoiceDetail({ id }: { id: number }) {
   const t = useTranslations('invoices');
@@ -28,9 +29,12 @@ export default function InvoiceDetail({ id }: { id: number }) {
         <h1 className="text-xl font-semibold">
           {t('detail')} {data.code}
         </h1>
-        <Button type="button" onClick={() => handlePrint()}>
-          {t('print')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <ServicesClaimPrintButton invoice={data} />
+          <Button type="button" onClick={() => handlePrint()}>
+            {t('print')}
+          </Button>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
         <Stat label={t('client')} value={data.clientName || '—'} />

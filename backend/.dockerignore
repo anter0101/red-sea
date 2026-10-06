@@ -1,3 +1,10 @@
-node_modules
-dist
-.git
+*
+!src
+!src/**
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!nest-cli.json
+!tsconfig.json
+!tsconfig.build.json
+!Dockerfile

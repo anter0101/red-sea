@@ -14,7 +14,6 @@ import {
 } from 'src/core/enums/journey';
 import {
   actualRevenueFrom,
-  expectedRevenueFrom,
   nolonExpenseRemainder,
   unitPriceFromSheet,
 } from './journey-revenue.calculator';
@@ -26,57 +25,9 @@ export class JourneyRevenueService {
     private readonly deliveryPriceRepository: Repository<DeliveryPrice>,
     @InjectRepository(Journey)
     private readonly journeyRepository: Repository<Journey>,
-    @InjectRepository(JourneyPolicy)
-    private readonly policyRepository: Repository<JourneyPolicy>,
     @InjectRepository(JourneyTransaction)
     private readonly transactionRepository: Repository<JourneyTransaction>,
   ) {}
-
-  async applyExpected(
-    journeyId: number,
-    areaId: number,
-    onDate?: Date | string | null,
-    updater?: string,
-    manager?: EntityManager,
-  ): Promise<DeliveryPrice | null> {
-    const journeyRepo = manager ? manager.getRepository(Journey) : this.journeyRepository;
-    const priceRepo = manager
-      ? manager.getRepository(DeliveryPrice)
-      : this.deliveryPriceRepository;
-
-    const journey = await journeyRepo.findOne({
-      where: { id: journeyId },
-      relations: ['client'],
-    });
-    if (!journey?.client?.id) return null;
-
-    const row = await this.resolveSheetRow(
-      priceRepo,
-      journey,
-      areaId,
-      onDate ?? new Date(),
-    );
-    if (!row) return null;
-
-    const kind = journey.client.pricingSheetKind ?? PricingSheetKind.ARISH;
-    const unit = unitPriceFromSheet(row, kind);
-    journey.expectedRevenue = expectedRevenueFrom(unit, journey.quantity) ?? undefined;
-    journey.updatedAt = new Date();
-    if (updater) journey.updatedBy = updater;
-    await journeyRepo.save(journey);
-    return row;
-  }
-
-  async applyExpectedForJourney(
-    journeyId: number,
-    areaId?: number | null,
-    updater?: string,
-    manager?: EntityManager,
-  ): Promise<void> {
-    const resolvedAreaId = areaId ?? (await this.latestPolicyAreaId(journeyId, manager));
-    if (!resolvedAreaId) return;
-    await this.applyExpected(journeyId, resolvedAreaId, new Date(), updater, manager);
-  }
 
   async applyFromPolicy(
     policy: JourneyPolicy,
@@ -91,9 +42,9 @@ export class JourneyRevenueService {
     const areaId = policy.deliveryArea?.id;
     if (!areaId) return;
 
-    const date = policy.tripDate ?? policy.policyDate ?? new Date();
-    const row = await this.applyExpected(journeyId, areaId, date, updater, manager);
-    if (!row) return;
+    const priceRepo = manager
+      ? manager.getRepository(DeliveryPrice)
+      : this.deliveryPriceRepository;
 
     const journey = await journeyRepo.findOne({
       where: { id: journeyId },
@@ -107,9 +58,13 @@ export class JourneyRevenueService {
         'driver.user.salary',
       ],
     });
-    if (!journey) return;
+    if (!journey?.client?.id) return;
 
-    const kind = journey.client?.pricingSheetKind ?? PricingSheetKind.ARISH;
+    const date = policy.tripDate ?? policy.policyDate ?? new Date();
+    const row = await this.resolveSheetRow(priceRepo, journey, areaId, date);
+    if (!row) return;
+
+    const kind = journey.client.pricingSheetKind ?? PricingSheetKind.ARISH;
     const unit = unitPriceFromSheet(row, kind);
     journey.actualRevenue = actualRevenueFrom(unit, policy.bookWeight) ?? undefined;
     journey.updatedAt = new Date();
@@ -241,19 +196,6 @@ export class JourneyRevenueService {
     }
 
     return (await qb.getOne()) ?? null;
-  }
-
-  private async latestPolicyAreaId(
-    journeyId: number,
-    manager?: EntityManager,
-  ): Promise<number | null> {
-    const policyRepo = manager ? manager.getRepository(JourneyPolicy) : this.policyRepository;
-    const policy = await policyRepo.findOne({
-      where: { journey: { id: journeyId } },
-      relations: ['deliveryArea'],
-      order: { policyDate: 'DESC', createdAt: 'DESC' },
-    });
-    return policy?.deliveryArea?.id ?? null;
   }
 
   private async custodyAlreadyGiven(

@@ -22,7 +22,6 @@ it('shows approve/reject only for PENDING rows when admin', () => {
       isAdmin
       onApprove={onApprove}
       onReject={() => {}}
-      onDelete={() => {}}
     />,
   );
   const approveBtn = screen.getByRole('button', { name: /rowActions\.approve/i });
@@ -38,7 +37,6 @@ it('hides approve/reject for terminal rows', () => {
       isAdmin
       onApprove={() => {}}
       onReject={() => {}}
-      onDelete={() => {}}
     />,
   );
   expect(screen.queryByRole('button', { name: /rowActions\.approve/i })).not.toBeInTheDocument();

@@ -79,7 +79,7 @@ export default function EmployeesTable({ data, branchId, onEdit, onDelete }: Emp
         id: 'actions',
         header: t('table.actions'),
         cell: ({ row }) => (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center justify-center gap-1">
             <Button variant="ghost" size="sm" asChild>
               <Link href={`/branches/${branchId}/employees/${row.original.id}`}>
                 <Eye className="w-4 h-4 text-blue-600" />

@@ -1,5 +1,5 @@
 # Run from this directory: docker compose up --build
-# App dirs are siblings of deployment/: ../redSea-backend-nestjs, ../red-sea-frontend-nextjs
+# App dirs live in this repo: ../backend, ../frontend
 # Compose loads .env automatically from this directory for ${VAR} substitution.
 #
 # DB export: nginx stream proxies TCP postgres:5432. Host bind/port use POSTGRES_EXPORT_*
@@ -49,7 +49,7 @@ services:
       - redsea
 
   minio:
-    image: minio/minio:latest
+    image: pgsty/silo:RELEASE.2026-09-16T00-00-00Z
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -58,6 +58,9 @@ services:
       - /data
       - --console-address
       - "${MINIO_CONSOLE_ADDRESS}"
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - minio_data:/data
     healthcheck:
@@ -71,7 +74,7 @@ services:
       - redsea
 
   minio-init:
-    image: minio/mc:latest
+    image: pgsty/silo:RELEASE.2026-09-16T00-00-00Z
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -79,19 +82,23 @@ services:
     depends_on:
       minio:
         condition: service_healthy
+    volumes:
+      - ./minio/cors.json:/cors.json:ro
     entrypoint: /bin/sh
     command:
       - -c
       - |
         mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"
         mc mb "local/$$BUCKET_NAME" --ignore-existing || true
+        mc anonymous set download "local/$$BUCKET_NAME"
+        mc cors set "local/$$BUCKET_NAME" /cors.json
     restart: "no"
     networks:
       - redsea
 
   backend:
     build:
-      context: ../redSea-backend-nestjs
+      context: ../backend
       dockerfile: Dockerfile
     env_file:
       - .env
@@ -112,7 +119,7 @@ services:
 
   frontend:
     build:
-      context: ../red-sea-frontend-nextjs
+      context: ../frontend
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}

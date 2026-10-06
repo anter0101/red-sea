@@ -74,7 +74,7 @@ export default function OfficeRequestsTable({
             <TableHead>{t('table.from')}</TableHead>
             <TableHead>{t('table.to')}</TableHead>
             <TableHead className="w-32 text-center">{t('table.status')}</TableHead>
-            {isAdmin && <TableHead className="text-left">{t('table.actions')}</TableHead>}
+            {isAdmin && <TableHead>{t('table.actions')}</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -106,7 +106,7 @@ export default function OfficeRequestsTable({
                 </TableCell>
                 {isAdmin && (
                   <TableCell>
-                    <div className="flex justify-end gap-1">
+                    <div className="flex justify-center gap-1">
                       {row.status === 'PENDING' && (
                         <>
                           {row.type === 'PRINT_DELEGATION' && (

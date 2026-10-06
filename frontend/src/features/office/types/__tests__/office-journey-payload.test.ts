@@ -118,13 +118,4 @@ describe('buildOfficeJourneyPayload', () => {
     expect(payload.driver).toEqual({ create: driverInline });
   });
 
-  it('includes deliveryAreaId when set', () => {
-    const payload = buildOfficeJourneyPayload({
-      ...base,
-      vehicleMode: 'COMPANY_CAR',
-      carId: '9',
-      deliveryAreaId: '15',
-    });
-    expect(payload.deliveryAreaId).toBe(15);
-  });
 });

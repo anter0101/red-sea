@@ -56,7 +56,7 @@ export default function PartnersTable({ partners }: EntityTableProps) {
         accessorKey: 'name',
         header: headers('name'),
         cell: ({ row }) => (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col items-center gap-1">
             <CodeLink href={row.original.id != null ? `/partners/${row.original.id}` : null}>
               {row.original.name}
             </CodeLink>

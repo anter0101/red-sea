@@ -3,6 +3,9 @@
   "create": "إضافة تباع",
   "personal-info": "المعلومات الشخصية",
   "driver-files": "ملفات التباع",
+  "attachments": {
+    "upload-error": "فشل رفع المرفق"
+  },
   "salary-settings": "إعدادات المرتب",
   "fields": {
     "assistant-code": "كود التباع",

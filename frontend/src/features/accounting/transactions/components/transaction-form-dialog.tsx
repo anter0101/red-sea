@@ -347,8 +347,8 @@ export default function TransactionFormDialog({
                       <table className="w-full text-sm">
                         <thead className="bg-muted/30 border-b">
                           <tr>
-                            <th className="text-right p-2 font-medium">{t('form.account')}</th>
-                            <th className="text-right p-2 font-medium w-32">المبلغ</th>
+                            <th className="text-center p-2 font-medium">{t('form.account')}</th>
+                            <th className="text-center p-2 font-medium w-32">المبلغ</th>
                             {!isFinalizeDraft && <th className="p-2 w-10 text-center" />}
                           </tr>
                         </thead>
@@ -475,8 +475,8 @@ export default function TransactionFormDialog({
                       <table className="w-full text-sm">
                         <thead className="bg-muted/30 border-b">
                           <tr>
-                            <th className="text-right p-2 font-medium">{t('form.account')}</th>
-                            <th className="text-right p-2 font-medium w-32">المبلغ</th>
+                            <th className="text-center p-2 font-medium">{t('form.account')}</th>
+                            <th className="text-center p-2 font-medium w-32">المبلغ</th>
                             {!isFinalizeDraft && <th className="p-2 w-10 text-center" />}
                           </tr>
                         </thead>

@@ -235,7 +235,7 @@ export default function BalanceSheetTab() {
             {tTab('assets')}
           </div>
           <div className="p-4 flex-1">
-            <Table className="text-right">
+            <Table>
               <TableBody>
                 {isTreeMode
                   ? (assets as IBalanceSheetTreeNode[]).map((node) => (
@@ -285,7 +285,7 @@ export default function BalanceSheetTab() {
             <h4 className="font-bold text-slate-800 mb-4 px-3 py-1 border-r-4 border-[#368baf] bg-slate-50/50 rounded-sm">
               {tTab('liabilities')}
             </h4>
-            <Table className="text-right mb-4">
+            <Table className="mb-4">
               <TableBody>
                 {isTreeMode
                   ? (liabilities as IBalanceSheetTreeNode[]).map((node) => (
@@ -324,7 +324,7 @@ export default function BalanceSheetTab() {
             <h4 className="font-bold text-slate-800 mb-4 mt-6 px-3 py-1 border-r-4 border-[#118A7E] bg-slate-50/50 rounded-sm">
               {tTab('equity')}
             </h4>
-            <Table className="text-right">
+            <Table>
               <TableBody>
                 {isTreeMode
                   ? (equity as IBalanceSheetTreeNode[]).map((node) => (

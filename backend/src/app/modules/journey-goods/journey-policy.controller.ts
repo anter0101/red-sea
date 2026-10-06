@@ -41,6 +41,7 @@ import { JourneyAttachmentService } from '../journey-attachment/journey-attachme
 import { PolicyLedgerService } from './policy-ledger.service';
 import { ApplyLedgerDTO } from './dtos/apply-ledger.dto';
 import { JourneyAttachmentType, JourneyStatus } from 'src/core/enums/journey';
+import { OwnerShipType } from 'src/core/enums/ownerShip-types';
 import { JourneyPolicyFormDTO } from './dtos/journey-policy-form.dto';
 import { withTransaction } from 'src/core/utils/transaction';
 import { DataSource } from 'typeorm';
@@ -180,7 +181,7 @@ export class JourneyPolicyController {
     // 1. Validate FK relations
     const journey = await this.journeyService.findByFields({
       where: { id: dto.journeyId },
-      relations: ['deliveryArea', 'deliveryGov'],
+      relations: ['deliveryArea', 'deliveryGov', 'car', 'transportSupplier'],
     });
     if (!journey) throw new NotFoundException(`Journey with id ${dto.journeyId} not found`);
 
@@ -193,6 +194,7 @@ export class JourneyPolicyController {
 
     await this.applyDelegationContext(dto, journey, user?.id);
     await this.validatePolicyReferences(dto.journeyId, dto);
+    this.assertTransportSupplier(journey, dto.transportSupplierId);
 
     // 2. Map to entity
     const entity = mapCreateJourneyPolicyDtoToEntity(dto);
@@ -209,6 +211,16 @@ export class JourneyPolicyController {
         manager,
       );
       await this.journeyRevenueService.applyFromPolicy(savedPolicy, user?.email, manager);
+      await this.policyLedgerService.apply(
+        dto.journeyId,
+        {
+          transportSupplierId: dto.transportSupplierId,
+          custodySupplierId: dto.custodySupplierId,
+          custodySupplierAmount: dto.custodySupplierAmount,
+        },
+        user?.email,
+        manager,
+      );
 
       if (dto.policyFile) {
         const policyAttachment = new JourneyAttachment();
@@ -245,10 +257,11 @@ export class JourneyPolicyController {
 
     const journey = await this.journeyService.findByFields({
       where: { id: existing.journey.id },
-      relations: ['deliveryArea', 'deliveryGov'],
+      relations: ['deliveryArea', 'deliveryGov', 'car', 'transportSupplier'],
     });
     await this.applyDelegationContext(dto, journey ?? existing.journey, user?.id);
     await this.validatePolicyReferences(existing.journey.id, dto);
+    this.assertTransportSupplier(journey ?? existing.journey, dto.transportSupplierId);
 
     const updated = await withTransaction(this.dataSource, async manager => {
       const updatedEntity = mapUpdateJourneyPolicyDtoToEntity(dto, existing);
@@ -261,6 +274,16 @@ export class JourneyPolicyController {
         manager,
       );
       await this.journeyRevenueService.applyFromPolicy(savedPolicy, user?.email, manager);
+      await this.policyLedgerService.apply(
+        existing.journey.id,
+        {
+          transportSupplierId: dto.transportSupplierId,
+          custodySupplierId: dto.custodySupplierId,
+          custodySupplierAmount: dto.custodySupplierAmount,
+        },
+        user?.email,
+        manager,
+      );
 
       // Handle policy file attachment on update
       if (dto.policyFile) {
@@ -350,8 +373,21 @@ export class JourneyPolicyController {
       throw new BadRequestException('لا يوجد موظف مرتبط بهذا المستخدم');
     }
     dto.employeeId = employee.id;
-    if (journey.deliveryArea?.id) dto.deliveryAreaId = journey.deliveryArea.id;
-    if (journey.deliveryGov?.id) dto.deliveryGovId = journey.deliveryGov.id;
+    if (dto.deliveryAreaId == null && journey.deliveryArea?.id) {
+      dto.deliveryAreaId = journey.deliveryArea.id;
+    }
+    if (dto.deliveryGovId == null && journey.deliveryGov?.id) {
+      dto.deliveryGovId = journey.deliveryGov.id;
+    }
+  }
+
+  private assertTransportSupplier(journey: Journey, transportSupplierId?: number): void {
+    const mode = journey.car?.ownerShip;
+    const postsExpense =
+      mode === OwnerShipType.NOLON_CAR || mode === OwnerShipType.CONTRACT_CAR;
+    if (!postsExpense) return;
+    if (transportSupplierId || journey.transportSupplier?.id) return;
+    throw new BadRequestException('مورد النقل مطلوب للنولون والعقد.');
   }
 
   private assertPolicyDateAfterDelegation(

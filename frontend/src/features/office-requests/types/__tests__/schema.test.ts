@@ -1,21 +1,21 @@
 import { officeRequestFormSchema, toOfficeRequestBody } from '../index';
 
 const validPrintDelegation = {
-  type: 'PRINT_DELEGATION',
+  type: 'PRINT_DELEGATION' as const,
   description: 'please print',
   journeyId: '12',
   amount: '',
 };
 
 const validNotes = {
-  type: 'END_WORKING_SHIFT',
+  type: 'END_WORKING_SHIFT' as const,
   description: 'shift done',
   journeyId: '',
   amount: '',
 };
 
 const validAskForCustody = {
-  type: 'ASK_FOR_CUSTODY',
+  type: 'ASK_FOR_CUSTODY' as const,
   description: '',
   journeyId: '',
   amount: '500',

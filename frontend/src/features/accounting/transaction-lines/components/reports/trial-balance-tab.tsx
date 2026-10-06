@@ -228,7 +228,7 @@ export default function TrialBalanceTab() {
         {isLoading ? (
           <div className="p-8 text-center text-muted-foreground">جاري التحميل...</div>
         ) : (
-          <Table className="text-right">
+          <Table>
             <TableHeader className="bg-[#118A7E]">
               <TableRow className="hover:bg-transparent border-none">
                 <TableHead
@@ -254,28 +254,28 @@ export default function TrialBalanceTab() {
                 </TableHead>
               </TableRow>
               <TableRow className="hover:bg-transparent border-none bg-[#0e7a6f]">
-                <TableHead className="text-right font-semibold text-white/90">
+                <TableHead className="font-semibold text-white/90">
                   {tTab('table.code')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-white/90 whitespace-nowrap border-l border-white/20">
+                <TableHead className="font-semibold text-white/90 whitespace-nowrap border-l border-white/20">
                   {tTab('table.account-name')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-white/90">
+                <TableHead className="font-semibold text-white/90">
                   {tTab('table.debit')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-white/90 border-l border-white/20">
+                <TableHead className="font-semibold text-white/90 border-l border-white/20">
                   {tTab('table.credit')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-white/90">
+                <TableHead className="font-semibold text-white/90">
                   {tTab('table.debit')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-white/90 border-l border-white/20">
+                <TableHead className="font-semibold text-white/90 border-l border-white/20">
                   {tTab('table.credit')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-white/90">
+                <TableHead className="font-semibold text-white/90">
                   {tTab('table.debit')}
                 </TableHead>
-                <TableHead className="text-right font-semibold text-white/90">
+                <TableHead className="font-semibold text-white/90">
                   {tTab('table.credit')}
                 </TableHead>
               </TableRow>
@@ -344,7 +344,7 @@ export default function TrialBalanceTab() {
               <TableFooter className="bg-[#1e293b] text-white">
                 <TableRow className="hover:bg-[#1e293b] h-16 border-none">
                   <TableCell colSpan={2} className="text-xl font-bold p-4">
-                    <div className="flex items-center gap-3 justify-end">
+                    <div className="flex items-center gap-3 justify-center">
                       {tTab('table.total')}
                       {!isBalanced && (
                         <Badge

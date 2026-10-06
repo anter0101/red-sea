@@ -3,6 +3,9 @@
   "create": "Create Driver Assistant",
   "personal-info": "Personal Information",
   "driver-files": "Assistant Files",
+  "attachments": {
+    "upload-error": "Failed to upload attachment"
+  },
   "salary-settings": "Salary Settings",
   "fields": {
     "assistant-code": "Driver Assistant Code",

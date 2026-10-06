@@ -8,14 +8,20 @@ import { PackingType, packingTypeLabels } from '@/features/clients/enums/packing
 import {
   JOURNEY_STATUS_COLORS,
   JOURNEY_STATUS_LABELS,
+  JOURNEY_STATUS_TEXT_COLORS,
 } from '@/features/trips/constants/journey-status';
 
-const tripStatusLabels: Record<string, { label: string; bgColor: string }> = Object.fromEntries(
-  Object.entries(JOURNEY_STATUS_LABELS).map(([key, label]) => [
-    key,
-    { label, bgColor: JOURNEY_STATUS_COLORS[key] ?? '#EEE' },
-  ]),
-);
+const tripStatusLabels: Record<string, { label: string; bgColor: string; textColor: string }> =
+  Object.fromEntries(
+    Object.entries(JOURNEY_STATUS_LABELS).map(([key, label]) => [
+      key,
+      {
+        label,
+        bgColor: JOURNEY_STATUS_COLORS[key] ?? '#EEE',
+        textColor: JOURNEY_STATUS_TEXT_COLORS[key] ?? '#111827',
+      },
+    ]),
+  );
 
 const vehicleTypeLabels: Record<string, string> = {
   NOLON_CAR: 'نولون',
@@ -82,7 +88,6 @@ export type TripRow = {
   nolonExpense: number;
   /** car.ownerShip: NOLON_CAR | CONTRACT_CAR | COMPANY_CAR | … */
   vehicleType: string | null;
-  expectedRevenue: number | null;
   actualRevenue: number | null;
   /** API coalesce — used for profit calc; not shown as a list column */
   totalRevenue: number;
@@ -148,11 +153,15 @@ export const columns: ColumnDef<TripRow>[] = [
     header: 'حالة الرحلة',
     cell: ({ row }) => {
       const status = row.original.tripStatus;
-      const info = tripStatusLabels[status] || { label: status || '-', bgColor: '#EEE' };
+      const info = tripStatusLabels[status] || {
+        label: status || '-',
+        bgColor: '#EEE',
+        textColor: '#111827',
+      };
       return (
         <Badge
-          className="capitalize px-4 py-1 text-black"
-          style={{ backgroundColor: info.bgColor }}
+          className="capitalize px-4 py-1"
+          style={{ backgroundColor: info.bgColor, color: info.textColor }}
         >
           {info.label}
         </Badge>
@@ -396,12 +405,6 @@ export const columns: ColumnDef<TripRow>[] = [
     accessorKey: 'totalExpenses',
     header: 'إجمالي المصروفات',
     cell: ({ row }) => row.original.totalExpenses ?? '-',
-  },
-  {
-    id: 'expectedRevenue',
-    accessorKey: 'expectedRevenue',
-    header: 'الإيراد المتوقع',
-    cell: ({ row }) => row.original.expectedRevenue ?? '-',
   },
   {
     id: 'actualRevenue',

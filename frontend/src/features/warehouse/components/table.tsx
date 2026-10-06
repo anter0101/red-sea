@@ -96,7 +96,7 @@ export default function ProductsTable({ data }: ProductsTableProps) {
         cell: ({ row }) => {
           const item = row.original;
           return (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-center gap-1">
               <Button variant="ghost" size="sm" onClick={() => router.push(`/warehouse/${item.id}`)}>
                 <Eye className="w-4 h-4 text-blue-600" />
               </Button>
