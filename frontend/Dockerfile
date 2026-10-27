@@ -1,7 +1,9 @@
 FROM node:20-alpine AS base
 
 RUN apk add --no-cache libc6-compat
-RUN corepack enable
+# Same pnpm the lockfile and CI use. Corepack otherwise downloads pnpm 12,
+# which ignores package.json "pnpm.overrides" and rejects the lockfile.
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 FROM base AS deps
 
