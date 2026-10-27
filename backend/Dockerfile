@@ -21,5 +21,8 @@ COPY --from=builder /app/dist ./dist
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --prod --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
 
+RUN addgroup -S app && adduser -S app -G app
+USER app
+
 EXPOSE 3000
 CMD ["node", "dist/main.js"]

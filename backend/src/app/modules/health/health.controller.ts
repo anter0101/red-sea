@@ -36,7 +36,7 @@ export class HealthController {
     }
 
     try {
-      const client = await this.gpsQueue.client;
+      const client = (await this.gpsQueue.client) as unknown as { ping: () => Promise<string> };
       const reply = await client.ping();
       if (String(reply).toUpperCase() !== 'PONG') {
         body.redis = 'down';

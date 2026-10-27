@@ -1,0 +1,8 @@
+title = "Red Sea"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "The repository combine commit contains a Nest starter badge token and a commented example. The commented example is gone from the current tree."
+commits = ["38cbb85348c18cbbfc8f6d92c37dfd3e1aebff53"]
