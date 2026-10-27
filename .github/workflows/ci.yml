@@ -1,7 +1,6 @@
-# Pull request and main. Release calls this same workflow before it deploys.
+# Pull request and push to main.
 # Stages: test → audit → docker.
-# Docker is skipped when release calls this file, because deploy builds the images.
-# This workflow does not push images and does not SSH.
+# Does not push images and does not SSH.
 
 name: ci
 
@@ -12,37 +11,20 @@ on:
   pull_request:
     branches:
       - main
-  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref }}-${{ github.event_name == 'workflow_call' && github.run_id || 'branch' }}
-  cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     name: test
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - app: backend
-            lint: pnpm lint:ci
-          - app: frontend
-            lint: pnpm lint
-    defaults:
-      run:
-        working-directory: ${{ matrix.app }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Postman collection is JSON
-        if: matrix.app == 'backend'
-        run: node --input-type=module -e "import { readFileSync } from 'node:fs'; JSON.parse(readFileSync('red-sea.postman.json', 'utf8'));"
+      - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
@@ -51,28 +33,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-          cache-dependency-path: ${{ matrix.app }}/pnpm-lock.yaml
 
-      - name: Install
-        run: pnpm install --frozen-lockfile
+      - name: Backend
+        working-directory: backend
+        run: |
+          pnpm install --frozen-lockfile
+          node --input-type=module -e "import { readFileSync } from 'node:fs'; JSON.parse(readFileSync('red-sea.postman.json', 'utf8'));"
+          pnpm lint:ci
+          pnpm typecheck
+          pnpm test:cov
 
-      - name: Lint
-        run: ${{ matrix.lint }}
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Unit tests and coverage
-        run: pnpm test:cov
+      - name: Frontend
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+          pnpm typecheck
+          pnpm test:cov
 
   audit:
     name: audit
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
@@ -84,21 +68,20 @@ jobs:
 
       - name: npm audit
         run: |
-          set -euo pipefail
           pnpm --dir backend audit --audit-level=high
           pnpm --dir frontend audit --audit-level=high
 
   docker:
     name: docker
     needs: audit
-    if: github.event_name != 'workflow_call'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Build backend image
-        run: docker build --tag red-sea-backend:ci backend
-
-      - name: Build frontend image
-        run: docker build --tag red-sea-frontend:ci --build-arg NEXT_PUBLIC_APP_URL=http://127.0.0.1 --build-arg NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1 frontend
+      - name: Build images
+        run: |
+          docker build --tag red-sea-backend:ci backend
+          docker build --tag red-sea-frontend:ci \
+            --build-arg NEXT_PUBLIC_APP_URL=http://127.0.0.1 \
+            --build-arg NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1 \
+            frontend

@@ -1,9 +1,7 @@
-# Production entry. This free private repository cannot use a protected environment,
-# so there is no reviewer gate.
-# Stages: ci (test, audit) and guard → deploy.
-# Deploy builds each image once, scans that image, writes a CycloneDX SBOM,
-# pushes to GHCR, then SSHs to the VPS to start the idle color and switch Nginx.
-# Manual runs are limited to main. A Release tag must point at a commit on main.
+# Release or a manual run.
+# Stages: test → audit, and guard → deploy.
+# Deploy builds, scans, pushes to GHCR, then SSHs to the VPS.
+# Manual runs are limited to main.
 
 name: release
 
@@ -21,9 +19,56 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  ci:
-    name: ci
-    uses: ./.github/workflows/ci.yml
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Backend
+        working-directory: backend
+        run: |
+          pnpm install --frozen-lockfile
+          node --input-type=module -e "import { readFileSync } from 'node:fs'; JSON.parse(readFileSync('red-sea.postman.json', 'utf8'));"
+          pnpm lint:ci
+          pnpm typecheck
+          pnpm test:cov
+
+      - name: Frontend
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+          pnpm typecheck
+          pnpm test:cov
+
+  audit:
+    name: audit
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: npm audit
+        run: |
+          pnpm --dir backend audit --audit-level=high
+          pnpm --dir frontend audit --audit-level=high
 
   guard:
     name: guard
@@ -50,7 +95,7 @@ jobs:
 
   deploy:
     name: deploy
-    needs: [ci, guard]
+    needs: [audit, guard]
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
