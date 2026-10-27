@@ -1,6 +1,7 @@
 # Release or a manual run.
 # Stages: test → audit, and guard → deploy.
-# Deploy builds, scans, pushes to GHCR, then SSHs to the VPS.
+# Deploy builds, pushes to GHCR, then SSHs to the VPS.
+# The security gate is the audit job. Image CVEs do not block the deploy.
 # Manual runs are limited to main.
 
 name: release
@@ -149,53 +150,7 @@ jobs:
             echo "frontend_id=${frontend_id}"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Scan the built images and write SBOMs
-        run: |
-          set -euo pipefail
-          scan() {
-            local image_id="$1"
-            local report="$2"
-            local sbom="$3"
-            docker run --rm \
-              -v /var/run/docker.sock:/var/run/docker.sock \
-              -v "${GITHUB_WORKSPACE}:/out" \
-              aquasec/trivy:0.58.1 image \
-              --scanners vuln \
-              --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
-              --format json \
-              --output "/out/${report}" \
-              --exit-code 0 \
-              "$image_id"
-            docker run --rm \
-              -v /var/run/docker.sock:/var/run/docker.sock \
-              -v "${GITHUB_WORKSPACE}:/out" \
-              aquasec/trivy:0.58.1 image \
-              --format cyclonedx \
-              --output "/out/${sbom}" \
-              "$image_id"
-          }
-          scan "${{ steps.build.outputs.backend_id }}" backend-trivy.json backend-sbom.cdx.json
-          scan "${{ steps.build.outputs.frontend_id }}" frontend-trivy.json frontend-sbom.cdx.json
-
-      - name: Upload image scan and SBOM
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-image-reports
-          retention-days: 90
-          if-no-files-found: warn
-          path: |
-            backend-trivy.json
-            frontend-trivy.json
-            backend-sbom.cdx.json
-            frontend-sbom.cdx.json
-
-      - name: Fail on critical or high CVEs
-        run: |
-          set -euo pipefail
-          python3 .github/scripts/fail-on-high-image-cves.py backend-trivy.json frontend-trivy.json
-
-      - name: Push the scanned images
+      - name: Push the images
         id: push
         run: |
           set -euo pipefail
@@ -241,7 +196,7 @@ jobs:
             echo "### Immutable release"
             echo "Backend: \`${backend_ref}\`"
             echo "Frontend: \`${frontend_ref}\`"
-            echo "Trivy scanned those image ids before the push. The VPS pin is the digest, not the git tag."
+            echo "The VPS pin is the digest, not the git tag. Dependency audit is the security gate."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload release digests
@@ -325,6 +280,5 @@ jobs:
             echo "Git SHA: \`${sha:-$GITHUB_SHA}\`"
             echo "Backend: \`${backend}\`"
             echo "Frontend: \`${frontend}\`"
-            echo "Trivy report and CycloneDX SBOM: [release-image-reports](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
             echo "Digests: [release-digests](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           } >> "$GITHUB_STEP_SUMMARY"

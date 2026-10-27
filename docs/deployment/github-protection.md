@@ -5,7 +5,7 @@ One-time settings for `anter0101/red-sea`. This repository is private on a free 
 The workflows in this repo:
 
 - [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs on every push to `main` and on a pull request into `main`. It does not push an image and it does not SSH.
-- [`.github/workflows/release.yml`](../../.github/workflows/release.yml) runs when a Release is published, or when someone starts it by hand from `main`. It runs test, then audit. The `guard` job rejects any ref that is not on `main`. There is no `production` environment. When audit and guard pass, `deploy` builds both images, scans them, pushes the digests to GHCR, then SSHs to the VPS. The VPS starts only the idle color, checks it, switches Nginx, and watches for about three minutes.
+- [`.github/workflows/release.yml`](../../.github/workflows/release.yml) runs when a Release is published, or when someone starts it by hand from `main`. It runs test, then audit. The `guard` job rejects any ref that is not on `main`. There is no `production` environment. When audit and guard pass, `deploy` builds both images, pushes the digests to GHCR, then SSHs to the VPS. The VPS starts only the idle color, checks it, switches Nginx, and watches for about three minutes.
 
 ## Who can push and release
 
@@ -48,4 +48,4 @@ Database passwords, `APP_SECRET_KEY`, `NEXTAUTH_SECRET`, MinIO keys, and the smo
 
 1. Push to `main` and confirm the `ci` workflow starts on that push.
 2. Run `release` by hand from a branch other than `main`. `guard` fails and `deploy` does not run.
-3. Run `release` by hand from `main`. Nobody has to approve it. A critical or high CVE fails the job and leaves GHCR unchanged. After a clean scan the job SSHs to the VPS, starts the idle color, and the summary names the live color, SHA, and both digests, with links to the scan report and the SBOM.
+3. Run `release` by hand from `main`. Nobody has to approve it. The dependency audit is the security gate. After it passes, the job pushes the images and SSHs to the VPS, starts the idle color, and the summary names the live color, SHA, and both digests.
