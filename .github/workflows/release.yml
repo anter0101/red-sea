@@ -1,6 +1,7 @@
 # Production entry. This free private repository cannot use a protected environment,
-# so the deploy job starts as soon as the quality jobs pass. There is no reviewer gate.
-# The job builds each image once, scans that image, writes a CycloneDX SBOM,
+# so there is no reviewer gate.
+# Stages: ci (test, audit) and guard → deploy.
+# Deploy builds each image once, scans that image, writes a CycloneDX SBOM,
 # pushes to GHCR, then SSHs to the VPS to start the idle color and switch Nginx.
 # Manual runs are limited to main. A Release tag must point at a commit on main.
 
@@ -20,75 +21,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  backend:
-    name: backend
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Postman collection is JSON
-        run: node --input-type=module -e "import { readFileSync } from 'node:fs'; JSON.parse(readFileSync('red-sea.postman.json', 'utf8'));"
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-          cache-dependency-path: backend/pnpm-lock.yaml
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Lint
-        run: pnpm lint:ci
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Unit tests and coverage
-        run: pnpm test:cov
-
-  frontend:
-    name: frontend
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-          cache-dependency-path: frontend/pnpm-lock.yaml
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Unit tests and coverage
-        run: pnpm test:cov
-
-  security:
-    uses: ./.github/workflows/security.yml
+  ci:
+    name: ci
+    uses: ./.github/workflows/ci.yml
 
   guard:
     name: guard
@@ -115,8 +50,7 @@ jobs:
 
   deploy:
     name: deploy
-    needs: [guard, backend, frontend, security]
-    if: ${{ needs.guard.result == 'success' && needs.backend.result == 'success' && needs.frontend.result == 'success' && needs.security.result == 'success' }}
+    needs: [ci, guard]
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:

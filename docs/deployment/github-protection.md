@@ -5,7 +5,7 @@ One-time settings for `anter0101/red-sea`. This repository is private on a free 
 The workflows in this repo:
 
 - [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs on every push to `main` and on a pull request into `main`. It does not push an image and it does not SSH.
-- [`.github/workflows/release.yml`](../../.github/workflows/release.yml) runs when a Release is published, or when someone starts it by hand from `main`. The `guard` job rejects any other ref. There is no `production` environment. When the quality jobs pass, `deploy` builds both images, scans them, pushes the digests to GHCR, then SSHs to the VPS. The VPS starts only the idle color, checks it, switches Nginx, and watches for about three minutes.
+- [`.github/workflows/release.yml`](../../.github/workflows/release.yml) runs when a Release is published, or when someone starts it by hand from `main`. It runs the `ci` workflow, and the `guard` job rejects any ref that is not on `main`. There is no `production` environment. When both pass, `deploy` builds both images, scans them, pushes the digests to GHCR, then SSHs to the VPS. The VPS starts only the idle color, checks it, switches Nginx, and watches for about three minutes.
 
 ## Who can push and release
 

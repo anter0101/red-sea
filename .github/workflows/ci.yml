@@ -1,7 +1,7 @@
-# Runs on a push to main and on a pull request into main.
-# This private repository is on a free account, so GitHub cannot require this check.
-# The ci job fails unless backend, frontend, the security scan, and the unpushed Docker builds succeed.
-# This workflow must not push images or open an SSH session to the VPS.
+# Pull request and main. Release calls this same workflow before it deploys.
+# Stages: test → audit → docker.
+# Docker is skipped when release calls this file, because deploy builds the images.
+# This workflow does not push images and does not SSH.
 
 name: ci
 
@@ -12,26 +12,36 @@ on:
   pull_request:
     branches:
       - main
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref }}-${{ github.event_name == 'workflow_call' && github.run_id || 'branch' }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
 
 jobs:
-  backend:
-    name: backend
+  test:
+    name: test
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: backend
+            lint: pnpm lint:ci
+          - app: frontend
+            lint: pnpm lint
     defaults:
       run:
-        working-directory: backend
+        working-directory: ${{ matrix.app }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Postman collection is JSON
+        if: matrix.app == 'backend'
         run: node --input-type=module -e "import { readFileSync } from 'node:fs'; JSON.parse(readFileSync('red-sea.postman.json', 'utf8'));"
 
       - uses: pnpm/action-setup@v4
@@ -42,13 +52,13 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-          cache-dependency-path: backend/pnpm-lock.yaml
+          cache-dependency-path: ${{ matrix.app }}/pnpm-lock.yaml
 
       - name: Install
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm lint:ci
+        run: ${{ matrix.lint }}
 
       - name: Typecheck
         run: pnpm typecheck
@@ -56,12 +66,10 @@ jobs:
       - name: Unit tests and coverage
         run: pnpm test:cov
 
-  frontend:
-    name: frontend
+  audit:
+    name: audit
+    needs: test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -73,26 +81,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-          cache-dependency-path: frontend/pnpm-lock.yaml
 
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Unit tests and coverage
-        run: pnpm test:cov
-
-  security:
-    uses: ./.github/workflows/security.yml
+      - name: npm audit
+        run: |
+          set -euo pipefail
+          pnpm --dir backend audit --audit-level=high
+          pnpm --dir frontend audit --audit-level=high
 
   docker:
     name: docker
+    needs: audit
+    if: github.event_name != 'workflow_call'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -103,19 +102,3 @@ jobs:
 
       - name: Build frontend image
         run: docker build --tag red-sea-frontend:ci --build-arg NEXT_PUBLIC_APP_URL=http://127.0.0.1 --build-arg NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1 frontend
-
-  ci:
-    name: ci
-    needs: [backend, frontend, docker, security]
-    if: ${{ always() && !cancelled() }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Require every quality job
-        run: |
-          set -euo pipefail
-          echo "backend=${{ needs.backend.result }} frontend=${{ needs.frontend.result }} docker=${{ needs.docker.result }} security=${{ needs.security.result }}"
-          test "${{ needs.backend.result }}" = "success"
-          test "${{ needs.frontend.result }}" = "success"
-          test "${{ needs.docker.result }}" = "success"
-          test "${{ needs.security.result }}" = "success"
-          echo "No image push and no SSH in this workflow."

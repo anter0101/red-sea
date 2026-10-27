@@ -35,5 +35,5 @@ flowchart LR
 
 - GitHub-hosted runners build and scan. The VPS does not compile the app during a deploy.
 - Application secrets live in `/opt/redsea/.env` on the VPS. The workflow only receives `DEPLOY_HOST`, `DEPLOY_USER`, and `DEPLOY_SSH_KEY`.
-- Critical and high security findings fail the pipeline. Medium findings are uploaded with the run.
+- A high or critical dependency advisory fails the security stage. The release image scan still fails on critical and high CVEs and uploads its report.
 - A failed check before the Nginx reload leaves the current color serving traffic.
