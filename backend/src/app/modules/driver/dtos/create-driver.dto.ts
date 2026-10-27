@@ -15,7 +15,8 @@ export class CreateDriverDTO extends OmitType(DriverDTO, ['id', 'updatedAt', 'us
   @ApiProperty({
     type: [NestedCreateContactDTO],
     required: false,
-    description: 'Contacts for this driver (alternative to user.contacts; userId assigned server-side)',
+    description:
+      'Contacts for this driver (alternative to user.contacts; userId assigned server-side)',
   })
   @IsOptional()
   @ValidateNested({ each: true })

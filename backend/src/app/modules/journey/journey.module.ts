@@ -46,4 +46,4 @@ import { JourneyRevenueService } from './journey-revenue.service';
   providers: [JourneyService, JourneyAssetsService, JourneyRevenueService],
   exports: [JourneyService, JourneyRevenueService],
 })
-export class JourneyModule { }
+export class JourneyModule {}

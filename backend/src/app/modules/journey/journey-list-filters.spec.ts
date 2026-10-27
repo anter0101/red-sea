@@ -5,7 +5,6 @@ import {
   needsSearchJoins,
 } from './journey-list-filters';
 import { JourneyQueryDTO } from './dtos/query-journey.dto';
-import { JourneyListScope } from './journey-list-scope.types';
 import { Journey } from './journey.entity';
 
 function createMockQb(): SelectQueryBuilder<Journey> {
@@ -26,9 +25,9 @@ function createMockQb(): SelectQueryBuilder<Journey> {
 
 describe('journey-list-filters', () => {
   it('needsSearchJoins returns true only when search is non-empty', () => {
-    expect(needsSearchJoins({ search: 'abc' } as JourneyQueryDTO)).toBe(true);
-    expect(needsSearchJoins({ search: '  ' } as JourneyQueryDTO)).toBe(false);
-    expect(needsSearchJoins({} as JourneyQueryDTO)).toBe(false);
+    expect(needsSearchJoins({ search: 'abc' })).toBe(true);
+    expect(needsSearchJoins({ search: '  ' })).toBe(false);
+    expect(needsSearchJoins({})).toBe(false);
   });
 
   it('needsCustodySourceJoin returns true when role scope is set', () => {
@@ -44,7 +43,7 @@ describe('journey-list-filters', () => {
       trailerId: 3,
       clientId: 4,
       driverAssistantId: 5,
-    } as JourneyQueryDTO);
+    });
 
     expect(qb.andWhere).toHaveBeenCalledWith('journey.driver_id = :_jDriverId', {
       _jDriverId: 1,
@@ -63,7 +62,7 @@ describe('journey-list-filters', () => {
 
   it('applyJourneyFilters adds branch OR EXISTS filter', () => {
     const qb = createMockQb();
-    applyJourneyFilters(qb, { branchId: 7 } as JourneyQueryDTO);
+    applyJourneyFilters(qb, { branchId: 7 });
 
     expect(qb.andWhere).toHaveBeenCalledWith(expect.any(Brackets));
     expect(qb.setParameter).toHaveBeenCalledWith('_jBranchId', 7);
@@ -94,11 +93,7 @@ describe('journey-list-filters', () => {
 
   it('applyJourneyFilters stacks role scope with query scope', () => {
     const qb = createMockQb();
-    applyJourneyFilters(
-      qb,
-      { driverId: 9 } as JourneyQueryDTO,
-      { custodySourceUserId: 10 },
-    );
+    applyJourneyFilters(qb, { driverId: 9 }, { custodySourceUserId: 10 });
 
     expect(qb.andWhere).toHaveBeenCalledWith('custodySourceUser.id = :_scopedCustodySourceUserId', {
       _scopedCustodySourceUserId: 10,

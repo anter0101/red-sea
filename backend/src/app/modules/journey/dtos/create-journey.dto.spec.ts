@@ -124,16 +124,12 @@ describe('CreateJourneyDTO', () => {
     });
 
     it('rejects invalid vehicleMode enum', async () => {
-      const errors = await validateCreateJourney(
-        basePayload({ vehicleMode: 'RENT' as JourneyVehicleMode }),
-      );
+      const errors = await validateCreateJourney(basePayload({ vehicleMode: 'RENT' }));
       expect(errors.length).toBeGreaterThan(0);
     });
 
     it('rejects invalid packingType', async () => {
-      const errors = await validateCreateJourney(
-        basePayload({ packingType: 'INVALID' as PackingType }),
-      );
+      const errors = await validateCreateJourney(basePayload({ packingType: 'INVALID' }));
       expect(errors.length).toBeGreaterThan(0);
     });
 

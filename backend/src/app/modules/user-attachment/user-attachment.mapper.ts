@@ -30,9 +30,7 @@ export function mapUserAttachmentToDtoSelective(
 
 export function mapUserAttachmentToDtoSelective(
   attachmentOrAttachments:
-    | UserAttachment
-    | UserAttachmentDTO
-    | (UserAttachment | UserAttachmentDTO)[],
+    UserAttachment | UserAttachmentDTO | (UserAttachment | UserAttachmentDTO)[],
   keys?: (keyof UserAttachmentDTO | keyof BaseDTO)[],
 ): Partial<UserAttachmentDTO> | Partial<UserAttachmentDTO>[] {
   const mapSingle = (

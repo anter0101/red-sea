@@ -26,23 +26,23 @@ export class TrailerService {
   }
 
   async findByFields(options: FindOneOptions<Trailer>): Promise<Trailer | undefined> {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     const result = await this.trailerRepository.findOne({
       ...options,
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
     return result || undefined;
   }
 
   async find(options: FindManyOptions<Trailer>): Promise<Trailer | undefined> {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     const result = await this.trailerRepository.findOne({
       ...options,
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
     return result || undefined;
   }
@@ -55,9 +55,9 @@ export class TrailerService {
       return await this.trailerRepository.findAndCount({
         ...options,
         where: {
-          ...((options.where as object) ?? {}),
+          ...(options.where ?? {}),
           deletedAt: IsNull(),
-        } as any,
+        },
       });
     }
 

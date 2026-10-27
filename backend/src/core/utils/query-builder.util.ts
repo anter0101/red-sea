@@ -69,17 +69,15 @@ export function applyQueryFilters<T extends ObjectLiteral>(
   // --------------------------------------------------------------------------
   // 1. Global search — case-insensitive OR across root + relation text columns
   // --------------------------------------------------------------------------
-  const rootRefs = searchableFields.map(f => (f.includes('.') ? f : `${alias}.${f}`));
-  const relRefs = relations.flatMap(rel =>
-    (rel.searchableFields ?? []).map(f => `${rel.alias}.${f}`),
+  const rootRefs = searchableFields.map((f) => (f.includes('.') ? f : `${alias}.${f}`));
+  const relRefs = relations.flatMap((rel) =>
+    (rel.searchableFields ?? []).map((f) => `${rel.alias}.${f}`),
   );
   const allSearchRefs = [...rootRefs, ...relRefs];
 
   if (query.search && allSearchRefs.length > 0) {
     const conditions = allSearchRefs.map((ref, i) => `LOWER(${ref}) LIKE LOWER(:_s${i})`);
-    const params = Object.fromEntries(
-      allSearchRefs.map((_, i) => [`_s${i}`, `%${query.search}%`]),
-    );
+    const params = Object.fromEntries(allSearchRefs.map((_, i) => [`_s${i}`, `%${query.search}%`]));
     qb.andWhere(`(${conditions.join(' OR ')})`, params);
   }
 
@@ -119,7 +117,7 @@ export function applyQueryFilters<T extends ObjectLiteral>(
 
   if (sortField) {
     const segments = sortField.split('.');
-    const isValid = segments.every(s => SAFE_FIELD_REGEX.test(s));
+    const isValid = segments.every((s) => SAFE_FIELD_REGEX.test(s));
     if (isValid) {
       const sortRef = sortField.includes('.') ? sortField : `${alias}.${sortField}`;
       qb.orderBy(sortRef, sortOrder);

@@ -58,7 +58,7 @@ function validationPipe(): ValidationPipe {
   });
 }
 
-function officeCreateBody(overrides: Record<string, unknown> = {}) {
+function officeCreateBody(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     vehicleMode: JourneyVehicleMode.COMPANY_CAR,
     clientId: 1,
@@ -141,7 +141,11 @@ describe('JourneyController — POST /api/journeys/office', () => {
   let journeyAssetsService: { resolveForCreate: jest.Mock; resolveForUpdate: jest.Mock };
   let journeyTransactionService: { save: jest.Mock };
   let clientService: { findById: jest.Mock };
-  let accountService: { custodyMovement: jest.Mock; findPersonSubAccount: jest.Mock };
+  let accountService: {
+    custodyMovement: jest.Mock;
+    findPersonSubAccount: jest.Mock;
+    createPersonSubAccounts: jest.Mock;
+  };
   let custodyService: { save: jest.Mock };
   let userService: { findByFields: jest.Mock };
   let journeyDelegationPrintService: { createForJourney: jest.Mock };
@@ -201,6 +205,7 @@ describe('JourneyController — POST /api/journeys/office', () => {
     accountService = {
       custodyMovement: jest.fn().mockResolvedValue(undefined),
       findPersonSubAccount: jest.fn(),
+      createPersonSubAccounts: jest.fn().mockResolvedValue(undefined),
     };
     custodyService = { save: jest.fn().mockResolvedValue({ id: 1 }) };
     userService = { findByFields: jest.fn().mockResolvedValue({ id: 4 }) };
@@ -213,9 +218,7 @@ describe('JourneyController — POST /api/journeys/office', () => {
         }
         if (personName === 'Office Employee') return mockEmpAccount;
         if (personName === 'Trip Driver') return mockDriverAccount;
-        throw new NotFoundException(
-          `Account for "${personName}" under "${parentName}" not found`,
-        );
+        throw new NotFoundException(`Account for "${personName}" under "${parentName}" not found`);
       },
     );
 
@@ -248,7 +251,14 @@ describe('JourneyController — POST /api/journeys/office', () => {
         { provide: AccountService, useValue: accountService },
         { provide: CustodyService, useValue: custodyService },
         { provide: JourneyDelegationPrintService, useValue: journeyDelegationPrintService },
-        { provide: JourneyRevenueService, useValue: { applyExpected: jest.fn(), applyExpectedForJourney: jest.fn(), applyFromPolicy: jest.fn() } },
+        {
+          provide: JourneyRevenueService,
+          useValue: {
+            applyExpected: jest.fn(),
+            applyExpectedForJourney: jest.fn(),
+            applyFromPolicy: jest.fn(),
+          },
+        },
         { provide: DataSource, useValue: dataSource },
       ],
     })
@@ -568,7 +578,10 @@ describe('JourneyController — GET /api/journeys/stats', () => {
       controllers: [JourneyController],
       providers: [
         { provide: JourneyService, useValue: journeyService },
-        { provide: JourneyAssetsService, useValue: { resolveForCreate: jest.fn(), resolveForUpdate: jest.fn() } },
+        {
+          provide: JourneyAssetsService,
+          useValue: { resolveForCreate: jest.fn(), resolveForUpdate: jest.fn() },
+        },
         { provide: DriverService, useValue: { findById: jest.fn() } },
         { provide: UserService, useValue: { findByFields: jest.fn() } },
         { provide: CarService, useValue: { findById: jest.fn() } },
@@ -576,11 +589,21 @@ describe('JourneyController — GET /api/journeys/stats', () => {
         { provide: JourneyTransactionService, useValue: { save: jest.fn() } },
         { provide: ClientService, useValue: { findById: jest.fn() } },
         { provide: EmployeeService, useValue: { findByFields: jest.fn() } },
-        { provide: AccountService, useValue: { custodyMovement: jest.fn(), findPersonSubAccount: jest.fn() } },
+        {
+          provide: AccountService,
+          useValue: { custodyMovement: jest.fn(), findPersonSubAccount: jest.fn() },
+        },
         { provide: CustodyService, useValue: { save: jest.fn() } },
         { provide: DataSource, useValue: { transaction: jest.fn() } },
         { provide: JourneyDelegationPrintService, useValue: { createForJourney: jest.fn() } },
-        { provide: JourneyRevenueService, useValue: { applyExpected: jest.fn(), applyExpectedForJourney: jest.fn(), applyFromPolicy: jest.fn() } },
+        {
+          provide: JourneyRevenueService,
+          useValue: {
+            applyExpected: jest.fn(),
+            applyExpectedForJourney: jest.fn(),
+            applyFromPolicy: jest.fn(),
+          },
+        },
       ],
     })
       .overrideGuard(AuthGuard)

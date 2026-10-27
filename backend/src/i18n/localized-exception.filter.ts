@@ -56,9 +56,10 @@ export class LocalizedExceptionFilter implements ExceptionFilter {
 
       if (pgCode === '23503') {
         const detail = exception.message.toLowerCase();
-        status = detail.includes('delete') || detail.includes('update or delete')
-          ? HttpStatus.CONFLICT
-          : HttpStatus.BAD_REQUEST;
+        status =
+          detail.includes('delete') || detail.includes('update or delete')
+            ? HttpStatus.CONFLICT
+            : HttpStatus.BAD_REQUEST;
         message =
           status === HttpStatus.CONFLICT
             ? 'Cannot delete or update this record because it is referenced by other records'

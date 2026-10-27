@@ -70,11 +70,7 @@ export class SalaryService {
     return qb.getManyAndCount();
   }
 
-  async save(
-    input: CreateSalaryDTO,
-    creator?: string,
-    manager?: EntityManager,
-  ): Promise<Salary> {
+  async save(input: CreateSalaryDTO, creator?: string, manager?: EntityManager): Promise<Salary> {
     const userRepo = manager ? manager.getRepository(User) : this.userRepository;
     const salaryRepo = manager ? manager.getRepository(Salary) : this.salaryRepository;
 

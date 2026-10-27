@@ -47,10 +47,7 @@ describe('GridsController', () => {
 
     const moduleRef = await Test.createTestingModule({
       controllers: [GridsController],
-      providers: [
-        { provide: GridsService, useValue: gridsService },
-        Reflector,
-      ],
+      providers: [{ provide: GridsService, useValue: gridsService }, Reflector],
     })
       .overrideGuard(AuthGuard)
       .useValue(authGuardMock)
@@ -70,9 +67,7 @@ describe('GridsController', () => {
   it('GET by-page-key returns 200 with empty columns when no prefs exist', async () => {
     gridsService.findByFields.mockResolvedValue(undefined);
 
-    const res = await request(app.getHttpServer())
-      .get('/api/grids/by-page-key/trips')
-      .expect(200);
+    const res = await request(app.getHttpServer()).get('/api/grids/by-page-key/trips').expect(200);
 
     expect(res.body).toEqual({ pageKey: 'trips', columns: [] });
     expect(gridsService.findByFields).toHaveBeenCalledWith({
@@ -89,9 +84,7 @@ describe('GridsController', () => {
       user: authUser,
     });
 
-    const res = await request(app.getHttpServer())
-      .get('/api/grids/by-page-key/trips')
-      .expect(200);
+    const res = await request(app.getHttpServer()).get('/api/grids/by-page-key/trips').expect(200);
 
     expect(res.body.pageKey).toBe('trips');
     expect(res.body.columns).toEqual(['delegateNumber', 'driverName']);

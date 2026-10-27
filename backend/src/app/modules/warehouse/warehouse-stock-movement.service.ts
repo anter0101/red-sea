@@ -89,10 +89,8 @@ export class WarehouseStockMovementService {
         weightNote: dto.weightNote,
         condition: dto.condition ?? warehouse.condition,
         manufacturingYear: dto.manufacturingYear ?? warehouse.manufacturingYear,
-        purchaseDate: dto.purchaseDate
-          ? (new Date(dto.purchaseDate) as any)
-          : warehouse.purchaseDate,
-        expiryDate: dto.expiryDate ? (new Date(dto.expiryDate) as any) : warehouse.expiryDate,
+        purchaseDate: dto.purchaseDate ? new Date(dto.purchaseDate) : warehouse.purchaseDate,
+        expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : warehouse.expiryDate,
         reason: dto.reason,
         notes: dto.notes,
         createdAt: new Date(),
@@ -105,9 +103,7 @@ export class WarehouseStockMovementService {
     });
   }
 
-  async getLastOutDatesByWarehouseIds(
-    warehouseIds: number[],
-  ): Promise<Map<number, Date>> {
+  async getLastOutDatesByWarehouseIds(warehouseIds: number[]): Promise<Map<number, Date>> {
     const map = new Map<number, Date>();
     if (warehouseIds.length === 0) return map;
 

@@ -38,8 +38,7 @@ export class OfficeRequestQueryDTO extends PaginateDTO {
 
   @ApiProperty({
     required: false,
-    description:
-      'Search across description, journey delegate number, and employee user names',
+    description: 'Search across description, journey delegate number, and employee user names',
   })
   @IsOptional()
   @IsString()

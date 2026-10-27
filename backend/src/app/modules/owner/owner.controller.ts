@@ -465,9 +465,7 @@ export class OwnerController {
         car.ownerShip === OwnerShipType.NOLON_CAR ||
         car.ownerShip === OwnerShipType.COMPANY_CAR
       ) {
-        throw new BadRequestException(
-          'Cannot assign owners to NOLON or company-owned cars',
-        );
+        throw new BadRequestException('Cannot assign owners to NOLON or company-owned cars');
       }
 
       if (car.ownerShip === OwnerShipType.CONTRACT_CAR) {
@@ -488,9 +486,7 @@ export class OwnerController {
           0,
         );
         if (totalPercentage !== 100) {
-          throw new BadRequestException(
-            'Shared ownership percentages must sum to 100',
-          );
+          throw new BadRequestException('Shared ownership percentages must sum to 100');
         }
       }
 
@@ -508,9 +504,7 @@ export class OwnerController {
         trailer.ownerShip === OwnerShipType.NOLON_CAR ||
         trailer.ownerShip === OwnerShipType.COMPANY_CAR
       ) {
-        throw new BadRequestException(
-          'Cannot assign owners to NOLON or company-owned trailers',
-        );
+        throw new BadRequestException('Cannot assign owners to NOLON or company-owned trailers');
       }
 
       return await this.relTrailerOwnerService.bulkAssignOwners(assignments, user?.email);

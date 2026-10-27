@@ -41,15 +41,15 @@ export function mapTireToTireDtoSelective(
   keys?: (keyof TireDTO | keyof BaseDTO)[],
 ): UpdateTireDTO | UpdateTireDTO[] {
   const mapSingle = (entity: Tire): UpdateTireDTO => {
-    const resultDto: UpdateTireDTO = {} as UpdateTireDTO;
+    const resultDto: UpdateTireDTO = {};
 
     const keysToMap = (keys || allowedTireDtoKeys).filter((key) =>
       allowedTireDtoKeys.includes(key),
     );
 
     keysToMap.forEach((key) => {
-      if (key in entity && entity[key as keyof Tire] !== undefined) {
-        (resultDto as any)[key] = entity[key as keyof Tire];
+      if (key in entity && entity[key] !== undefined) {
+        (resultDto as any)[key] = entity[key];
       }
     });
 

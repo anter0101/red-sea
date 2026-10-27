@@ -28,23 +28,23 @@ export class CarService {
   }
 
   async findByFields(options: FindOneOptions<UpdateCarDTO>): Promise<CarDTO | undefined> {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     const result = await this.carRepository.findOne({
       ...(options as FindOneOptions<Car>),
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
     return result || undefined;
   }
 
   async find(options: FindManyOptions<UpdateCarDTO>): Promise<Car | undefined> {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     const result = await this.carRepository.findOne({
       ...(options as FindOneOptions<Car>),
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
     return result || undefined;
   }
@@ -57,15 +57,13 @@ export class CarService {
       return await this.carRepository.findAndCount({
         ...(options as FindManyOptions<Car>),
         where: {
-          ...((options.where as object) ?? {}),
+          ...(options.where ?? {}),
           deletedAt: IsNull(),
-        } as any,
+        },
       });
     }
 
-    const qb = this.carRepository
-      .createQueryBuilder('car')
-      .andWhere('car.deleted_at IS NULL');
+    const qb = this.carRepository.createQueryBuilder('car').andWhere('car.deleted_at IS NULL');
 
     applyQueryFilters(qb, query, {
       alias: 'car',
@@ -108,18 +106,12 @@ export class CarService {
     const row = await this.carRepository
       .createQueryBuilder('car')
       .where('car.deleted_at IS NULL')
-      .select(
-        `COUNT(car.id) FILTER (WHERE car.status = '${VeachleStatus.ONROAD}')`,
-        'onRoad',
-      )
+      .select(`COUNT(car.id) FILTER (WHERE car.status = '${VeachleStatus.ONROAD}')`, 'onRoad')
       .addSelect(
         `COUNT(car.id) FILTER (WHERE car."ownerShip" = '${OwnerShipType.COMPANY_CAR}')`,
         'company',
       )
-      .addSelect(
-        `COUNT(car.id) FILTER (WHERE car."ownerShip" = '${OwnerShipType.SHARE}')`,
-        'share',
-      )
+      .addSelect(`COUNT(car.id) FILTER (WHERE car."ownerShip" = '${OwnerShipType.SHARE}')`, 'share')
       .getRawOne<{ onRoad: string; company: string; share: string }>();
 
     return {

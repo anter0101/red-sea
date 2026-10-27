@@ -39,8 +39,8 @@ export function mapTrailerAttachmentToDtoSelective(
     );
 
     keysToMap.forEach((key) => {
-      if (key in attachment && attachment[key as keyof TrailerAttachment] !== undefined) {
-        (resultDto as any)[key] = attachment[key as keyof TrailerAttachment];
+      if (key in attachment && attachment[key] !== undefined) {
+        (resultDto as any)[key] = attachment[key];
       }
     });
 

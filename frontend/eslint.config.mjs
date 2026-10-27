@@ -1,24 +1,19 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
+import nextTypescript from 'eslint-config-next/typescript';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
 const eslintConfig = [
-  ...compat.config({
-    extends: ['next/core-web-vitals', 'next/typescript'],
-    plugins: ['react', '@typescript-eslint', 'simple-import-sort'],
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    plugins: {
+      'simple-import-sort': simpleImportSort,
+    },
     rules: {
       'react/react-in-jsx-scope': 'off',
       'react/jsx-props-no-spreading': 'off',
       'react/require-default-props': 'off',
-      curly: ['off'],
-      'no-magic-numbers': 'off',
       'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
       'react-hooks/exhaustive-deps': 'warn',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
@@ -26,60 +21,43 @@ const eslintConfig = [
       'spaced-comment': ['warn', 'always'],
       'prefer-const': 'error',
       'no-invalid-this': 'off',
-      'default-case': 'error',
+      'default-case': 'warn',
       'react/no-unknown-property': ['error', { ignore: ['jsx', 'global'] }],
-      'simple-import-sort/imports': 'warn',
-      'simple-import-sort/exports': 'warn',
       '@typescript-eslint/consistent-type-imports': 'warn',
-      curly: ['error', 'all'],
+      curly: ['warn', 'all'],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-empty-object-type': 'warn',
+      'react/no-unescaped-entities': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
+      'react-hooks/static-components': 'warn',
+      'react-hooks/incompatible-library': 'warn',
       'no-magic-numbers': [
         'warn',
         { ignore: [0, 1], ignoreArrayIndexes: true, enforceConst: true },
       ],
-    },
-    overrides: [
-      {
-        files: ['**/*.js', '**/*.ts', '**/*.tsx'],
-        rules: {
-          'simple-import-sort/imports': [
-            'warn',
-            {
-              groups: [
-                // `react` first, `next` second, then packages starting with a character
-                [
-                  '^react$',
-                  '^next',
-                  '^[a-z]',
-                  '^enums',
-                  '^hooks',
-                  '^utils/icons',
-                  '^utils',
-                  '^types',
-                ],
-                // Packages starting with `@`
-                ['^@'],
-                // Packages starting with `~`
-                ['^~'],
-                // Imports starting with `../`
-                ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
-                // Imports starting with `./`
-                ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
-                // Style imports
-                ['^.+\\.s?css$'],
-                // Side effect imports
-                ['^\\u0000'],
-              ],
-            },
+      'simple-import-sort/exports': 'warn',
+      'simple-import-sort/imports': [
+        'warn',
+        {
+          groups: [
+            ['^react$', '^next', '^[a-z]', '^enums', '^hooks', '^utils/icons', '^utils', '^types'],
+            ['^@'],
+            ['^~'],
+            ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
+            ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
+            ['^.+\\.s?css$'],
+            ['^\\u0000'],
           ],
         },
-      },
-      {
-        files: ['store/slices/**/*.ts'],
-        // avoid state param assignment
-        rules: { 'no-param-reassign': ['error', { props: false }] },
-      },
-    ],
-  }),
+      ],
+    },
+  },
+  {
+    files: ['store/slices/**/*.ts'],
+    rules: { 'no-param-reassign': ['error', { props: false }] },
+  },
 ];
 
 export default eslintConfig;

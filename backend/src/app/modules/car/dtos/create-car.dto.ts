@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsInt, IsOptional, IsString, ValidateIf } from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsString, ValidateIf } from 'class-validator';
 import { OwnerShipType } from 'src/core/enums/ownerShip-types';
 import { VeachleStatus } from 'src/core/enums/veachle-status';
 import { CarDTO } from './car.dto';

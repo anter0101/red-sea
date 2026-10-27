@@ -1,10 +1,5 @@
 import { Test } from '@nestjs/testing';
-import {
-  CanActivate,
-  ExecutionContext,
-  INestApplication,
-  ValidationPipe,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { DataSource, EntityManager } from 'typeorm';
 

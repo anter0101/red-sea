@@ -1,0 +1,117 @@
+# Pull requests into main. Required status check name: ci
+# The ci job fails unless backend, frontend, the security scan, and the unpushed Docker builds succeed.
+# This workflow must not push images or open an SSH session to the VPS.
+
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Postman collection is JSON
+        run: node --input-type=module -e "import { readFileSync } from 'node:fs'; JSON.parse(readFileSync('red-sea.postman.json', 'utf8'));"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint:ci
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests and coverage
+        run: pnpm test:cov
+
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests and coverage
+        run: pnpm test:cov
+
+  security:
+    uses: ./.github/workflows/security.yml
+
+  docker:
+    name: docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build --tag red-sea-backend:ci backend
+
+      - name: Build frontend image
+        run: docker build --tag red-sea-frontend:ci --build-arg NEXT_PUBLIC_APP_URL=http://127.0.0.1 --build-arg NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1 frontend
+
+  ci:
+    name: ci
+    needs: [backend, frontend, docker, security]
+    if: ${{ always() && !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every quality job
+        run: |
+          set -euo pipefail
+          echo "backend=${{ needs.backend.result }} frontend=${{ needs.frontend.result }} docker=${{ needs.docker.result }} security=${{ needs.security.result }}"
+          test "${{ needs.backend.result }}" = "success"
+          test "${{ needs.frontend.result }}" = "success"
+          test "${{ needs.docker.result }}" = "success"
+          test "${{ needs.security.result }}" = "success"
+          echo "No image push and no SSH in this workflow."

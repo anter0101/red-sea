@@ -72,7 +72,7 @@ export function mapNolonInlineDriverToCreate(dto: NolonInlineDriverDTO): CreateD
     licenseExpiryDate: (dto.licenseExpiryDate ?? '2030-12-31') as unknown as Date,
     user,
     contacts,
-  } as CreateDriverDTO;
+  };
 }
 
 function uniqueSuffix(): string {
@@ -117,4 +117,3 @@ export function mapNolonInlineTrailerToCreate(dto: NolonInlineTrailerDTO): Creat
 
   return result;
 }
-

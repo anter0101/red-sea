@@ -39,23 +39,23 @@ export class UserService {
   }
 
   async findByFields(options: FindOneOptions<UpdateUserDTO>): Promise<UserDTO | undefined> {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     const result = await this.userRepository.findOne({
       ...(options as FindOneOptions<User>),
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
     return result || undefined;
   }
 
   async find(options: FindManyOptions<UpdateUserDTO>): Promise<User | undefined> {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     const result = await this.userRepository.findOne({
       ...(options as FindOneOptions<User>),
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
     return result || undefined;
   }
@@ -68,9 +68,9 @@ export class UserService {
       const [results, count] = await this.userRepository.findAndCount({
         ...(options as FindManyOptions<User>),
         where: {
-          ...((options.where as object) ?? {}),
+          ...(options.where ?? {}),
           deletedAt: IsNull(),
-        } as any,
+        },
       });
       return [await this.enrichAssistantsWithCurrentJourneys(results), count];
     }
@@ -124,16 +124,13 @@ export class UserService {
     role?: UserRole,
   ): Promise<UserWithCurrentJourney[]> {
     const shouldEnrich =
-      role === UserRole.DRIVER_ASSISTANT ||
-      users.some((u) => u.role === UserRole.DRIVER_ASSISTANT);
+      role === UserRole.DRIVER_ASSISTANT || users.some((u) => u.role === UserRole.DRIVER_ASSISTANT);
 
     if (!shouldEnrich || users.length === 0) {
       return users;
     }
 
-    const assistantIds = users
-      .filter((u) => u.role === UserRole.DRIVER_ASSISTANT)
-      .map((u) => u.id);
+    const assistantIds = users.filter((u) => u.role === UserRole.DRIVER_ASSISTANT).map((u) => u.id);
 
     if (assistantIds.length === 0) {
       return users;
@@ -151,7 +148,12 @@ export class UserService {
         invoiceIssued: JourneyStatus.INVOICE_ISSUED,
       })
       .orderBy('journey.id', 'DESC')
-      .getRawMany<{ id: string; assistantId: string; carId: string | null; carCode: string | null }>();
+      .getRawMany<{
+        id: string;
+        assistantId: string;
+        carId: string | null;
+        carCode: string | null;
+      }>();
 
     const currentByAssistant = new Map<
       number,

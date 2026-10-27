@@ -104,7 +104,7 @@ describe('TrialBalanceService', () => {
         name: 'Cash',
         type: AccountType.CASH,
         normalBalance: normalBalanceType.DEBIT,
-        openingBalance: 0 as unknown as number,
+        openingBalance: 0,
       },
       {
         id: 2,
@@ -112,7 +112,7 @@ describe('TrialBalanceService', () => {
         name: 'Equity',
         type: AccountType.EQUITY,
         normalBalance: normalBalanceType.CREDIT,
-        openingBalance: 0 as unknown as number,
+        openingBalance: 0,
       },
     ]);
 
@@ -152,7 +152,7 @@ describe('TrialBalanceService', () => {
         name: 'X',
         type: AccountType.ASSET,
         normalBalance: normalBalanceType.DEBIT,
-        openingBalance: 0 as unknown as number,
+        openingBalance: 0,
       },
     ]);
 
@@ -195,7 +195,7 @@ describe('TrialBalanceService', () => {
         name: 'Parent',
         type: AccountType.ASSET,
         normalBalance: normalBalanceType.DEBIT,
-        openingBalance: 0 as unknown as number,
+        openingBalance: 0,
         parentAccount: undefined,
       } as Account,
       {
@@ -204,7 +204,7 @@ describe('TrialBalanceService', () => {
         name: 'Leaf A',
         type: AccountType.ASSET,
         normalBalance: normalBalanceType.DEBIT,
-        openingBalance: 0 as unknown as number,
+        openingBalance: 0,
         parentAccount: parentStub,
       } as Account,
       {
@@ -213,7 +213,7 @@ describe('TrialBalanceService', () => {
         name: 'Leaf B',
         type: AccountType.ASSET,
         normalBalance: normalBalanceType.DEBIT,
-        openingBalance: 0 as unknown as number,
+        openingBalance: 0,
         parentAccount: parentStub,
       } as Account,
     ]);
@@ -435,7 +435,9 @@ describe('IncomeStatementService', () => {
     expect(report.revenueTree).toHaveLength(1);
     expect(report.revenueTree![0].amount).toBe(50000);
     expect(report.revenueTree![0].children).toHaveLength(2);
-    expect(report.revenueTree![0].children!.map((c) => c.amount).sort((a, b) => a - b)).toEqual([20000, 30000]);
+    expect(report.revenueTree![0].children!.map((c) => c.amount).sort((a, b) => a - b)).toEqual([
+      20000, 30000,
+    ]);
     expect(report.totalRevenue).toBe(50000);
   });
 
@@ -633,7 +635,7 @@ describe('BalanceSheetService', () => {
         name: 'Cash',
         type: AccountType.CASH,
         normalBalance: normalBalanceType.DEBIT,
-        openingBalance: 0 as unknown as number,
+        openingBalance: 0,
         parentAccount: parentStub,
       } as Account,
     ]);
@@ -677,7 +679,7 @@ describe('LedgerService', () => {
       name: 'Petty cash',
       type: AccountType.CASH,
       normalBalance: normalBalanceType.DEBIT,
-      openingBalance: 500 as unknown as number,
+      openingBalance: 500,
     } as Account;
     accountRepo.findOne.mockResolvedValue(acc);
 
@@ -745,8 +747,8 @@ describe('LedgerService', () => {
       name: 'X',
       type: AccountType.ASSET,
       normalBalance: normalBalanceType.DEBIT,
-      openingBalance: 250 as unknown as number,
-    } as Account);
+      openingBalance: 250,
+    });
 
     const linesChain = createChainMock({
       getMany: jest.fn().mockResolvedValue([]),

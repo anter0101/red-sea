@@ -1,0 +1,352 @@
+# Production entry. A reviewer of the production environment must approve the deploy job first.
+# After approval this workflow builds each image once, scans that image, writes a CycloneDX SBOM,
+# pushes to GHCR, then SSHs to the VPS to start the idle color and switch Nginx.
+# Manual runs are limited to main. A Release tag must point at a commit on main.
+
+name: release
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+
+jobs:
+  backend:
+    name: backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Postman collection is JSON
+        run: node --input-type=module -e "import { readFileSync } from 'node:fs'; JSON.parse(readFileSync('red-sea.postman.json', 'utf8'));"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint:ci
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests and coverage
+        run: pnpm test:cov
+
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests and coverage
+        run: pnpm test:cov
+
+  security:
+    uses: ./.github/workflows/security.yml
+
+  guard:
+    name: guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require a commit on main
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            echo "Manual production runs are only allowed from main (got ${{ github.ref }})."
+            exit 1
+          fi
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "Refusing this run: $GITHUB_SHA is not on origin/main."
+            exit 1
+          fi
+          echo "Commit $GITHUB_SHA is on origin/main."
+
+  deploy:
+    name: deploy
+    needs: [guard, backend, frontend, security]
+    if: ${{ needs.guard.result == 'success' && needs.backend.result == 'success' && needs.frontend.result == 'success' && needs.security.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    environment:
+      name: production
+    permissions:
+      contents: read
+      packages: write
+    env:
+      EVENT_NAME: ${{ github.event_name }}
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+      NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+      NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Require public frontend URLs
+        run: |
+          set -euo pipefail
+          if [ -z "${NEXT_PUBLIC_APP_URL}" ] || [ -z "${NEXT_PUBLIC_BACKEND_URL}" ]; then
+            echo "Set Actions variables NEXT_PUBLIC_APP_URL and NEXT_PUBLIC_BACKEND_URL before publishing a release."
+            exit 1
+          fi
+
+      - name: Build backend and frontend once
+        id: build
+        run: |
+          set -euo pipefail
+          owner=$(printf '%s' "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')
+          backend_image="ghcr.io/${owner}/red-sea-backend"
+          frontend_image="ghcr.io/${owner}/red-sea-frontend"
+          docker build --tag "${backend_image}:${GITHUB_SHA}" backend
+          docker build \
+            --tag "${frontend_image}:${GITHUB_SHA}" \
+            --build-arg "NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}" \
+            --build-arg "NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}" \
+            frontend
+          if [ "$EVENT_NAME" = "release" ]; then
+            if ! printf '%s' "$RELEASE_TAG" | grep -Eq '^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$'; then
+              echo "Release tag is not a valid Docker tag: ${RELEASE_TAG}"
+              exit 1
+            fi
+            docker tag "${backend_image}:${GITHUB_SHA}" "${backend_image}:${RELEASE_TAG}"
+            docker tag "${frontend_image}:${GITHUB_SHA}" "${frontend_image}:${RELEASE_TAG}"
+          fi
+          backend_id=$(docker image inspect --format '{{.Id}}' "${backend_image}:${GITHUB_SHA}")
+          frontend_id=$(docker image inspect --format '{{.Id}}' "${frontend_image}:${GITHUB_SHA}")
+          {
+            echo "backend_image=${backend_image}"
+            echo "frontend_image=${frontend_image}"
+            echo "backend_id=${backend_id}"
+            echo "frontend_id=${frontend_id}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Scan the built images and write SBOMs
+        run: |
+          set -euo pipefail
+          scan() {
+            local image_id="$1"
+            local report="$2"
+            local sbom="$3"
+            docker run --rm \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "${GITHUB_WORKSPACE}:/out" \
+              aquasec/trivy:0.58.1 image \
+              --scanners vuln \
+              --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
+              --format json \
+              --output "/out/${report}" \
+              --exit-code 0 \
+              "$image_id"
+            docker run --rm \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "${GITHUB_WORKSPACE}:/out" \
+              aquasec/trivy:0.58.1 image \
+              --format cyclonedx \
+              --output "/out/${sbom}" \
+              "$image_id"
+          }
+          scan "${{ steps.build.outputs.backend_id }}" backend-trivy.json backend-sbom.cdx.json
+          scan "${{ steps.build.outputs.frontend_id }}" frontend-trivy.json frontend-sbom.cdx.json
+
+      - name: Upload image scan and SBOM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-image-reports
+          retention-days: 90
+          if-no-files-found: warn
+          path: |
+            backend-trivy.json
+            frontend-trivy.json
+            backend-sbom.cdx.json
+            frontend-sbom.cdx.json
+
+      - name: Fail on critical or high CVEs
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/fail-on-high-image-cves.py backend-trivy.json frontend-trivy.json
+
+      - name: Push the scanned images
+        id: push
+        run: |
+          set -euo pipefail
+          backend_image="${{ steps.build.outputs.backend_image }}"
+          frontend_image="${{ steps.build.outputs.frontend_image }}"
+          backend_id="${{ steps.build.outputs.backend_id }}"
+          frontend_id="${{ steps.build.outputs.frontend_id }}"
+          test "$backend_id" = "$(docker image inspect --format '{{.Id}}' "${backend_image}:${GITHUB_SHA}")"
+          test "$frontend_id" = "$(docker image inspect --format '{{.Id}}' "${frontend_image}:${GITHUB_SHA}")"
+          echo "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          digest_of() {
+            docker image inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "$1" | head -n 1
+          }
+          docker push "${backend_image}:${GITHUB_SHA}"
+          docker push "${frontend_image}:${GITHUB_SHA}"
+          backend_ref=$(digest_of "${backend_image}:${GITHUB_SHA}")
+          frontend_ref=$(digest_of "${frontend_image}:${GITHUB_SHA}")
+          if [ "$EVENT_NAME" = "release" ]; then
+            docker push "${backend_image}:${RELEASE_TAG}"
+            docker push "${frontend_image}:${RELEASE_TAG}"
+            test "$backend_ref" = "$(digest_of "${backend_image}:${RELEASE_TAG}")"
+            test "$frontend_ref" = "$(digest_of "${frontend_image}:${RELEASE_TAG}")"
+          fi
+          case "$backend_ref" in
+            "${backend_image}@sha256:"*) ;;
+            *) echo "Backend push did not record a digest: ${backend_ref}"; exit 1 ;;
+          esac
+          case "$frontend_ref" in
+            "${frontend_image}@sha256:"*) ;;
+            *) echo "Frontend push did not record a digest: ${frontend_ref}"; exit 1 ;;
+          esac
+          BACKEND_REF="$backend_ref" \
+            FRONTEND_REF="$frontend_ref" \
+            BACKEND_ID="$backend_id" \
+            FRONTEND_ID="$frontend_id" \
+            GIT_SHA="$GITHUB_SHA" \
+            python3 .github/scripts/write-release-digests.py
+          {
+            echo "backend_ref=${backend_ref}"
+            echo "frontend_ref=${frontend_ref}"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "### Immutable release"
+            echo "Backend: \`${backend_ref}\`"
+            echo "Frontend: \`${frontend_ref}\`"
+            echo "Trivy scanned those image ids before the push. The VPS pin is the digest, not the git tag."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload release digests
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-digests
+          retention-days: 90
+          path: release-digests.json
+
+      - name: Start the idle color and switch traffic
+        id: ship
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          BACKEND_REF: ${{ steps.push.outputs.backend_ref }}
+          FRONTEND_REF: ${{ steps.push.outputs.frontend_ref }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_SSH_KEY" ]; then
+            echo "Set DEPLOY_HOST, DEPLOY_USER, and DEPLOY_SSH_KEY on the production environment."
+            exit 1
+          fi
+          printf '%s' "$BACKEND_REF" | grep -Eq '^[^[:space:]]+@sha256:[0-9a-f]{64}$'
+          printf '%s' "$FRONTEND_REF" | grep -Eq '^[^[:space:]]+@sha256:[0-9a-f]{64}$'
+          key="$RUNNER_TEMP/redsea-deploy-key"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$key"
+          chmod 600 "$key"
+          ssh_opts=(-i "$key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new)
+          target="${DEPLOY_USER}@${DEPLOY_HOST}"
+          remote() {
+            ssh "${ssh_opts[@]}" "$target" "$@"
+          }
+          copy() {
+            scp "${ssh_opts[@]}" "$@"
+          }
+          remote "mkdir -p /opt/redsea/scripts /opt/redsea/nginx /opt/redsea/zap /opt/redsea/smoke/scripts /opt/redsea/smoke/postman /opt/redsea/state /opt/redsea/log"
+          copy deployment/docker-compose.yml deployment/docker-compose.apps.yml "${target}:/opt/redsea/"
+          copy deployment/scripts/. "${target}:/opt/redsea/scripts/"
+          copy deployment/nginx/. "${target}:/opt/redsea/nginx/"
+          copy deployment/zap/api-auth.yaml "${target}:/opt/redsea/zap/api-auth.yaml"
+          copy backend/scripts/run-newman-smoke.mjs "${target}:/opt/redsea/smoke/scripts/run-newman-smoke.mjs"
+          copy backend/red-sea.postman.json "${target}:/opt/redsea/smoke/red-sea.postman.json"
+          copy backend/postman/Red-Sea.local.postman_environment.json "${target}:/opt/redsea/smoke/postman/Red-Sea.local.postman_environment.json"
+          set +e
+          remote "BACKEND_IMAGE=$(printf '%q' "$BACKEND_REF") FRONTEND_IMAGE=$(printf '%q' "$FRONTEND_REF") APP_RELEASE_SHA=$(printf '%q' "$GITHUB_SHA") bash /opt/redsea/scripts/release-remote.sh" | tee "$RUNNER_TEMP/release-result.txt"
+          ship_status=${PIPESTATUS[0]}
+          set -e
+          rm -f "$key"
+          cp "$RUNNER_TEMP/release-result.txt" release-result.txt
+          exit "$ship_status"
+
+      - name: Write the release summary
+        if: always()
+        run: |
+          set -euo pipefail
+          result="failed"
+          color=""
+          sha=""
+          backend="${{ steps.push.outputs.backend_ref }}"
+          frontend="${{ steps.push.outputs.frontend_ref }}"
+          if [ -f release-result.txt ]; then
+            parsed=$(sed -n 's/^result=//p' release-result.txt | tail -n 1)
+            if [ -n "$parsed" ]; then
+              result="$parsed"
+            fi
+            live_color=$(sed -n 's/^color=//p' release-result.txt | tail -n 1)
+            live_sha=$(sed -n 's/^sha=//p' release-result.txt | tail -n 1)
+            live_backend=$(sed -n 's/^backend=//p' release-result.txt | tail -n 1)
+            live_frontend=$(sed -n 's/^frontend=//p' release-result.txt | tail -n 1)
+            if [ -n "$live_color" ]; then color="$live_color"; fi
+            if [ -n "$live_sha" ]; then sha="$live_sha"; fi
+            if [ "$result" = "rolled_back" ]; then
+              backend="$live_backend"
+              frontend="$live_frontend"
+            fi
+          fi
+          {
+            echo "### Release ${result}"
+            echo "Color: \`${color:-unknown}\`"
+            echo "Git SHA: \`${sha:-$GITHUB_SHA}\`"
+            echo "Backend: \`${backend}\`"
+            echo "Frontend: \`${frontend}\`"
+            echo "Trivy report and CycloneDX SBOM: [release-image-reports](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            echo "Digests: [release-digests](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } >> "$GITHUB_STEP_SUMMARY"

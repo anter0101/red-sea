@@ -23,10 +23,20 @@ async function login(email, password) {
   return data.token;
 }
 
+function requiredEnv(name) {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(
+      `Missing ${name}. Set SMOKE_ADMIN_EMAIL, SMOKE_ADMIN_PASSWORD, SMOKE_EMPLOYEE_EMAIL, and SMOKE_EMPLOYEE_PASSWORD.`,
+    );
+  }
+  return value;
+}
+
 async function main() {
   console.log(`Fetching tokens from ${BASE}...\n`);
-  const adminToken = await login('admin@admin.com', '12345');
-  const employeeToken = await login('office1@test.com', '12345');
+  const adminToken = await login(requiredEnv('SMOKE_ADMIN_EMAIL'), requiredEnv('SMOKE_ADMIN_PASSWORD'));
+  const employeeToken = await login(requiredEnv('SMOKE_EMPLOYEE_EMAIL'), requiredEnv('SMOKE_EMPLOYEE_PASSWORD'));
 
   const journeys = await fetch(`${BASE}/api/journeys?page=1&pageSize=1&sortField=id&sortOrder=DESC`, {
     headers: { Authorization: `Bearer ${adminToken}` },

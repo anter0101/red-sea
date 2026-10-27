@@ -3,13 +3,23 @@ import { invoiceTotals } from './invoice-calculator';
 describe('invoiceTotals', () => {
   it('drops VAT when tax is off and keeps the withholding', () => {
     expect(
-      invoiceTotals({ revenue: 1000, taxEnabled: false, vatPercentage: 14, withholdingPercentage: 3 }),
+      invoiceTotals({
+        revenue: 1000,
+        taxEnabled: false,
+        vatPercentage: 14,
+        withholdingPercentage: 3,
+      }),
     ).toEqual({ totalRevenue: 1000, vatAmount: 0, withholdingAmount: 30, netAmount: 970 });
   });
 
   it('adds VAT and subtracts withholding when tax is on', () => {
     expect(
-      invoiceTotals({ revenue: 1000, taxEnabled: true, vatPercentage: 14, withholdingPercentage: 3 }),
+      invoiceTotals({
+        revenue: 1000,
+        taxEnabled: true,
+        vatPercentage: 14,
+        withholdingPercentage: 3,
+      }),
     ).toEqual({ totalRevenue: 1000, vatAmount: 140, withholdingAmount: 30, netAmount: 1110 });
   });
 

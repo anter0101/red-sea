@@ -19,7 +19,10 @@ export class JourneyQueryDTO extends PaginateDTO {
   @IsEnum(JourneyStatus)
   tripStatus?: JourneyStatus;
 
-  @ApiProperty({ required: false, description: 'true: already on an invoice. false: not invoiced yet.' })
+  @ApiProperty({
+    required: false,
+    description: 'true: already on an invoice. false: not invoiced yet.',
+  })
   @IsOptional()
   @Transform(({ value }) => {
     if (value === true || value === 'true') return true;

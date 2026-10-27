@@ -85,8 +85,8 @@ export function mapOwnerToOwnerDtoSelective(
             'plateNumber',
           ]) as any,
         }));
-      } else if (key in owner && owner[key as keyof Owner] !== undefined) {
-        (dto as any)[key] = owner[key as keyof Owner];
+      } else if (key in owner && owner[key] !== undefined) {
+        (dto as any)[key] = owner[key];
       }
     });
 

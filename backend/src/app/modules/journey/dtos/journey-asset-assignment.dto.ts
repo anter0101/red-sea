@@ -10,7 +10,7 @@ function transformAssignment<T extends { id?: number; create?: unknown }>(
   value: unknown,
   AssignmentCtor: new () => T,
   CreateCtor: new () => object,
-): T | unknown {
+): unknown {
   const normalized = normalizeJourneyAssetAssignment(value);
   if (!normalized) return value;
 
@@ -20,7 +20,7 @@ function transformAssignment<T extends { id?: number; create?: unknown }>(
     return dto;
   }
   if (normalized.create != null) {
-    dto.create = plainToInstance(CreateCtor, normalized.create) as T['create'];
+    dto.create = plainToInstance(CreateCtor, normalized.create);
   }
   return dto;
 }

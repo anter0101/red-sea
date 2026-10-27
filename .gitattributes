@@ -1,0 +1,3 @@
+# Keep deploy scripts LF so the VPS bash does not see CR.
+deployment/scripts/*.sh text eol=lf
+*.sh text eol=lf

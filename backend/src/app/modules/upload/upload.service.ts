@@ -1,9 +1,11 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CreatePresignedUrlDto } from './dto/create-presignedUrl.dto';
 import { MimeTypeMap } from 'src/core/enums/mime-type';
+
+const VIEW_URL_TTL_SECONDS = 3600;
 
 @Injectable()
 export class UploadService {
@@ -14,8 +16,7 @@ export class UploadService {
   constructor(private readonly configService: ConfigService) {
     const internalEndpoint = this.configService.get<string>('AWS_ENDPOINT');
     // Browser must reach this host. The signature includes it, so it cannot be rewritten later.
-    this.publicEndpoint =
-      this.configService.get<string>('AWS_PUBLIC_ENDPOINT') || internalEndpoint;
+    this.publicEndpoint = this.configService.get<string>('AWS_PUBLIC_ENDPOINT') || internalEndpoint;
     const region = this.configService.getOrThrow<string>('AWS_REGION', { infer: true });
     this.bucket = this.configService.getOrThrow<string>('BUCKET_NAME');
 
@@ -48,6 +49,42 @@ export class UploadService {
 
     // Keep `url` as uploadUrl for backward compatibility with older clients
     return { ...dto, uploadUrl, fileUrl, url: uploadUrl };
+  }
+
+  async generateViewUrl(stored: string): Promise<{ url: string; expiresIn: number }> {
+    const key = this.extractObjectKey(stored);
+    const expiresIn = VIEW_URL_TTL_SECONDS;
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+    const url = await getSignedUrl(this.s3Client, command, { expiresIn });
+    return { url, expiresIn };
+  }
+
+  /** Stored rows may carry an old host (e.g. http://localhost:9000), so only the path after the bucket counts. */
+  private extractObjectKey(stored: string): string {
+    const value = stored.trim();
+    let path = value;
+    if (/^https?:\/\//i.test(value)) {
+      try {
+        path = new URL(value).pathname;
+      } catch {
+        throw new BadRequestException('Invalid file URL');
+      }
+      const marker = `/${this.bucket}/`;
+      const at = path.indexOf(marker);
+      if (at === -1) throw new BadRequestException('File is not in the storage bucket');
+      path = path.slice(at + marker.length);
+    }
+
+    let key: string;
+    try {
+      key = path.replace(/^\/+/, '').split('/').map(decodeURIComponent).join('/');
+    } catch {
+      throw new BadRequestException('Invalid file URL');
+    }
+    if (!key.startsWith('uploads/') || key.split('/').includes('..')) {
+      throw new BadRequestException('File is not in the storage bucket');
+    }
+    return key;
   }
 
   private buildFileUrl(key: string): string {

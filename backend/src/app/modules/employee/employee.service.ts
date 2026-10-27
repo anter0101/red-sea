@@ -73,9 +73,7 @@ export class EmployeeService {
   }
 
   async save(employee: Employee, creator?: string, manager?: EntityManager): Promise<Employee> {
-    const employeeRepository = manager
-      ? manager.getRepository(Employee)
-      : this.employeeRepository;
+    const employeeRepository = manager ? manager.getRepository(Employee) : this.employeeRepository;
     const userRepository = manager ? manager.getRepository(User) : this.userRepository;
 
     // Auto-generate user code if not already assigned
@@ -84,10 +82,7 @@ export class EmployeeService {
     }
 
     if (employee.user) {
-      employee.user.username = await generateUniqueUsername(
-        userRepository,
-        employee.user.role,
-      );
+      employee.user.username = await generateUniqueUsername(userRepository, employee.user.role);
     }
 
     // Automatically handle metadata fields

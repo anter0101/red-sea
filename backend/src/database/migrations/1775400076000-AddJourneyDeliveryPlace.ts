@@ -26,8 +26,12 @@ export class AddJourneyDeliveryPlace1775400076000 implements MigrationInterface 
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "journeys" DROP CONSTRAINT IF EXISTS "FK_journeys_delivery_gov"`);
-    await queryRunner.query(`ALTER TABLE "journeys" DROP CONSTRAINT IF EXISTS "FK_journeys_delivery_area"`);
+    await queryRunner.query(
+      `ALTER TABLE "journeys" DROP CONSTRAINT IF EXISTS "FK_journeys_delivery_gov"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "journeys" DROP CONSTRAINT IF EXISTS "FK_journeys_delivery_area"`,
+    );
     await queryRunner.query(`ALTER TABLE "journeys" DROP COLUMN IF EXISTS "delivery_gov_id"`);
     await queryRunner.query(`ALTER TABLE "journeys" DROP COLUMN IF EXISTS "delivery_area_id"`);
   }

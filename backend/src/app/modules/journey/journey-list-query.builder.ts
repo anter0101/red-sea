@@ -210,7 +210,9 @@ export function buildJourneyListQuery(
   const orderExpr = (sortField && SORT_MAP[sortField]) || 'journey.id';
   const direction: 'ASC' | 'DESC' = sortField ? sortOrder : 'DESC';
   // limit/offset still emit SQL when the query has joins. skip/take do not, and getRawMany never applies them later.
-  qb.orderBy(orderExpr, direction).offset(page * pageSize).limit(pageSize);
+  qb.orderBy(orderExpr, direction)
+    .offset(page * pageSize)
+    .limit(pageSize);
 
   return qb;
 }

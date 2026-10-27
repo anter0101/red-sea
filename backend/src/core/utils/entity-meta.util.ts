@@ -18,11 +18,11 @@ const EXCLUDED_COLUMNS = new Set(['password', 'createdBy', 'updatedBy', 'deleted
  * // → ['code', 'manufacturer', 'model', 'color', 'plateNumber', 'plateLetters',
  * //    'chassisNumber', 'licenseNumber', 'notes']
  */
-export function getStringColumns(entityClass: Function): string[] {
+export function getStringColumns(entityClass: abstract new (...args: never[]) => object): string[] {
   const storage = getMetadataArgsStorage();
   return storage.columns
-    .filter(col => col.target === entityClass)
-    .filter(col => {
+    .filter((col) => col.target === entityClass)
+    .filter((col) => {
       const opts = (col as any).options ?? {};
       const t = opts.type;
       return (
@@ -35,6 +35,6 @@ export function getStringColumns(entityClass: Function): string[] {
         t === 'citext'
       );
     })
-    .map(col => col.propertyName as string)
-    .filter(name => !EXCLUDED_COLUMNS.has(name));
+    .map((col) => col.propertyName)
+    .filter((name) => !EXCLUDED_COLUMNS.has(name));
 }

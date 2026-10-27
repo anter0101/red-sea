@@ -17,6 +17,8 @@
     "generate:errors-i18n": "node scripts/generate-errors-json.js",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "lint:ci": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "typecheck": "tsc --noEmit --pretty false",
     "test": "jest",
     "test:accounting": "jest --testPathPatterns=accounting --verbose",
     "test:accounting-api": "jest --testPathPatterns=accounting-api.spec --verbose",
@@ -92,9 +94,18 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.spec.ts"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "statements": 36,
+        "branches": 30,
+        "functions": 19,
+        "lines": 37
+      }
+    }
   }
 }

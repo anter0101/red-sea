@@ -1,0 +1,50 @@
+# Workstation build. `docker compose up --build` loads this through docker-compose.override.yml.
+# The VPS prepare script passes -f and does not load this file.
+
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      GPS_API_HashKey: ${GPS_API_HASH}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    expose:
+      - "${PORT}"
+    restart: unless-stopped
+    networks:
+      - redsea
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
+    environment:
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NODE_ENV: ${NODE_ENV}
+    depends_on:
+      - backend
+    expose:
+      - "3000"
+    restart: unless-stopped
+    networks:
+      - redsea
+
+  nginx:
+    depends_on:
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_started

@@ -48,9 +48,7 @@ export function assertVehicleAvailable(
   if (status === VeachleStatus.AVILABLE || status === VeachleStatus.ONROAD) {
     return;
   }
-  throw new BadRequestException(
-    `${asset} with id ${id} is not available (status: ${status})`,
-  );
+  throw new BadRequestException(`${asset} with id ${id} is not available (status: ${status})`);
 }
 
 export function validateCarForMode(car: Car, mode: JourneyVehicleMode): void {

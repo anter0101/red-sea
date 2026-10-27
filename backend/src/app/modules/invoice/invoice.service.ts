@@ -100,7 +100,11 @@ export class InvoiceService {
     };
   }
 
-  async issue(dto: CreateInvoiceDTO, creator?: string, manager?: EntityManager): Promise<InvoiceView> {
+  async issue(
+    dto: CreateInvoiceDTO,
+    creator?: string,
+    manager?: EntityManager,
+  ): Promise<InvoiceView> {
     if (!manager) {
       throw new BadRequestException('إصدار الفاتورة لازم يتم في معاملة واحدة.');
     }
@@ -183,10 +187,12 @@ export class InvoiceService {
     if (creator) saved.updatedBy = creator;
     await invoiceRepo.save(saved);
 
-    await manager.getRepository(Journey).update(
-      { id: In(loaded.ids) },
-      { tripStatus: JourneyStatus.INVOICE_ISSUED, updatedAt: new Date(), updatedBy: creator },
-    );
+    await manager
+      .getRepository(Journey)
+      .update(
+        { id: In(loaded.ids) },
+        { tripStatus: JourneyStatus.INVOICE_ISSUED, updatedAt: new Date(), updatedBy: creator },
+      );
 
     const full = await this.findEntity(saved.id, manager);
     return this.present(full!, manager);
@@ -206,7 +212,10 @@ export class InvoiceService {
       .createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.client', 'client')
       .loadRelationCountAndMap('invoice.journeyCount', 'invoice.journeys')
-      .orderBy(sortFields[query.sortField ?? ''] ?? 'invoice.id', query.sortField ? (query.sortOrder ?? 'ASC') : 'DESC')
+      .orderBy(
+        sortFields[query.sortField ?? ''] ?? 'invoice.id',
+        query.sortField ? (query.sortOrder ?? 'ASC') : 'DESC',
+      )
       .skip((page - 1) * pageSize)
       .take(pageSize);
 
@@ -267,7 +276,9 @@ export class InvoiceService {
       errors.push(`الرحلة ${label} عليها فاتورة بالفعل.`);
     }
 
-    const billedIds = new Set(billed.map((row) => row.journey?.id).filter((id): id is number => id != null));
+    const billedIds = new Set(
+      billed.map((row) => row.journey?.id).filter((id): id is number => id != null),
+    );
     const amounts = new Map<number, number>();
     for (const journey of journeys) {
       if (billedIds.has(journey.id)) continue;
@@ -308,9 +319,7 @@ export class InvoiceService {
   }
 
   private async companyHeader(manager?: EntityManager) {
-    const repo = manager
-      ? manager.getRepository(CompanySettings)
-      : this.companySettingsRepository;
+    const repo = manager ? manager.getRepository(CompanySettings) : this.companySettingsRepository;
     const [row] = await repo.find({ order: { id: 'ASC' }, take: 1 });
     if (!row) return DEFAULT_COMPANY_SETTINGS;
     return {
@@ -364,7 +373,10 @@ export class InvoiceService {
     return { revenueInProgress, revenueDone, withholding, clientsInProgress, client, vat };
   }
 
-  private async postedTrn1Amount(journeyId: number, manager?: EntityManager): Promise<number | null> {
+  private async postedTrn1Amount(
+    journeyId: number,
+    manager?: EntityManager,
+  ): Promise<number | null> {
     const repo = manager ? manager.getRepository(Transaction) : this.transactionRepository;
     const rows = await repo
       .createQueryBuilder('tx')
@@ -514,7 +526,8 @@ function lineSnapshot(journey: Journey, revenueAmount: number): InvoiceLineSnaps
     governorate: journey.deliveryGov?.name ?? policy?.deliveryGov?.name ?? null,
     receivedCompany: journey.receivedCompany ?? null,
     packingType: journey.packingType ?? null,
-    destination: journey.deliveryArea?.name ?? policy?.deliveryArea?.name ?? journey.direction ?? null,
+    destination:
+      journey.deliveryArea?.name ?? policy?.deliveryArea?.name ?? journey.direction ?? null,
     journeyDate: sheetDate(policy?.tripDate ?? policy?.loadingDate ?? journey.delegateDate),
     quantity,
     unitPrice: unitPrice(quantity, revenueAmount),
@@ -551,5 +564,7 @@ function unitPrice(quantity?: number | null, revenueAmount?: number): number {
 }
 
 function isUniqueViolation(error: unknown): boolean {
-  return error instanceof QueryFailedError && (error.driverError as { code?: string })?.code === '23505';
+  return (
+    error instanceof QueryFailedError && (error.driverError as { code?: string })?.code === '23505'
+  );
 }

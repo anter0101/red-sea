@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Custody } from './custody.entity';
 import { EntityManager, FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { UpdateCustodyDTO } from './dtos/update-custody.dto';
 import { CustodyQueryDTO } from './dtos/query-custody.dto';
 import { applyQueryFilters } from 'src/core/utils/query-builder.util';
 import { getStringColumns } from 'src/core/utils/entity-meta.util';

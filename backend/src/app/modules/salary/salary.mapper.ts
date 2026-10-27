@@ -126,8 +126,7 @@ export function mapUpdateSalaryDtoToEntity(dto: UpdateSalaryDTO, existing: Salar
   const normalized = normalizeSalaryFieldsByType({
     salaryType: dto.salaryType ?? existing.salaryType,
     salaryAmount: dto.salaryAmount !== undefined ? dto.salaryAmount : existing.salaryAmount,
-    dailyWorkPrice:
-      dto.dailyWorkPrice !== undefined ? dto.dailyWorkPrice : existing.dailyWorkPrice,
+    dailyWorkPrice: dto.dailyWorkPrice !== undefined ? dto.dailyWorkPrice : existing.dailyWorkPrice,
     commissionPerJourney:
       dto.commissionPerJourney !== undefined
         ? dto.commissionPerJourney
@@ -141,11 +140,11 @@ export function mapUpdateSalaryDtoToEntity(dto: UpdateSalaryDTO, existing: Salar
 
   if (dto.id !== undefined) existing.id = dto.id;
   if (dto.salaryType !== undefined) existing.salaryType = dto.salaryType;
-  existing.salaryAmount = normalized.salaryAmount as number | undefined;
-  existing.dailyWorkPrice = normalized.dailyWorkPrice as number | undefined;
-  existing.commissionPerJourney = normalized.commissionPerJourney as number | undefined;
-  existing.commissionIsPercentage = normalized.commissionIsPercentage as boolean | undefined;
-  existing.nolonPercent = normalized.nolonPercent as number | undefined;
+  existing.salaryAmount = normalized.salaryAmount;
+  existing.dailyWorkPrice = normalized.dailyWorkPrice;
+  existing.commissionPerJourney = normalized.commissionPerJourney;
+  existing.commissionIsPercentage = normalized.commissionIsPercentage;
+  existing.nolonPercent = normalized.nolonPercent;
   if (dto.updatedBy !== undefined) existing.updatedBy = dto.updatedBy;
 
   return existing as Salary;

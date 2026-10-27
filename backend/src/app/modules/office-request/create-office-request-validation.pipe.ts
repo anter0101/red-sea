@@ -36,7 +36,7 @@ export class CreateOfficeRequestValidationPipe implements PipeTransform {
         });
         break;
       default:
-        throw new BadRequestException(`Invalid office request type: ${type}`);
+        throw new BadRequestException('Invalid office request type');
     }
 
     const errors = await validate(instance as object);

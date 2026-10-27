@@ -1,14 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  ArrayMinSize,
-  IsArray,
-  IsBoolean,
-  IsInt,
-  IsNumber,
-  Max,
-  Min,
-} from 'class-validator';
+import { ArrayMinSize, IsArray, IsBoolean, IsInt, IsNumber, Max, Min } from 'class-validator';
 
 const PERCENT_MESSAGE = 'النسبة لازم تكون بين 0 و 100';
 

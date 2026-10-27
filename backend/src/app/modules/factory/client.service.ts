@@ -29,12 +29,12 @@ export class ClientService {
   // GENERIC FIND ONE
   // -------------------------------------------------------
   async findByFields(options: FindOneOptions<Client>): Promise<Client | undefined> {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     const result = await this.clientRepository.findOne({
       ...options,
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
     return result || undefined;
   }
@@ -43,12 +43,12 @@ export class ClientService {
   // GENERIC FIND MANY
   // -------------------------------------------------------
   async find(options: FindManyOptions<Client>): Promise<Client[] | undefined> {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     const result = await this.clientRepository.find({
       ...options,
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
     return result || undefined;
   }
@@ -64,9 +64,9 @@ export class ClientService {
       return this.clientRepository.findAndCount({
         ...options,
         where: {
-          ...((options.where as object) ?? {}),
+          ...(options.where ?? {}),
           deletedAt: IsNull(),
-        } as any,
+        },
       });
     }
 

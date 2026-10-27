@@ -47,9 +47,7 @@ export class SupplierGovernmentFkDropCity1775400070000 implements MigrationInter
     `);
 
     const table = await queryRunner.getTable('suppliers');
-    const existingFk = table?.foreignKeys.find((fk) =>
-      fk.columnNames.includes('government_id'),
-    );
+    const existingFk = table?.foreignKeys.find((fk) => fk.columnNames.includes('government_id'));
     if (!existingFk) {
       await queryRunner.createForeignKey(
         'suppliers',

@@ -46,7 +46,7 @@ export function mapTransactionLineToTransactionLineDtoSelective(
 
     keysToMap.forEach((key) => {
       if (key in line) {
-        dto[key as keyof TransactionLineDTO] = line[key as keyof TransactionLine] as any;
+        dto[key] = line[key as keyof TransactionLine] as any;
       }
     });
 

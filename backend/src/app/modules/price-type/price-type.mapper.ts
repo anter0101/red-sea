@@ -36,8 +36,8 @@ export function mapPriceTypeToPriceTypeDtoSelective(
     );
 
     keysToMap.forEach((key) => {
-      if (key in priceType && priceType[key as keyof PriceType] !== undefined) {
-        (dto as any)[key] = priceType[key as keyof PriceType];
+      if (key in priceType && priceType[key] !== undefined) {
+        (dto as any)[key] = priceType[key];
       }
     });
 

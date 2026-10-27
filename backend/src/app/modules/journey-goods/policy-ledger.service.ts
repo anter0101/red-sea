@@ -175,7 +175,12 @@ export class PolicyLedgerService {
     const clientId = journey.client?.id;
     if (!clientId) warnings.push('الرحلة بدون عميل.');
     else {
-      await this.accountService.createClientAccounts(clientId, journey.client.name, undefined, manager);
+      await this.accountService.createClientAccounts(
+        clientId,
+        journey.client.name,
+        undefined,
+        manager,
+      );
     }
 
     const revenue = Number(journey.actualRevenue ?? 0);
@@ -200,8 +205,7 @@ export class PolicyLedgerService {
     }
 
     const mode = journey.car?.ownerShip;
-    const postsExpense =
-      mode === OwnerShipType.NOLON_CAR || mode === OwnerShipType.CONTRACT_CAR;
+    const postsExpense = mode === OwnerShipType.NOLON_CAR || mode === OwnerShipType.CONTRACT_CAR;
 
     if (postsExpense) {
       const nolonRows = await jtRepo.find({
@@ -266,7 +270,15 @@ export class PolicyLedgerService {
         );
         if (supplierLeaf && nolon > 0) {
           lines.push(
-            await this.pair('TRN2', nolon, nolonAccount, supplierLeaf, policy.id, journey.id, txRepo),
+            await this.pair(
+              'TRN2',
+              nolon,
+              nolonAccount,
+              supplierLeaf,
+              policy.id,
+              journey.id,
+              txRepo,
+            ),
           );
         }
 

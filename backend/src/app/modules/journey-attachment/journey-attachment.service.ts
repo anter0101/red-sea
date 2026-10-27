@@ -27,9 +27,7 @@ export class JourneyAttachmentService {
     return await this.repo.find(options);
   }
 
-  async findAndCount(
-    query?: JourneyAttachmentQueryDTO,
-  ): Promise<[JourneyAttachment[], number]> {
+  async findAndCount(query?: JourneyAttachmentQueryDTO): Promise<[JourneyAttachment[], number]> {
     if (!query) return await this.repo.findAndCount();
 
     const qb = this.repo

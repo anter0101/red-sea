@@ -14,7 +14,9 @@ export class CreateAskForCustodyOfficeRequestDTO {
   @Type(() => Number)
   amount: number;
 
-  @ApiPropertyOptional({ description: 'Optional journey context (not required for custody transfer)' })
+  @ApiPropertyOptional({
+    description: 'Optional journey context (not required for custody transfer)',
+  })
   @IsOptional()
   @IsInt()
   @IsPositive()

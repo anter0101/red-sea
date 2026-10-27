@@ -250,6 +250,6 @@ export class CarController {
   async delete(@Param('id', ParseIntPipe) id: number, @AuthUser() user: any): Promise<void> {
     const existing = await this.carService.findById(id);
     if (!existing) throw new NotFoundException(`Car with id ${id} not found`);
-    await this.carService.softDelete(existing.id!, user?.email);
+    await this.carService.softDelete(existing.id, user?.email);
   }
 }

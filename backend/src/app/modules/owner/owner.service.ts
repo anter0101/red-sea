@@ -19,12 +19,12 @@ export class OwnerService {
   }
 
   async findOne(options: FindOneOptions<Owner>) {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     return this.ownerRepo.findOne({
       ...options,
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
   }
 
@@ -40,9 +40,9 @@ export class OwnerService {
       return this.ownerRepo.findAndCount({
         ...options,
         where: {
-          ...((options.where as object) ?? {}),
+          ...(options.where ?? {}),
           deletedAt: IsNull(),
-        } as any,
+        },
       });
     }
 

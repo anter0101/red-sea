@@ -241,10 +241,20 @@ export class Seeder {
     const suppliers = await this.supplierRepository.find();
     for (const supplier of suppliers) {
       if (supplier.type === SupplierType.TRANSPORTATION) {
-        await this.accountService.createSupplierAccount(supplier.id, supplier.name, 'transport', 'system');
+        await this.accountService.createSupplierAccount(
+          supplier.id,
+          supplier.name,
+          'transport',
+          'system',
+        );
       }
       if (supplier.type === SupplierType.CUSTODY) {
-        await this.accountService.createSupplierAccount(supplier.id, supplier.name, 'custody', 'system');
+        await this.accountService.createSupplierAccount(
+          supplier.id,
+          supplier.name,
+          'custody',
+          'system',
+        );
       }
     }
     return clients.length;

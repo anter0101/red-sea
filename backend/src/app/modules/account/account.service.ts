@@ -16,15 +16,9 @@ import { GeneratorTypes } from 'src/core/enums/generator-types';
 import { QueryAccountDTO, parseParentAccountIdQuery } from './dtos/query-account.dto';
 import { Employee } from '../employee/employee.entity';
 import { TransactionService } from '../transaction/transaction.service';
-import {
-  clientDoneRevenueAccountName,
-  clientRevenueAccountName,
-} from './client-account.constants';
+import { clientDoneRevenueAccountName, clientRevenueAccountName } from './client-account.constants';
 import { AccountActorType, AccountSystemKey } from './account-system-keys';
-import {
-  ACCOUNT_PARENT_CUSTODY,
-  buildPersonAccountName,
-} from './person-account.constants';
+import { ACCOUNT_PARENT_CUSTODY, buildPersonAccountName } from './person-account.constants';
 
 /**
  * Chart-of-accounts hierarchy rules (PostgreSQL self-FK on parent_account_id):
@@ -58,7 +52,7 @@ export class AccountService {
     private readonly transactionLineRepository: Repository<TransactionLine>,
     @Inject(forwardRef(() => TransactionService))
     private readonly transactionService: TransactionService,
-  ) { }
+  ) {}
 
   /**
    * Validates child `type` under this parent. CASH is permitted only under ASSET; otherwise
@@ -79,14 +73,10 @@ export class AccountService {
       AccountType.REVENUE,
     ];
     if (debitNormalTypes.includes(type) && normalBalance !== normalBalanceType.DEBIT) {
-      throw new BadRequestException(
-        `For account type "${type}", normalBalance must be DEBIT.`,
-      );
+      throw new BadRequestException(`For account type "${type}", normalBalance must be DEBIT.`);
     }
     if (creditNormalTypes.includes(type) && normalBalance !== normalBalanceType.CREDIT) {
-      throw new BadRequestException(
-        `For account type "${type}", normalBalance must be CREDIT.`,
-      );
+      throw new BadRequestException(`For account type "${type}", normalBalance must be CREDIT.`);
     }
   }
 
@@ -95,7 +85,7 @@ export class AccountService {
     if (parentType === AccountType.ASSET && childType === AccountType.CASH) return;
     throw new BadRequestException(
       `Account type "${childType}" is not allowed under a "${parentType}" parent. Use "${parentType}"` +
-      (parentType === AccountType.ASSET ? ', or CASH for cash/bank style accounts.' : '.'),
+        (parentType === AccountType.ASSET ? ', or CASH for cash/bank style accounts.' : '.'),
     );
   }
 
@@ -158,7 +148,7 @@ export class AccountService {
     }
 
     // Normalize query string values (e.g. "null") — works even when global ValidationPipe has transform: false
-    const parentAccountId = parseParentAccountIdQuery(query.parentAccountId as unknown);
+    const parentAccountId = parseParentAccountIdQuery(query.parentAccountId);
     if (!hasSearch && parentAccountId === null) {
       qb.andWhere('account.parent_account_id IS NULL');
     } else if (!hasSearch && parentAccountId !== undefined) {
@@ -306,18 +296,14 @@ export class AccountService {
     }
 
     if (!account.code) {
-      account.code = await generateUniqueCode(
-        accountRepository,
-        GeneratorTypes.ACCOUNT,
-        'code',
-      );
+      account.code = await generateUniqueCode(accountRepository, GeneratorTypes.ACCOUNT, 'code');
     }
 
     if (account.openingBalanceLocked === true) {
       // e.g. create with optional openingBalance — keep value and lock from mapper
     } else {
       if (account.openingBalance === undefined || account.openingBalance === null) {
-        account.openingBalance = 0 as unknown as number;
+        account.openingBalance = 0;
       }
       account.openingBalanceLocked = false;
     }
@@ -509,8 +495,6 @@ export class AccountService {
     return false;
   }
 
-
-
   async findPersonSubAccount(
     personName: string,
     parentNameArabic: string,
@@ -528,9 +512,7 @@ export class AccountService {
       relations: ['parentAccount'],
     });
     if (!account) {
-      throw new NotFoundException(
-        `Account for "${trimmed}" under "${parentNameArabic}" not found`,
-      );
+      throw new NotFoundException(`Account for "${trimmed}" under "${parentNameArabic}" not found`);
     }
 
     return account;
@@ -751,9 +733,7 @@ export class AccountService {
     amount: number,
     manager?: EntityManager,
   ): Promise<Transaction> {
-    const accountRepository = manager
-      ? manager.getRepository(Account)
-      : this.accountRepository;
+    const accountRepository = manager ? manager.getRepository(Account) : this.accountRepository;
     const inventoryAccount = await accountRepository.findOne({ where: { name: 'الخزينه' } });
     if (!inventoryAccount) {
       throw new NotFoundException('Inventory account not found');
@@ -769,9 +749,10 @@ export class AccountService {
       employee.user?.lastName,
       `Employee ${employee.id}`,
     );
-    const description = employee.user?.firstName || employee.user?.lastName
-      ? `عهدة على الموظف ${employeeName}`
-      : `عهدة على الموظف ${employee.id}`;
+    const description =
+      employee.user?.firstName || employee.user?.lastName
+        ? `عهدة على الموظف ${employeeName}`
+        : `عهدة على الموظف ${employee.id}`;
 
     const userCustodyAccount = await this.findPersonSubAccount(
       employeeName,
@@ -799,7 +780,6 @@ export class AccountService {
 
     return this.transactionService.save(transaction, undefined, manager);
   }
-
 
   async custodyMovement(
     accountFrom: Account,
@@ -832,7 +812,6 @@ export class AccountService {
   }
 
   // balance = openingBalance + debitTotal - creditTotal;
-
 
   async getCurrentBalancesForAccounts(accountIds: number[]): Promise<Map<number, number>> {
     const uniqueIds = [...new Set(accountIds.filter((id) => id > 0))];
@@ -877,10 +856,7 @@ export class AccountService {
     return opening + Number(creditTotal) - Number(debitTotal);
   }
 
-  async checkAvailableBalance(
-    accountId: number,
-    amount: number,
-  ): Promise<boolean> {
+  async checkAvailableBalance(accountId: number, amount: number): Promise<boolean> {
     const balance = await this.getCurrentBalance(accountId);
 
     return balance >= amount;

@@ -7,6 +7,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
 import SelectWithActions from '@/components/common/select-with-actions';
+import { StoredFileLink } from '@/components/common/stored-file-link';
 import { Button } from '@/components/ui/button';
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/dropzone';
 import {
@@ -313,18 +314,9 @@ const OwnershipForm = ({ onNext, onPrevious, trailerId, trailer }: OwnershipForm
                             <DropzoneContent />
                           </Dropzone>
                           {typeof contractField.value === 'string' && contractField.value ? (
-                            <a
-                              href={
-                                contractField.value.startsWith('http')
-                                  ? contractField.value
-                                  : undefined
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-primary underline truncate"
-                            >
+                            <StoredFileLink url={contractField.value} className="truncate">
                               {contractField.value.split('/').pop()}
-                            </a>
+                            </StoredFileLink>
                           ) : null}
                         </FormControl>
                         <FormMessage />

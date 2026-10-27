@@ -19,6 +19,7 @@ import { LedgerService } from './financial-stats/services/ledger.service';
 import { TrialBalanceService } from './financial-stats/services/trial-balance.service';
 import { IncomeStatementService } from './financial-stats/services/income-statement.service';
 import { BalanceSheetService } from './financial-stats/services/balance-sheet.service';
+import { DashboardSummaryService } from './financial-stats/services/dashboard-summary.service';
 
 const authGuardMock: CanActivate = {
   canActivate(context: ExecutionContext): boolean {
@@ -91,7 +92,7 @@ describe('AccountController (HTTP)', () => {
       isLeaf: true,
       isSystem: false,
       normalBalance: normalBalanceType.DEBIT,
-      openingBalance: 0 as unknown as number,
+      openingBalance: 0,
       openingBalanceLocked: false,
     } as Account;
     accountService.findAndCount.mockResolvedValue([[row], 1]);
@@ -118,9 +119,9 @@ describe('AccountController (HTTP)', () => {
       isLeaf: true,
       isSystem: false,
       normalBalance: normalBalanceType.CREDIT,
-      openingBalance: 0 as unknown as number,
+      openingBalance: 0,
       openingBalanceLocked: false,
-    } as Account);
+    });
 
     const res = await request(app.getHttpServer()).get('/api/accounting/accounts/2').expect(200);
     expect(res.body.id).toBe(2);
@@ -136,9 +137,9 @@ describe('AccountController (HTTP)', () => {
       isLeaf: true,
       isSystem: false,
       normalBalance: normalBalanceType.DEBIT,
-      openingBalance: 0 as unknown as number,
+      openingBalance: 0,
       openingBalanceLocked: false,
-    } as Account);
+    });
 
     const res = await request(app.getHttpServer())
       .post('/api/accounting/accounts')
@@ -162,9 +163,9 @@ describe('AccountController (HTTP)', () => {
       isLeaf: true,
       isSystem: false,
       normalBalance: normalBalanceType.DEBIT,
-      openingBalance: 500 as unknown as number,
+      openingBalance: 500,
       openingBalanceLocked: true,
-    } as Account);
+    });
 
     const res = await request(app.getHttpServer())
       .put('/api/accounting/accounts/4/opening-balance')
@@ -181,7 +182,7 @@ describe('AccountController (HTTP)', () => {
       name: 'A',
       type: AccountType.ASSET,
       normalBalance: normalBalanceType.DEBIT,
-    } as Account);
+    });
 
     await request(app.getHttpServer())
       .put('/api/accounting/accounts/1')
@@ -228,7 +229,7 @@ describe('AccountController (HTTP)', () => {
     } as Account;
     accountService.findById.mockResolvedValue(existing);
     accountService.isDescendant.mockResolvedValue(false);
-    accountService.update.mockResolvedValue({ ...existing, name: 'New' } as Account);
+    accountService.update.mockResolvedValue({ ...existing, name: 'New' });
 
     const res = await request(app.getHttpServer())
       .put('/api/accounting/accounts/5')
@@ -370,7 +371,7 @@ describe('TransactionController (HTTP)', () => {
   });
 
   it('DELETE /api/accounting/transactions/:id removes transaction', async () => {
-    transactionService.findById.mockResolvedValue({ id: 3 } as Transaction);
+    transactionService.findById.mockResolvedValue({ id: 3 });
     await request(app.getHttpServer()).delete('/api/accounting/transactions/3').expect(200);
     expect(transactionService.delete).toHaveBeenCalledWith(3);
   });
@@ -445,6 +446,7 @@ describe('FinancialStatsController (HTTP)', () => {
         { provide: TrialBalanceService, useValue: trialBalanceService },
         { provide: IncomeStatementService, useValue: incomeStatementService },
         { provide: BalanceSheetService, useValue: balanceSheetService },
+        { provide: DashboardSummaryService, useValue: {} },
       ],
     })
       .overrideGuard(AuthGuard)

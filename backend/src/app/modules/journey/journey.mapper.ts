@@ -8,7 +8,6 @@ import { User } from '../user/user.entity';
 import { Car } from '../car/car.entity';
 import { Trailer } from '../trailer/trailer.entity';
 import { Client } from '../factory/client.entity';
-import { Employee } from '../employee/employee.entity';
 
 const allowedJourneyDtoKeys: ReadonlyArray<keyof JourneyDTO | keyof BaseDTO> = [
   'id',

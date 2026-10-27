@@ -8,10 +8,7 @@ import { JourneyTransaction } from '../journey-transaction/journey-transaction.e
 import { PricingSheetKind } from 'src/core/enums/pricing-sheet-kind';
 import { OwnerShipType } from 'src/core/enums/ownerShip-types';
 import { SalaryType } from 'src/core/enums/salary';
-import {
-  JourneyTransactionCategoryType,
-  JourneyTransactionType,
-} from 'src/core/enums/journey';
+import { JourneyTransactionCategoryType, JourneyTransactionType } from 'src/core/enums/journey';
 import {
   actualRevenueFrom,
   nolonExpenseRemainder,
@@ -42,9 +39,7 @@ export class JourneyRevenueService {
     const areaId = policy.deliveryArea?.id;
     if (!areaId) return;
 
-    const priceRepo = manager
-      ? manager.getRepository(DeliveryPrice)
-      : this.deliveryPriceRepository;
+    const priceRepo = manager ? manager.getRepository(DeliveryPrice) : this.deliveryPriceRepository;
 
     const journey = await journeyRepo.findOne({
       where: { id: journeyId },
@@ -145,8 +140,7 @@ export class JourneyRevenueService {
     const dailyLabel = role === 'driver' ? 'يوم عمل السائق' : 'يوم عمل التابع';
     const commissionLabel = role === 'driver' ? 'عمولة/نولون الشيت' : 'عمولة/نولون الشيت (تابع)';
 
-    const postDaily =
-      type === SalaryType.MONTHLY || type === SalaryType.COMMISSION;
+    const postDaily = type === SalaryType.MONTHLY || type === SalaryType.COMMISSION;
     const postSheetNolon =
       type === SalaryType.MONTHLY ||
       type === SalaryType.COMMISSION ||
@@ -198,10 +192,7 @@ export class JourneyRevenueService {
     return (await qb.getOne()) ?? null;
   }
 
-  private async custodyAlreadyGiven(
-    journeyId: number,
-    manager?: EntityManager,
-  ): Promise<number> {
+  private async custodyAlreadyGiven(journeyId: number, manager?: EntityManager): Promise<number> {
     const repo = manager ? manager.getRepository(JourneyTransaction) : this.transactionRepository;
     const rows = await repo.find({
       where: { journey: { id: journeyId }, category: JourneyTransactionCategoryType.CUSTODY },

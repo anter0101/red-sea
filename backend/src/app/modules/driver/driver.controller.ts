@@ -266,7 +266,7 @@ export class DriverController {
       if (contacts && contacts.length > 0) {
         // Remove existing contacts for this user
         const existingContacts = (await this.contactService.find({
-          where: { user: { id: existing.user.id } } as any,
+          where: { user: { id: existing.user.id } },
         })) as Contact[] | null;
 
         if (existingContacts && existingContacts.length > 0) {
@@ -282,7 +282,7 @@ export class DriverController {
         await this.contactService.save(mappedContacts, user?.email);
       }
 
-      return driver as unknown as UpdateDriverDTO;
+      return driver;
     });
 
     return updated;
@@ -305,7 +305,7 @@ export class DriverController {
       return topLevel;
     }
 
-    const nested = dto.user?.contacts as DriverContactPayload[] | undefined;
+    const nested = dto.user?.contacts;
     if (nested && nested.length > 0) {
       return nested;
     }

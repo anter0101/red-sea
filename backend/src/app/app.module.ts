@@ -54,6 +54,7 @@ import { JourneyDelegationPrintModule } from './modules/journey-delegation-print
 import { I18nModule } from '../i18n/i18n.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { CompanySettingsModule } from './modules/company-settings/company-settings.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -124,6 +125,7 @@ import { CompanySettingsModule } from './modules/company-settings/company-settin
     CompanySettingsModule,
     JourneyDelegationPrintModule,
     I18nModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [],

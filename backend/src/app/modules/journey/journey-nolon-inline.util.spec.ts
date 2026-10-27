@@ -1,5 +1,8 @@
 import { OwnerShipType } from 'src/core/enums/ownerShip-types';
-import { mapNolonInlineCarToCreate, mapNolonInlineTrailerToCreate } from './journey-nolon-inline.util';
+import {
+  mapNolonInlineCarToCreate,
+  mapNolonInlineTrailerToCreate,
+} from './journey-nolon-inline.util';
 
 describe('mapNolonInlineCarToCreate', () => {
   it('maps only provided NOLON car fields without defaults', () => {

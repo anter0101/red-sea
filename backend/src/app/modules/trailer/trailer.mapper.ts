@@ -63,13 +63,13 @@ export function mapTrailerToTrailerDtoSelective(
 
       // Special relations
       if (key === 'axles' && trailer.axles) {
-        dto.axles = trailer.axles as unknown as TrailerDTO['axles'];
+        dto.axles = trailer.axles;
       }
       if (key === 'Ownerships' && trailer.Ownerships) {
-        dto.Ownerships = trailer.Ownerships as unknown as TrailerDTO['Ownerships'];
+        dto.Ownerships = trailer.Ownerships;
       }
       if (key === 'trailerAttachments' && trailer.trailerAttachments) {
-        dto.trailerAttachments = trailer.trailerAttachments as unknown as TrailerDTO['trailerAttachments'];
+        dto.trailerAttachments = trailer.trailerAttachments;
       }
     });
 

@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 import { JourneyAssetsService } from './journey-assets.service';
 import { CreateJourneyDTO } from './dtos/create-journey.dto';
@@ -83,23 +83,21 @@ describe('JourneyAssetsService.resolveForCreate', () => {
     jest.restoreAllMocks();
   });
 
-  function mockFindOneForFlatIds(
-    mode: JourneyVehicleMode,
-    carId: number,
-    trailerId: number,
-  ) {
+  function mockFindOneForFlatIds(mode: JourneyVehicleMode, carId: number, trailerId: number) {
     const expected = {
       [JourneyVehicleMode.COMPANY_CAR]: OwnerShipType.COMPANY_CAR,
       [JourneyVehicleMode.CONTRACT_CAR]: OwnerShipType.CONTRACT_CAR,
       [JourneyVehicleMode.NOLON_CAR]: OwnerShipType.NOLON_CAR,
     }[mode];
 
-    manager.findOne.mockImplementation(async (entity: unknown, opts: { where: { id: number } }) => {
-      if (entity === Driver) return driver;
-      if (entity === Car) return car(carId, expected);
-      if (entity === Trailer) return trailer(trailerId, expected);
-      return null;
-    });
+    manager.findOne.mockImplementation(
+      async (entity: unknown, _opts: { where: { id: number } }) => {
+        if (entity === Driver) return driver;
+        if (entity === Car) return car(carId, expected);
+        if (entity === Trailer) return trailer(trailerId, expected);
+        return null;
+      },
+    );
   }
 
   describe('COMPANY_CAR', () => {
@@ -242,7 +240,7 @@ describe('JourneyAssetsService.resolveForCreate', () => {
         if (entityOrPayload === Driver) {
           return { id: 50, user: { id: 500, firstName: 'Nolon', lastName: 'Driver' } };
         }
-        if (entityOrPayload === Contact) return { id: 301, ...payload, id: 301 };
+        if (entityOrPayload === Contact) return { ...payload, id: 301 };
         if (payload?.plateNumber === '9901') return { ...payload, id: 51 };
         if (payload?.plateNumber === '9902') return { ...payload, id: 52 };
         return { ...payload, id: 99 };
@@ -284,12 +282,14 @@ describe('JourneyAssetsService.resolveForCreate', () => {
     });
 
     it('allows ONROAD car on another journey', async () => {
-      manager.findOne.mockImplementation(async (entity: unknown, opts: { where: { id: number } }) => {
-        if (entity === Driver) return driver;
-        if (entity === Car) return car(3, OwnerShipType.NOLON_CAR, VeachleStatus.ONROAD);
-        if (entity === Trailer) return trailer(1, OwnerShipType.NOLON_CAR);
-        return null;
-      });
+      manager.findOne.mockImplementation(
+        async (entity: unknown, _opts: { where: { id: number } }) => {
+          if (entity === Driver) return driver;
+          if (entity === Car) return car(3, OwnerShipType.NOLON_CAR, VeachleStatus.ONROAD);
+          if (entity === Trailer) return trailer(1, OwnerShipType.NOLON_CAR);
+          return null;
+        },
+      );
 
       const result = await service.resolveForCreate(
         baseDto({
@@ -303,12 +303,14 @@ describe('JourneyAssetsService.resolveForCreate', () => {
     });
 
     it('rejects UNAVAILABLE car', async () => {
-      manager.findOne.mockImplementation(async (entity: unknown, opts: { where: { id: number } }) => {
-        if (entity === Driver) return driver;
-        if (entity === Car) return car(3, OwnerShipType.NOLON_CAR, VeachleStatus.UNAVILABLE);
-        if (entity === Trailer) return trailer(1, OwnerShipType.NOLON_CAR);
-        return null;
-      });
+      manager.findOne.mockImplementation(
+        async (entity: unknown, _opts: { where: { id: number } }) => {
+          if (entity === Driver) return driver;
+          if (entity === Car) return car(3, OwnerShipType.NOLON_CAR, VeachleStatus.UNAVILABLE);
+          if (entity === Trailer) return trailer(1, OwnerShipType.NOLON_CAR);
+          return null;
+        },
+      );
 
       await expect(
         service.resolveForCreate(

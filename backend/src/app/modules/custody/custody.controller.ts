@@ -55,7 +55,7 @@ export class CustodyController {
     @Inject(forwardRef(() => JourneyService))
     private readonly journeyService: JourneyService,
     private readonly driverService: DriverService,
-  ) { }
+  ) {}
 
   @Get('/')
   @Roles(UserRole.ADMIN, UserRole.DATA_ENTRY)
@@ -147,7 +147,7 @@ export class CustodyController {
       true,
     ).map((dto) => ({
       ...dto,
-      custodyAmount: dto.accountId ? balances.get(dto.accountId) ?? 0 : 0,
+      custodyAmount: dto.accountId ? (balances.get(dto.accountId) ?? 0) : 0,
     }));
 
     HeaderUtil.addPaginationHeaders(
@@ -256,7 +256,7 @@ export class CustodyController {
       );
     }
 
-    const entity = await mapCreateCustodyDtoToEntity(dto);
+    const entity = mapCreateCustodyDtoToEntity(dto);
     const savedCustody = await this.custodyService.save(entity, user?.email);
 
     return mapCustodyToCustodyDtoSelective(savedCustody, [
@@ -332,7 +332,7 @@ export class CustodyController {
       }
     }
 
-    const mappedCustody = await mapUpdateCustodyDtoToEntity(dto);
+    const mappedCustody = mapUpdateCustodyDtoToEntity(dto);
     const updatedCustody = await this.custodyService.update(mappedCustody, user?.email);
 
     return mapCustodyToCustodyDtoSelective(updatedCustody, [

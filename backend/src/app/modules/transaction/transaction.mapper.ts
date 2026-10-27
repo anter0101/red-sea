@@ -48,7 +48,7 @@ export function mapTransactionToTransactionDtoSelective(
 
     keysToMap.forEach((key) => {
       if (key in transaction) {
-        dto[key as keyof TransactionDTO] = transaction[key as keyof Transaction] as any;
+        dto[key] = transaction[key as keyof Transaction] as any;
       }
     });
 

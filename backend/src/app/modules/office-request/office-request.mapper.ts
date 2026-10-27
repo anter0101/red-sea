@@ -51,7 +51,12 @@ export function mapOfficeRequestToDtoSelective(
     );
 
     keysToMap.forEach((key) => {
-      if (key === 'journey' || key === 'requestedFrom' || key === 'requestedTo' || key === 'amount') {
+      if (
+        key === 'journey' ||
+        key === 'requestedFrom' ||
+        key === 'requestedTo' ||
+        key === 'amount'
+      ) {
         return;
       }
       if (key in request && request[key as keyof OfficeRequest] !== undefined) {

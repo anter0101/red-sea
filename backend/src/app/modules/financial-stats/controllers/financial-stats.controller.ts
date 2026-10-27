@@ -140,6 +140,9 @@ export class FinancialStatsController {
   })
   @ApiOkResponse({ type: AccountingDashboardDTO })
   async getDashboard(@Query() query: DateRangeDTO): Promise<AccountingDashboardDTO> {
-    return Object.assign(new AccountingDashboardDTO(), await this.dashboardSummaryService.getSummary(query));
+    return Object.assign(
+      new AccountingDashboardDTO(),
+      await this.dashboardSummaryService.getSummary(query),
+    );
   }
 }

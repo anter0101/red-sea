@@ -93,7 +93,9 @@ class InvoiceCycleSeeder {
       where: { sellingOrderNo: Like(`${SEED_PREFIX}-%`) },
     });
     if (already > 0) {
-      this.logger.warn(`${SEED_PREFIX} journeys already exist (${already}). Skipping untaxed invoices.`);
+      this.logger.warn(
+        `${SEED_PREFIX} journeys already exist (${already}). Skipping untaxed invoices.`,
+      );
       return;
     }
 
@@ -128,7 +130,9 @@ class InvoiceCycleSeeder {
       where: { sellingOrderNo: Like(`${TAX_PREFIX}-%`) },
     });
     if (already > 0) {
-      this.logger.warn(`${TAX_PREFIX} journeys already exist (${already}). Skipping taxed invoices.`);
+      this.logger.warn(
+        `${TAX_PREFIX} journeys already exist (${already}). Skipping taxed invoices.`,
+      );
       return;
     }
 
@@ -148,9 +152,7 @@ class InvoiceCycleSeeder {
       const journeyIds: number[] = [];
       for (let i = 0; i < JOURNEYS_PER_INVOICE; i += 1) {
         index += 1;
-        journeyIds.push(
-          await this.cycleJourney(taxCase.client, areas, fleet, index, TAX_PREFIX),
-        );
+        journeyIds.push(await this.cycleJourney(taxCase.client, areas, fleet, index, TAX_PREFIX));
       }
       await this.issueInvoice(taxCase.client.id, journeyIds, taxCase);
     }
@@ -251,7 +253,9 @@ class InvoiceCycleSeeder {
 
   private async fleet() {
     const alive = { deletedAt: IsNull() };
-    const cars = await this.cars.find({ where: { ...alive, ownerShip: OwnerShipType.COMPANY_CAR } });
+    const cars = await this.cars.find({
+      where: { ...alive, ownerShip: OwnerShipType.COMPANY_CAR },
+    });
     const drivers = await this.drivers.find({ where: alive });
     const trailers = await this.trailers.find({ where: alive });
     if (!cars.length || !drivers.length || !trailers.length) {
@@ -337,7 +341,7 @@ async function bootstrap() {
     logger.log('Invoice cycle seed complete.');
   } catch (error) {
     logger.error('Invoice cycle seed failed.');
-    logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
+    logger.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
     process.exitCode = 1;
   } finally {
     await app.close();

@@ -6,7 +6,9 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  */
 export class Phase3InvoiceAccounts1775400077500 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`UPDATE "accounts" SET "system_key" = 'CLIENTS' WHERE "name" = 'عملاء' AND "system_key" IS NULL`);
+    await queryRunner.query(
+      `UPDATE "accounts" SET "system_key" = 'CLIENTS' WHERE "name" = 'عملاء' AND "system_key" IS NULL`,
+    );
     await queryRunner.query(
       `UPDATE "accounts" SET "system_key" = 'WITHHOLDING_TAX' WHERE "name" = 'ضرائب منبع' AND "system_key" IS NULL`,
     );
@@ -143,7 +145,9 @@ export class Phase3InvoiceAccounts1775400077500 implements MigrationInterface {
     await queryRunner.query(
       `UPDATE "accounts" SET "isLeaf" = true, "system_key" = NULL WHERE "system_key" = 'CLIENTS'`,
     );
-    await queryRunner.query(`UPDATE "accounts" SET "system_key" = NULL WHERE "system_key" = 'WITHHOLDING_TAX'`);
+    await queryRunner.query(
+      `UPDATE "accounts" SET "system_key" = NULL WHERE "system_key" = 'WITHHOLDING_TAX'`,
+    );
     await queryRunner.query(`DELETE FROM "accounts" WHERE "system_key" = 'VAT_PAYABLE'`);
   }
 }

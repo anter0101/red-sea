@@ -29,9 +29,7 @@ export class JourneyDelegationPrintService {
     manager?: EntityManager,
     creator?: string,
   ): Promise<JourneyDelegationPrint> {
-    const repo = manager
-      ? manager.getRepository(JourneyDelegationPrint)
-      : this.repository;
+    const repo = manager ? manager.getRepository(JourneyDelegationPrint) : this.repository;
 
     const existing = await repo.findOne({ where: { journey: { id: journeyId } } });
     if (existing) {
@@ -77,10 +75,12 @@ export class JourneyDelegationPrintService {
     return saved;
   }
 
-  async resetToNotPrinted(journeyId: number, manager?: EntityManager, updater?: string): Promise<void> {
-    const repo = manager
-      ? manager.getRepository(JourneyDelegationPrint)
-      : this.repository;
+  async resetToNotPrinted(
+    journeyId: number,
+    manager?: EntityManager,
+    updater?: string,
+  ): Promise<void> {
+    const repo = manager ? manager.getRepository(JourneyDelegationPrint) : this.repository;
 
     const record = await repo.findOne({
       where: { journey: { id: journeyId } },

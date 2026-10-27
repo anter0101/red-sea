@@ -15,7 +15,10 @@ export class CarModelQueryDTO extends PaginateDTO {
   @Type(() => Number)
   manufacturerId?: number;
 
-  @ApiProperty({ required: false, description: 'Search by name or manufacturer name (partial, case-insensitive)' })
+  @ApiProperty({
+    required: false,
+    description: 'Search by name or manufacturer name (partial, case-insensitive)',
+  })
   @IsOptional()
   @IsString()
   search?: string;

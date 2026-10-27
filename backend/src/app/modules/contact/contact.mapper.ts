@@ -36,15 +36,15 @@ export function mapContactToContactDtoSelective(
   keys?: (keyof ContactDTO | keyof BaseDTO)[],
 ): UpdateContactDTO | UpdateContactDTO[] {
   const mapSingle = (entity: Contact): UpdateContactDTO => {
-    const resultDto: UpdateContactDTO = {} as UpdateContactDTO;
+    const resultDto: UpdateContactDTO = {};
 
     const keysToMap = (keys || allowedContactDtoKeys).filter((key) =>
       allowedContactDtoKeys.includes(key),
     );
 
     keysToMap.forEach((key) => {
-      if (key in entity && entity[key as keyof Contact] !== undefined) {
-        (resultDto as any)[key] = entity[key as keyof Contact];
+      if (key in entity && entity[key] !== undefined) {
+        (resultDto as any)[key] = entity[key];
       }
     });
 

@@ -89,7 +89,12 @@ export class EnsureInvoiceChartParents1775400078100 implements MigrationInterfac
     `);
 
     await this.backfillLeaves(queryRunner, 'CLIENTS_IN_PROGRESS', 'A3-CIP-', '');
-    await this.backfillLeaves(queryRunner, 'REVENUE_IN_PROGRESS', 'A3-RIP-', 'ايرادات تحت التنفيذ ');
+    await this.backfillLeaves(
+      queryRunner,
+      'REVENUE_IN_PROGRESS',
+      'A3-RIP-',
+      'ايرادات تحت التنفيذ ',
+    );
     await this.backfillLeaves(queryRunner, 'REVENUE_DONE', 'A3-RD-', 'ايرادات تم تنفيذها ');
   }
 

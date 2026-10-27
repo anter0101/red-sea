@@ -44,8 +44,8 @@ export function mapAxleToAxleDtoSelective(
       : allowedAxleDtoKeys;
 
     useKeys.forEach((key) => {
-      if (entity[key as keyof Axle] !== undefined) {
-        (dto as any)[key] = entity[key as keyof Axle];
+      if (entity[key] !== undefined) {
+        (dto as any)[key] = entity[key];
       }
     });
 

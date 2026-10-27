@@ -39,7 +39,7 @@ export default function TransactionsTable({ data, onEdit }: TransactionsTablePro
           <TableHead>{t('table.description')}</TableHead>
 
           <TableHead className="w-32 text-center">{t('table.status')}</TableHead>
-          <TableHead>{t('table.actions')}</TableHead>}
+          <TableHead>{t('table.actions')}</TableHead>
         </TableRow>
       </TableHeader>
 

@@ -202,7 +202,7 @@ export function mapCustodyToCustodyDtoSelective(
     : mapSingle(custodyOrCustodies);
 }
 
-export const mapCreateCustodyDtoToEntity = async (dto: CreateCustodyDTO): Promise<Custody> => {
+export const mapCreateCustodyDtoToEntity = (dto: CreateCustodyDTO): Custody => {
   const custody = new Custody();
   custody.createdAt = dto.createdAt;
   custody.status = dto.status ?? CustodyStatus.ACTIVE;
@@ -226,7 +226,7 @@ export const mapCreateCustodyDtoToEntity = async (dto: CreateCustodyDTO): Promis
   return custody;
 };
 
-export const mapUpdateCustodyDtoToEntity = async (dto: UpdateCustodyDTO): Promise<Custody> => {
+export const mapUpdateCustodyDtoToEntity = (dto: UpdateCustodyDTO): Custody => {
   const custody = new Custody();
 
   if (dto.id !== undefined) custody.id = dto.id;

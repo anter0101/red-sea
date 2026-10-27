@@ -13,7 +13,15 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiExtraModels,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { AuthGuard, AuthUser, Roles, RolesGuard } from 'src/core/security';
 import { UserRole } from 'src/core/enums/user-role';
 import type { Request } from 'src/core/utils/request';
@@ -32,10 +40,7 @@ import {
 import type { CreateOfficeRequestDTO } from './dtos/create-office-request.dto';
 import { CreateOfficeRequestValidationPipe } from './create-office-request-validation.pipe';
 import { OfficeRequestQueryDTO } from './dtos/query-office-request.dto';
-import {
-  CustodyTransferParty,
-  OfficeRequestActionDTO,
-} from './dtos/office-request-action.dto';
+import { CustodyTransferParty, OfficeRequestActionDTO } from './dtos/office-request-action.dto';
 import {
   mapCreateOfficeRequestDtoToEntity,
   mapOfficeRequestToDtoSelective,
@@ -45,7 +50,10 @@ import { OfficeRequest } from './office-request.entity';
 import { JourneyService } from '../journey/journey.service';
 import { EmployeeService } from '../employee/employee.service';
 import { AccountService } from '../account/account.service';
-import { ACCOUNT_PARENT_CUSTODY, buildPersonAccountName } from '../account/person-account.constants';
+import {
+  ACCOUNT_PARENT_CUSTODY,
+  buildPersonAccountName,
+} from '../account/person-account.constants';
 import { CustodyService } from '../custody/custody.service';
 import { Employee } from '../employee/employee.entity';
 import { Account } from '../account/account.entity';
@@ -92,8 +100,7 @@ export class OfficeRequestController {
       pageRequestSortString(query.sortField, query.sortOrder),
     );
 
-    const requestingUserId =
-      req.user?.role === UserRole.DATA_ENTRY ? req.user.id : undefined;
+    const requestingUserId = req.user?.role === UserRole.DATA_ENTRY ? req.user.id : undefined;
 
     const whereConditions: FindOptionsWhere<OfficeRequest> = {};
     if (query.journeyId) {
@@ -132,7 +139,11 @@ export class OfficeRequestController {
   @Post('/:id/request-action')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Admin: approve or reject a pending office request' })
-  @ApiResponse({ status: 200, description: 'Office request action applied', type: OfficeRequestDTO })
+  @ApiResponse({
+    status: 200,
+    description: 'Office request action applied',
+    type: OfficeRequestDTO,
+  })
   async requestAction(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: OfficeRequestActionDTO,
@@ -172,7 +183,7 @@ export class OfficeRequestController {
       return manager.getRepository(OfficeRequest).save(existing);
     });
 
-    return mapOfficeRequestToDtoSelective(updated) as OfficeRequestDTO;
+    return mapOfficeRequestToDtoSelective(updated);
   }
 
   @Get('/:id')
@@ -202,7 +213,7 @@ export class OfficeRequestController {
       throw new NotFoundException(`Office request with id ${id} not found`);
     }
 
-    return mapOfficeRequestToDtoSelective(existing) as OfficeRequestDTO;
+    return mapOfficeRequestToDtoSelective(existing);
   }
 
   @Post('/')
@@ -245,7 +256,7 @@ export class OfficeRequestController {
       ],
     });
 
-    return mapOfficeRequestToDtoSelective(loaded ?? saved) as OfficeRequestDTO;
+    return mapOfficeRequestToDtoSelective(loaded ?? saved);
   }
 
   @Delete('/:id')
@@ -300,7 +311,9 @@ export class OfficeRequestController {
     if (type === OfficeRequestType.END_WORKING_SHIFT) {
       const transferTo = custody.transferTo ?? CustodyTransferParty.TREASURY;
       if (transferTo === CustodyTransferParty.EMPLOYEE && !custody.targetEmployeeId) {
-        throw new BadRequestException('custody.targetEmployeeId is required when transferTo is EMPLOYEE');
+        throw new BadRequestException(
+          'custody.targetEmployeeId is required when transferTo is EMPLOYEE',
+        );
       }
       return;
     }
@@ -308,7 +321,9 @@ export class OfficeRequestController {
     if (type === OfficeRequestType.ASK_FOR_CUSTODY) {
       const transferFrom = custody.transferFrom ?? CustodyTransferParty.TREASURY;
       if (transferFrom === CustodyTransferParty.EMPLOYEE && !custody.sourceEmployeeId) {
-        throw new BadRequestException('custody.sourceEmployeeId is required when transferFrom is EMPLOYEE');
+        throw new BadRequestException(
+          'custody.sourceEmployeeId is required when transferFrom is EMPLOYEE',
+        );
       }
     }
   }
@@ -329,7 +344,11 @@ export class OfficeRequestController {
     switch (existing.type) {
       case OfficeRequestType.PRINT_DELEGATION:
         if (existing.journey?.id) {
-          await this.journeyDelegationPrintService.grantPrint(existing.journey.id, manager, updater);
+          await this.journeyDelegationPrintService.grantPrint(
+            existing.journey.id,
+            manager,
+            updater,
+          );
         }
         return;
 

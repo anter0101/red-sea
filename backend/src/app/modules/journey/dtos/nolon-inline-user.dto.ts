@@ -17,7 +17,10 @@ export class NolonInlineUserDTO {
   @Type(() => String)
   nationalId?: string | number;
 
-  @ApiPropertyOptional({ description: 'Primary contact phone (Contact entity)', example: '010051515' })
+  @ApiPropertyOptional({
+    description: 'Primary contact phone (Contact entity)',
+    example: '010051515',
+  })
   @IsOptional()
   @IsString()
   phoneNumber?: string;

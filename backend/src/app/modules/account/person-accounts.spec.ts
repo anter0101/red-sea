@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 
@@ -11,7 +11,7 @@ import { AccountService } from './account.service';
 import { Account, AccountType, normalBalanceType } from './account.entity';
 import { TransactionLine, EntryType } from '../transaction-line/transaction-line.entity';
 import { TransactionService } from '../transaction/transaction.service';
-import { Transaction, TransactionStatus } from '../transaction/transaction.entity';
+import { TransactionStatus } from '../transaction/transaction.entity';
 import { Employee } from '../employee/employee.entity';
 import {
   ACCOUNT_PARENT_CUSTODY,
@@ -101,7 +101,7 @@ describe('AccountService — person sub-accounts', () => {
     mockRepo = createAccountRepoMock();
     mockRepo.find.mockResolvedValue([]);
     mockTlRepo = createTransactionLineRepoMock();
-    transactionService = { save: jest.fn().mockResolvedValue({ id: 1 } as Transaction) };
+    transactionService = { save: jest.fn().mockResolvedValue({ id: 1 }) };
 
     const moduleRef = await Test.createTestingModule({
       providers: [

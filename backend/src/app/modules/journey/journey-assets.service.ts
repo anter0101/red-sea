@@ -56,7 +56,7 @@ export class JourneyAssetsService {
   constructor(
     private readonly userService: UserService,
     private readonly accountService: AccountService,
-  ) { }
+  ) {}
 
   /**
    * Resolves driver/car/trailer from ids, nested assignment objects, or inline create payloads.
@@ -81,7 +81,14 @@ export class JourneyAssetsService {
       creator,
       true,
     );
-    const carId = await this.resolveCar(dto.vehicleMode, dto.carId, dto.car, manager, creator, true);
+    const carId = await this.resolveCar(
+      dto.vehicleMode,
+      dto.carId,
+      dto.car,
+      manager,
+      creator,
+      true,
+    );
     const trailerId = await this.resolveTrailer(
       dto.vehicleMode,
       dto.trailerId,
@@ -179,7 +186,9 @@ export class JourneyAssetsService {
     const normalized = normalizeJourneyAssetAssignment(assignment);
 
     if (flatId != null && normalized?.create != null) {
-      throw new BadRequestException('Provide either flat asset id or inline asset fields, not both');
+      throw new BadRequestException(
+        'Provide either flat asset id or inline asset fields, not both',
+      );
     }
 
     if (normalized?.id != null) {
@@ -329,7 +338,9 @@ export class JourneyAssetsService {
   ): Promise<number> {
     const existing = await manager.findOne(Driver, { where: { licenseNumber: dto.licenseNumber } });
     if (existing) {
-      throw new BadRequestException(`Driver with license number ${dto.licenseNumber} already exists`);
+      throw new BadRequestException(
+        `Driver with license number ${dto.licenseNumber} already exists`,
+      );
     }
 
     if (dto.user?.email) {

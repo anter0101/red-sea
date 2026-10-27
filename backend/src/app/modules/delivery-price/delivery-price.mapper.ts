@@ -59,7 +59,7 @@ export function mapDeliveryPriceToDeliveryPriceDtoSelective(
     });
 
     // Only add client if it's in the requested keys
-    if (keysToMap.includes('client' as any) && price.client) {
+    if (keysToMap.includes('client') && price.client) {
       (dto as any).client = {
         id: price.client.id,
         name: price.client.name,
@@ -67,7 +67,7 @@ export function mapDeliveryPriceToDeliveryPriceDtoSelective(
     }
 
     // Only add area if it's in the requested keys
-    if (keysToMap.includes('area' as any) && price.area) {
+    if (keysToMap.includes('area') && price.area) {
       (dto as any).area = {
         id: price.area.id,
         name: price.area.name,
@@ -75,7 +75,7 @@ export function mapDeliveryPriceToDeliveryPriceDtoSelective(
     }
 
     // Only add priceType if it's in the requested keys
-    if (keysToMap.includes('priceType' as any) && price.priceType) {
+    if (keysToMap.includes('priceType') && price.priceType) {
       (dto as any).priceType = {
         id: price.priceType.id,
         name: price.priceType.name,
@@ -138,8 +138,8 @@ export const mapCreateDeliveryPriceDtoToEntity = (dto: CreateDeliveryPriceDTO): 
   const tax = Number((entity as any).taxPrice ?? 0);
   entity.totalPrice = base + additional + tax;
 
-  entity.validFrom = dto.validFrom as any;
-  entity.validTo = dto.validTo as any;
+  entity.validFrom = dto.validFrom;
+  entity.validTo = dto.validTo;
   entity.notes = dto.notes;
 
   if (dto.createdAt !== undefined) entity.createdAt = dto.createdAt;

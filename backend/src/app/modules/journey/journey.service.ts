@@ -114,9 +114,7 @@ export class JourneyService {
     changedBy?: string,
     manager?: EntityManager,
   ): Promise<void> {
-    const repo = manager
-      ? manager.getRepository(JourneyStatusEvent)
-      : this.statusEventRepository;
+    const repo = manager ? manager.getRepository(JourneyStatusEvent) : this.statusEventRepository;
     const event = repo.create({
       journey: { id: journeyId } as Journey,
       fromStatus: fromStatus ?? undefined,
@@ -135,7 +133,13 @@ export class JourneyService {
     if (updater) entity.updatedBy = updater;
     const saved = await repo.save(entity);
     if (existing && existing.tripStatus !== saved.tripStatus) {
-      await this.recordStatusEvent(saved.id, existing.tripStatus, saved.tripStatus, updater, manager);
+      await this.recordStatusEvent(
+        saved.id,
+        existing.tripStatus,
+        saved.tripStatus,
+        updater,
+        manager,
+      );
     }
     return saved;
   }

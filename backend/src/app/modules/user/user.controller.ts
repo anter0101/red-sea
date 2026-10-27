@@ -176,7 +176,7 @@ export class UserController {
       // Validate that none of these phones already exist for any user
       const phones = contacts.map((c) => c.phone);
       const contactOfOtherUser = (await this.contactService.find({
-        where: { phone: In(phones) } as any,
+        where: { phone: In(phones) },
       })) as Contact[] | null;
 
       if (contactOfOtherUser && contactOfOtherUser.length > 0) {
@@ -186,7 +186,7 @@ export class UserController {
 
     const created = await withTransaction(this.dataSource, async (manager) => {
       const mappedUser = await mapUserCreateDtoToEntity(createUserDTO);
-      const savedUser = await this.userService.save(mappedUser as any, user?.email);
+      const savedUser = await this.userService.save(mappedUser, user?.email);
 
       if (contacts && contacts.length > 0) {
         const mappedContacts = mapCreateContactDtoToEntity(
@@ -248,7 +248,7 @@ export class UserController {
       // Validate that none of these phones already exist for a *different* user
       const phones = contacts.map((c) => c.phone);
       const contactOfOtherUser = (await this.contactService.find({
-        where: { phone: In(phones), user: { id: Not(id) } } as any,
+        where: { phone: In(phones), user: { id: Not(id) } },
       })) as Contact[] | null;
 
       if (contactOfOtherUser && contactOfOtherUser.length > 0) {
@@ -284,7 +284,7 @@ export class UserController {
 
       if (contacts && contacts.length > 0) {
         const existingContacts = (await this.contactService.find({
-          where: { user: { id } } as any,
+          where: { user: { id } },
         })) as Contact[] | null;
 
         if (existingContacts && existingContacts.length > 0) {
@@ -318,6 +318,6 @@ export class UserController {
     if (!existing) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
-    await this.userService.softDelete(existing.id!, user?.email);
+    await this.userService.softDelete(existing.id, user?.email);
   }
 }

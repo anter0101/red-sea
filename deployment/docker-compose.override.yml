@@ -1,0 +1,5 @@
+# Loaded only when Compose is started with no -f flag.
+# The VPS command passes -f docker-compose.yml -f docker-compose.apps.yml, so this file stays out of production.
+
+include:
+  - docker-compose.local.yml

@@ -3,7 +3,7 @@
  * Grid by-page-key must return 200 (not 404) when prefs are missing.
  */
 import { Test } from '@nestjs/testing';
-import { CanActivate, ExecutionContext, Type } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Provider, Type } from '@nestjs/common';
 import request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -85,7 +85,7 @@ const stub = () => ({});
 type SmokeCase = {
   path: string;
   controllers: Type<unknown>[];
-  providers: { provide: unknown; useValue: Record<string, unknown> }[];
+  providers: Provider[];
 };
 
 const cases: SmokeCase[] = [
@@ -97,7 +97,10 @@ const cases: SmokeCase[] = [
   {
     path: '/api/clients',
     controllers: [ClientController],
-    providers: [{ provide: ClientService, useValue: { findAndCount: emptyFindAndCount() } }],
+    providers: [
+      { provide: ClientService, useValue: { findAndCount: emptyFindAndCount() } },
+      { provide: AccountService, useValue: stub() },
+    ],
   },
   {
     path: '/api/suppliers',
@@ -105,6 +108,7 @@ const cases: SmokeCase[] = [
     providers: [
       { provide: SupplierService, useValue: { findAndCount: emptyFindAndCount() } },
       { provide: GovernmentService, useValue: stub() },
+      { provide: AccountService, useValue: stub() },
     ],
   },
   {
@@ -138,7 +142,10 @@ const cases: SmokeCase[] = [
   {
     path: '/api/branches',
     controllers: [BranchController],
-    providers: [{ provide: BranchService, useValue: { findAndCount: emptyFindAndCount() } }],
+    providers: [
+      { provide: BranchService, useValue: { findAndCount: emptyFindAndCount() } },
+      { provide: AccountService, useValue: stub() },
+    ],
   },
   {
     path: '/api/salaries',

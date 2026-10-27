@@ -8,7 +8,6 @@ import {
   Get,
   Inject,
   Logger,
-  BadRequestException,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -31,7 +30,6 @@ import { JourneyDTO } from './dtos/journey.dto';
 import { CreateJourneyDTO } from './dtos/create-journey.dto';
 import { UpdateJourneyDTO } from './dtos/update-journey.dto';
 import { JourneyQueryDTO } from './dtos/query-journey.dto';
-import { JourneyStatus } from 'src/core/enums/journey';
 import { JourneyStatsDTO } from './dtos/journey-stats.dto';
 import { JourneyStatusEventDTO } from './dtos/journey-status-event.dto';
 import { JourneyListScope } from './journey-list-scope.types';
@@ -88,7 +86,7 @@ export class JourneyController {
     private readonly custodyService: CustodyService,
     private readonly dataSource: DataSource,
     private readonly journeyDelegationPrintService: JourneyDelegationPrintService,
-  ) { }
+  ) {}
 
   private resolveListScope(req: Request): JourneyListScope | undefined {
     return req.user?.role === UserRole.DATA_ENTRY && req.user?.id
@@ -115,7 +113,7 @@ export class JourneyController {
       pageRequest.page,
       pageRequest.size,
       query.sortField,
-      (query.sortOrder as 'ASC' | 'DESC') || 'ASC',
+      query.sortOrder || 'ASC',
       scope,
     );
 
@@ -165,9 +163,16 @@ export class JourneyController {
   @Roles(UserRole.DATA_ENTRY)
   @ApiOperation({ summary: 'Create a new journey' })
   @ApiResponse({ status: 201, description: 'Journey created', type: JourneyDTO })
-  async officeCreate(@Body() dto: CreateJourneyDTO, @AuthUser() user: any): Promise<Partial<JourneyDTO>> {
+  async officeCreate(
+    @Body() dto: CreateJourneyDTO,
+    @AuthUser() user: any,
+  ): Promise<Partial<JourneyDTO>> {
     const saved = await withTransaction(this.dataSource, async (manager) => {
-      const resolvedAssets = await this.journeyAssetsService.resolveForCreate(dto, manager, user?.email);
+      const resolvedAssets = await this.journeyAssetsService.resolveForCreate(
+        dto,
+        manager,
+        user?.email,
+      );
       dto.driverId = resolvedAssets.driverId;
       dto.carId = resolvedAssets.carId;
       dto.trailerId = resolvedAssets.trailerId;
@@ -294,7 +299,6 @@ export class JourneyController {
   //   return mapJourneyToDtoSelective(saved);
   // }
 
-
   private async validateJourneyReferences(dto: CreateJourneyDTO | UpdateJourneyDTO): Promise<void> {
     if (dto.driverAssistantId !== undefined) {
       const assistant = await this.UserService.findByFields({
@@ -311,8 +315,6 @@ export class JourneyController {
         throw new NotFoundException(`Client with id ${dto.clientId} not found`);
       }
     }
-
-
   }
 
   // UPDATE
@@ -407,13 +409,18 @@ export class JourneyController {
   @Get('/:id/history')
   @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
   @ApiOperation({ summary: 'Get journey status change history' })
-  @ApiResponse({ status: 200, description: 'Status events', type: JourneyStatusEventDTO, isArray: true })
+  @ApiResponse({
+    status: 200,
+    description: 'Status events',
+    type: JourneyStatusEventDTO,
+    isArray: true,
+  })
   async getJourneyHistory(@Param('id', ParseIntPipe) id: number): Promise<JourneyStatusEventDTO[]> {
     const journey = await this.journeyService.findById(id);
     if (!journey) throw new NotFoundException(`Journey with id ${id} not found`);
 
     const events = await this.journeyService.getStatusHistory(id);
-    return events.map(event => ({
+    return events.map((event) => ({
       id: event.id,
       fromStatus: event.fromStatus ?? null,
       toStatus: event.toStatus,

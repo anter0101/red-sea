@@ -202,7 +202,7 @@ export class JourneyPolicyController {
     entity.journey = journey;
 
     // Save
-    const saved = await withTransaction(this.dataSource, async manager => {
+    const saved = await withTransaction(this.dataSource, async (manager) => {
       const savedPolicy = await this.policyService.save(entity, user?.email);
       await this.journeyService.transitionStatus(
         dto.journeyId,
@@ -263,7 +263,7 @@ export class JourneyPolicyController {
     await this.validatePolicyReferences(existing.journey.id, dto);
     this.assertTransportSupplier(journey ?? existing.journey, dto.transportSupplierId);
 
-    const updated = await withTransaction(this.dataSource, async manager => {
+    const updated = await withTransaction(this.dataSource, async (manager) => {
       const updatedEntity = mapUpdateJourneyPolicyDtoToEntity(dto, existing);
       const savedPolicy = await this.policyService.update(updatedEntity, user?.email);
 
@@ -383,8 +383,7 @@ export class JourneyPolicyController {
 
   private assertTransportSupplier(journey: Journey, transportSupplierId?: number): void {
     const mode = journey.car?.ownerShip;
-    const postsExpense =
-      mode === OwnerShipType.NOLON_CAR || mode === OwnerShipType.CONTRACT_CAR;
+    const postsExpense = mode === OwnerShipType.NOLON_CAR || mode === OwnerShipType.CONTRACT_CAR;
     if (!postsExpense) return;
     if (transportSupplierId || journey.transportSupplier?.id) return;
     throw new BadRequestException('مورد النقل مطلوب للنولون والعقد.');

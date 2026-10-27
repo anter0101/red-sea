@@ -42,23 +42,23 @@ export class DriverService {
   }
 
   async findByFields(options: FindOneOptions<UpdateDriverDTO>): Promise<DriverDTO | undefined> {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     const result = await this.driverRepository.findOne({
       ...(options as FindOneOptions<Driver>),
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
     return result || undefined;
   }
 
   async find(options: FindManyOptions<UpdateDriverDTO>): Promise<Driver | undefined> {
-    const where = options.where as Record<string, unknown> | Record<string, unknown>[] | undefined;
+    const where = options.where;
     const result = await this.driverRepository.findOne({
       ...(options as FindOneOptions<Driver>),
       where: Array.isArray(where)
         ? where.map((w) => ({ ...w, deletedAt: IsNull() }))
-        : ({ ...(where ?? {}), deletedAt: IsNull() } as any),
+        : { ...(where ?? {}), deletedAt: IsNull() },
     });
     return result || undefined;
   }
@@ -71,9 +71,9 @@ export class DriverService {
       const [results, count] = await this.driverRepository.findAndCount({
         ...(options as FindManyOptions<Driver>),
         where: {
-          ...((options.where as object) ?? {}),
+          ...(options.where ?? {}),
           deletedAt: IsNull(),
-        } as any,
+        },
       });
       return [await this.enrichWithCurrentJourneys(results), count];
     }

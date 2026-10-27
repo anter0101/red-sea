@@ -37,9 +37,7 @@ export function mapPhysicalAttachmentToDtoSelective(
 
 export function mapPhysicalAttachmentToDtoSelective(
   attachmentOrAttachments:
-    | PhysicalAttachment
-    | PhysicalAttachmentDTO
-    | (PhysicalAttachment | PhysicalAttachmentDTO)[],
+    PhysicalAttachment | PhysicalAttachmentDTO | (PhysicalAttachment | PhysicalAttachmentDTO)[],
   keys?: (keyof PhysicalAttachmentDTO | keyof BaseDTO)[],
 ): Partial<PhysicalAttachmentDTO> | Partial<PhysicalAttachmentDTO>[] {
   const mapSingle = (

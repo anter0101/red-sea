@@ -15,7 +15,9 @@ export class CreateEndWorkingShiftOfficeRequestDTO {
   @IsOptional()
   @IsString()
   note?: string;
-  @ApiPropertyOptional({ description: 'Optional journey context (not required for custody transfer)' })
+  @ApiPropertyOptional({
+    description: 'Optional journey context (not required for custody transfer)',
+  })
   @IsOptional()
   @IsInt()
   @IsPositive()

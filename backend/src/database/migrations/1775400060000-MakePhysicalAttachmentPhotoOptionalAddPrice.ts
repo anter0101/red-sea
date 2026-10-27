@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class MakePhysicalAttachmentPhotoOptionalAddPrice1775400060000
-  implements MigrationInterface
-{
+export class MakePhysicalAttachmentPhotoOptionalAddPrice1775400060000 implements MigrationInterface {
   private table = 'physical_attachments';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -11,9 +9,7 @@ export class MakePhysicalAttachmentPhotoOptionalAddPrice1775400060000
 
     const photoColumn = table.findColumnByName('photoUrl');
     if (photoColumn && !photoColumn.isNullable) {
-      await queryRunner.query(
-        `ALTER TABLE "${this.table}" ALTER COLUMN "photoUrl" DROP NOT NULL`,
-      );
+      await queryRunner.query(`ALTER TABLE "${this.table}" ALTER COLUMN "photoUrl" DROP NOT NULL`);
     }
 
     if (!table.findColumnByName('price')) {
@@ -38,11 +34,7 @@ export class MakePhysicalAttachmentPhotoOptionalAddPrice1775400060000
       await queryRunner.dropColumn(this.table, 'price');
     }
 
-    await queryRunner.query(
-      `UPDATE "${this.table}" SET "photoUrl" = '' WHERE "photoUrl" IS NULL`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "${this.table}" ALTER COLUMN "photoUrl" SET NOT NULL`,
-    );
+    await queryRunner.query(`UPDATE "${this.table}" SET "photoUrl" = '' WHERE "photoUrl" IS NULL`);
+    await queryRunner.query(`ALTER TABLE "${this.table}" ALTER COLUMN "photoUrl" SET NOT NULL`);
   }
 }

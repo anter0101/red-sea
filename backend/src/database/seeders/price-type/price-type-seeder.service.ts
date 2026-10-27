@@ -32,7 +32,7 @@ export class PriceTypeSeederService {
 
       const priceType = this.priceTypeRepository.create({
         name: packingType,
-        description: descriptionMap[packingType as PackingType],
+        description: descriptionMap[packingType],
       });
       const saved = await this.priceTypeRepository.save(priceType);
       results.push(saved);

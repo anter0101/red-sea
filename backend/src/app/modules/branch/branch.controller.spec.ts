@@ -5,6 +5,7 @@ import { AuthGuard, RolesGuard } from 'src/core/security';
 import { UserRole } from 'src/core/enums/user-role';
 import { BranchController } from './branch.controller';
 import { BranchService } from './branch.service';
+import { AccountService } from '../account/account.service';
 import { createLocalizedValidationPipe } from 'src/i18n/localized-validation.pipe';
 
 const authGuardMock: CanActivate = {
@@ -34,7 +35,13 @@ describe('BranchController — POST /api/branches', () => {
 
     const moduleRef = await Test.createTestingModule({
       controllers: [BranchController],
-      providers: [{ provide: BranchService, useValue: branchService }],
+      providers: [
+        { provide: BranchService, useValue: branchService },
+        {
+          provide: AccountService,
+          useValue: { createBranchAccount: jest.fn().mockResolvedValue(undefined) },
+        },
+      ],
     })
       .overrideGuard(AuthGuard)
       .useValue(authGuardMock)

@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 
+import { StoredFileLink } from '@/components/common/stored-file-link';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -242,14 +243,9 @@ export default function PhysicalAttachmentFormDialog({
                       )}
                       {typeof field.value === 'string' && field.value && (
                         <div className="flex items-center justify-between gap-2 rounded-md border p-2">
-                          <a
-                            href={field.value}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="truncate text-sm text-primary underline"
-                          >
+                          <StoredFileLink url={field.value} className="truncate">
                             {t('form.current-photo')}
-                          </a>
+                          </StoredFileLink>
                           <Button
                             size="sm"
                             variant="outline"

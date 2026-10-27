@@ -16,7 +16,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit --pretty false",
     "test": "jest",
+    "test:cov": "jest --coverage",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\""
   },
   "dependencies": {

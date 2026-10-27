@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsDateString,
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsPositive,
-  IsString,
-} from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsOptional, IsPositive, IsString } from 'class-validator';
 import { PaginateDTO } from 'src/core/utils/paginate.dto';
 import { JourneyTransactionCategoryType, JourneyTransactionType } from 'src/core/enums/journey';
 

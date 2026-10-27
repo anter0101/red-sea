@@ -81,7 +81,7 @@ export class EmployeeController {
     private readonly salaryService: SalaryService,
     private readonly custodyService: CustodyService,
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   @Get('/')
   @Roles(UserRole.ADMIN, UserRole.USER)
@@ -150,7 +150,10 @@ export class EmployeeController {
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Create a new employee' })
   @ApiResponse({ status: 201, description: 'Record created', type: EmployeeDTO })
-  async create(@Body() dto: CreateEmployeeDTO, @AuthUser() user: UserDTO): Promise<Partial<EmployeeDTO>> {
+  async create(
+    @Body() dto: CreateEmployeeDTO,
+    @AuthUser() user: UserDTO,
+  ): Promise<Partial<EmployeeDTO>> {
     if (!dto.user?.email) {
       throw new BadRequestException('User email is required');
     }
@@ -257,11 +260,7 @@ export class EmployeeController {
     });
 
     return { message: 'Custody assigned successfully' };
-
-
   }
-
-
 
   @Put('/:id')
   @Roles(UserRole.ADMIN)
@@ -331,7 +330,7 @@ export class EmployeeController {
 
       if (contacts && contacts.length > 0) {
         const existingContacts = (await this.contactService.find({
-          where: { user: { id: existing.user.id } } as any,
+          where: { user: { id: existing.user.id } },
         })) as Contact[] | null;
 
         if (existingContacts && existingContacts.length > 0) {
@@ -411,7 +410,7 @@ export class EmployeeController {
   private resolveContacts(
     dto: CreateEmployeeDTO | UpdateEmployeeDTO,
   ): EmployeeContactPayload[] | undefined {
-    const nested = dto.user?.contacts as EmployeeContactPayload[] | undefined;
+    const nested = dto.user?.contacts;
     if (nested && nested.length > 0) {
       return nested;
     }
@@ -467,7 +466,7 @@ export class EmployeeController {
     employee: Employee,
     keys: (keyof EmployeeDTO | 'id' | 'user')[],
   ): Promise<Partial<EmployeeDTO>> {
-    const dto = mapEmployeeToEmployeeDtoSelective(employee, keys as any);
+    const dto = mapEmployeeToEmployeeDtoSelective(employee, keys);
     return {
       ...dto,
       custody: await this.resolveCustodyAmount(employee),

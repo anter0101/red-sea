@@ -46,6 +46,10 @@ API notes that stayed next to the frontend app:
 
 [archive/superpowers](archive/superpowers) holds the phase-6 office and custody plans and specs. Those files are history. Unchecked boxes in them are not open work.
 
+## Deployment
+
+[Release pipeline learning notes](deployment/learning/README.md) walk through the eight stages for the new VPS: review on `main`, tests and scans, one image digest, blue-green, and rollback. Read them in order. They are the plan, not a record of a pipeline that already runs.
+
 ## Phases
 
 | Doc | What it is |

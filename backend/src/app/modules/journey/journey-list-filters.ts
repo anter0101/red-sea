@@ -59,7 +59,7 @@ export function applyJourneyFilters(
 
   if (query.branchId) {
     qb.andWhere(
-      new Brackets(bqb => {
+      new Brackets((bqb) => {
         bqb
           .where(
             `EXISTS (
@@ -83,7 +83,7 @@ export function applyJourneyFilters(
 
   if (query.search) {
     qb.andWhere(
-      new Brackets(bqb => {
+      new Brackets((bqb) => {
         bqb
           .orWhere('LOWER(journey.delegateNumber) LIKE LOWER(:_jterm)')
           .orWhere('LOWER(journey.direction) LIKE LOWER(:_jterm)')

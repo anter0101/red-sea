@@ -8,7 +8,6 @@ import { TransactionService } from './transaction/transaction.service';
 import { Transaction, TransactionStatus } from './transaction/transaction.entity';
 import { TransactionLineService } from './transaction-line/transaction-line.service';
 import { TransactionLine, EntryType } from './transaction-line/transaction-line.entity';
-import { AccountService } from './account/account.service';
 import { FinancialStatsModule } from './financial-stats/financial-stats.module';
 
 describe('AccountService (chart of accounts rules)', () => {
@@ -31,6 +30,7 @@ describe('AccountService (chart of accounts rules)', () => {
             }),
           },
         },
+        { provide: TransactionService, useValue: { save: jest.fn() } },
       ],
     }).compile();
     service = moduleRef.get(AccountService);

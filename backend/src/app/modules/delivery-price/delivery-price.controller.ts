@@ -74,7 +74,7 @@ export class DeliveryPriceController {
       pageRequest.page,
       pageRequest.size,
       query.sortField,
-      (query.sortOrder as 'ASC' | 'DESC') || 'ASC',
+      query.sortOrder || 'ASC',
     );
 
     // Add pagination headers to the response

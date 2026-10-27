@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'react-toastify';
 import { Loader2, Plus } from 'lucide-react';
 
+import { StoredFileLink } from '@/components/common/stored-file-link';
 import { Button } from '@/components/ui/button';
 import { Dropzone, DropzoneEmptyState } from '@/components/ui/dropzone';
 import {
@@ -92,14 +93,7 @@ export default function DriverAttachmentsPanel({
                 className="flex items-center justify-between gap-2 border-b border-border py-2"
               >
                 <span className="text-sm font-medium">{typeLabel(item.type)}</span>
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary underline"
-                >
-                  {t('attachments.view')}
-                </a>
+                <StoredFileLink url={item.url}>{t('attachments.view')}</StoredFileLink>
               </li>
             ))}
           </ul>

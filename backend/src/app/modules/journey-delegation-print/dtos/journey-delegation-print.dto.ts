@@ -12,7 +12,8 @@ export class JourneyDelegationPrintDTO {
   status: JourneyDelegationPrintStatus;
 
   @ApiProperty({
-    description: 'True only after an admin approved a print request and the journey still has no policy',
+    description:
+      'True only after an admin approved a print request and the journey still has no policy',
   })
   canPrint: boolean;
 }

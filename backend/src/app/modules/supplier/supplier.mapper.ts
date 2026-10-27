@@ -62,7 +62,7 @@ export function mapSupplierToSupplierDtoSelective(
       dto.government = {
         id: supplier.government.id,
         name: supplier.government.name,
-      } as any;
+      };
     }
 
     return dto;

@@ -1,5 +1,7 @@
-# Run from this directory: docker compose up --build
-# App dirs live in this repo: ../backend, ../frontend
+# Shared services. Images only. From this directory:
+#   Workstation: docker compose up --build
+#     (no -f flag also loads docker-compose.override.yml, which includes docker-compose.local.yml)
+#   One color:   bash scripts/prepare-inactive.sh
 # Compose loads .env automatically from this directory for ${VAR} substitution.
 #
 # DB export: nginx stream proxies TCP postgres:5432. Host bind/port use POSTGRES_EXPORT_*
@@ -83,57 +85,17 @@ services:
       minio:
         condition: service_healthy
     volumes:
-      - ./minio/cors.json:/cors.json:ro
+      - ./minio/cors.xml:/cors.xml:ro
     entrypoint: /bin/sh
     command:
       - -c
       - |
+        set -e
         mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"
-        mc mb "local/$$BUCKET_NAME" --ignore-existing || true
-        mc anonymous set download "local/$$BUCKET_NAME"
-        mc cors set "local/$$BUCKET_NAME" /cors.json
+        mc mb "local/$$BUCKET_NAME" --ignore-existing
+        mc anonymous set none "local/$$BUCKET_NAME"
+        mc cors set "local/$$BUCKET_NAME" /cors.xml || echo "CORS not set (only needed when the browser reaches MinIO on another origin)"
     restart: "no"
-    networks:
-      - redsea
-
-  backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-    env_file:
-      - .env
-    environment:
-      GPS_API_HashKey: ${GPS_API_HASH}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    expose:
-      - "${PORT}"
-    restart: unless-stopped
-    networks:
-      - redsea
-
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
-        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
-        NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-    environment:
-      NEXTAUTH_URL: ${NEXTAUTH_URL}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      NODE_ENV: ${NODE_ENV}
-    depends_on:
-      - backend
-    expose:
-      - "3000"
-    restart: unless-stopped
     networks:
       - redsea
 
@@ -144,13 +106,12 @@ services:
       - "${POSTGRES_EXPORT_BIND:-127.0.0.1}:${POSTGRES_EXPORT_PORT:-15432}:5432"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/upstreams.conf:/etc/nginx/upstreams.conf:ro
     depends_on:
       postgres:
         condition: service_started
-      frontend:
-        condition: service_started
-      backend:
-        condition: service_started
+      minio:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - redsea

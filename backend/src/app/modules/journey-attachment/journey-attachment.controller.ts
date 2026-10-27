@@ -46,11 +46,16 @@ export class JourneyAttachmentController {
   @Get('/')
   @Roles(UserRole.ADMIN, UserRole.USER)
   @ApiOperation({ summary: 'Get list of journey attachments (paginated, searchable)' })
-  @ApiResponse({ status: 200, description: 'List of attachments', type: JourneyAttachmentDTO, isArray: true })
+  @ApiResponse({
+    status: 200,
+    description: 'List of attachments',
+    type: JourneyAttachmentDTO,
+    isArray: true,
+  })
   async getAll(@Req() req: Request, @Query() query: JourneyAttachmentQueryDTO) {
     const [results, count] = await this.attService.findAndCount(query);
     HeaderUtil.addPaginationHeaders(req.res!, count, +(query.page ?? 1), false);
-    return results.map(a => mapJourneyAttachmentToDtoSelective(a));
+    return results.map((a) => mapJourneyAttachmentToDtoSelective(a));
   }
 
   @Get('/:journeyId')

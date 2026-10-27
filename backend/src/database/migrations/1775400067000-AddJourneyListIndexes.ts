@@ -24,7 +24,10 @@ export class AddJourneyListIndexes1775400067000 implements MigrationInterface {
     );
     await queryRunner.createIndex(
       'journeys',
-      new TableIndex({ name: 'IDX_journeys_custody_source_id', columnNames: ['custody_source_id'] }),
+      new TableIndex({
+        name: 'IDX_journeys_custody_source_id',
+        columnNames: ['custody_source_id'],
+      }),
     );
     await queryRunner.createIndex(
       'journeys',

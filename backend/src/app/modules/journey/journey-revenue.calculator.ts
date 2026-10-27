@@ -12,10 +12,7 @@ const toNumber = (value: number | string | null | undefined): number => {
   return Number.isFinite(n) ? n : 0;
 };
 
-export function unitPriceFromSheet(
-  row: DeliveryPriceAmounts,
-  kind: PricingSheetKind,
-): number {
+export function unitPriceFromSheet(row: DeliveryPriceAmounts, kind: PricingSheetKind): number {
   if (kind === PricingSheetKind.WATANIA) {
     if (row.totalPrice != null && row.totalPrice !== '') {
       return toNumber(row.totalPrice);

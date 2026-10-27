@@ -63,7 +63,10 @@ export class OfficeRequestCustodyActionDTO {
 }
 
 export class OfficeRequestActionDTO {
-  @ApiProperty({ enum: OFFICE_REQUEST_ACTION_STATUSES, description: 'Approve or reject the request' })
+  @ApiProperty({
+    enum: OFFICE_REQUEST_ACTION_STATUSES,
+    description: 'Approve or reject the request',
+  })
   @IsEnum(OFFICE_REQUEST_ACTION_STATUSES)
   status: OfficeRequestStatus.APPROVED | OfficeRequestStatus.REJECTED;
 

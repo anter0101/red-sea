@@ -5,8 +5,7 @@ import { PaginateDTO } from 'src/core/utils/paginate.dto';
 export class DriverQueryDTO extends PaginateDTO {
   @ApiProperty({
     required: false,
-    description:
-      'Search across all driver + user text fields (license number, name, email, etc.)',
+    description: 'Search across all driver + user text fields (license number, name, email, etc.)',
   })
   @IsOptional()
   @IsString()

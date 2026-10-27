@@ -13,7 +13,7 @@ import { GeneratorTypes } from '../enums/generator-types';
 export const generateUniqueCode = async <T extends Record<string, any>>(
   repository: Repository<T>,
   type: GeneratorTypes | UserRole,
-  field: keyof T = 'code' as keyof T,
+  field: keyof T = 'code',
   relation?: string,
 ): Promise<string> => {
   let unique = false;
@@ -74,7 +74,7 @@ export const generateUniqueCode = async <T extends Record<string, any>>(
 export const generateUniqueUsername = async <T extends Record<string, any>>(
   repository: Repository<T>,
   role: UserRole,
-  field: keyof T = 'username' as keyof T,
+  field: keyof T = 'username',
   relation?: string,
 ): Promise<string> => {
   let unique = false;
@@ -121,7 +121,7 @@ export const generateUniqueUsername = async <T extends Record<string, any>>(
 export const generateUniqueJourneyNumber = async <T extends Record<string, any>>(
   repository: Repository<T>,
 ): Promise<string> => {
-  return generateUniqueCode(repository, GeneratorTypes.JOURNEY, 'delegateNumber' as keyof T);
+  return generateUniqueCode(repository, GeneratorTypes.JOURNEY, 'delegateNumber');
 };
 
 /**

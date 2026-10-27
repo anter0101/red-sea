@@ -8,8 +8,6 @@ export class MakeOfficeRequestJourneyNullable1775400052000 implements MigrationI
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "office_requests" ALTER COLUMN "journey_id" SET NOT NULL`,
-    );
+    await queryRunner.query(`ALTER TABLE "office_requests" ALTER COLUMN "journey_id" SET NOT NULL`);
   }
 }

@@ -18,12 +18,10 @@ export function parseParentAccountIdQuery(value: unknown): number | null | undef
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value >= 1 ? value : undefined;
   }
-  if (typeof value === 'object' || typeof value === 'bigint' || typeof value === 'symbol') {
+  if (typeof value !== 'string' && typeof value !== 'boolean') {
     return undefined;
   }
-  const s = String(value as string | boolean)
-    .trim()
-    .toLowerCase();
+  const s = String(value).trim().toLowerCase();
   if (s === '' || s === 'null' || s === 'undefined') return null;
   const n = parseInt(s, 10);
   if (Number.isNaN(n) || n < 1) return undefined;

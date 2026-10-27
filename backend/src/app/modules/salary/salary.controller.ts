@@ -24,10 +24,7 @@ import { UpdateSalaryDTO } from './dtos/update-salary.dto';
 import { SalaryQueryDTO } from './dtos/query-salary.dto';
 import { PageRequest, pageRequestSortString } from 'src/core/utils/pagination.entity';
 import { HeaderUtil } from 'src/core/utils/header-util';
-import {
-  mapSalaryToSalaryDtoSelective,
-  mapUpdateSalaryDtoToEntity,
-} from './salary.mapper';
+import { mapSalaryToSalaryDtoSelective, mapUpdateSalaryDtoToEntity } from './salary.mapper';
 import { UserDTO } from '../user/dtos/user.dto';
 import { UserService } from '../user/user.service';
 

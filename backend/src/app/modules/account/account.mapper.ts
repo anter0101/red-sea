@@ -80,7 +80,7 @@ export const mapCreateAccountDtoToEntity = (dto: CreateAccountDTO): Account => {
   }
 
   if (dto.openingBalance !== undefined) {
-    entity.openingBalance = dto.openingBalance as unknown as number;
+    entity.openingBalance = dto.openingBalance;
     entity.openingBalanceLocked = true;
   }
 

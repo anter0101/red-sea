@@ -22,9 +22,7 @@ export function mapTrailerManufacturerToDtoSelective(
 
 export function mapTrailerManufacturerToDtoSelective(
   manufacturerOrList:
-    | TrailerManufacturer
-    | TrailerManufacturerDTO
-    | (TrailerManufacturer | TrailerManufacturerDTO)[],
+    TrailerManufacturer | TrailerManufacturerDTO | (TrailerManufacturer | TrailerManufacturerDTO)[],
   keys?: (keyof TrailerManufacturerDTO | keyof BaseDTO)[],
 ): Partial<TrailerManufacturerDTO> | Partial<TrailerManufacturerDTO>[] {
   const mapSingle = (

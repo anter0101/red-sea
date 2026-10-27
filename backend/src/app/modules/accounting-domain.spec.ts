@@ -8,7 +8,6 @@ jest.mock('src/core/utils/generator', () => ({
 
 import { AccountService } from './account/account.service';
 import { Account, AccountType, normalBalanceType } from './account/account.entity';
-import { QueryAccountDTO } from './account/dtos/query-account.dto';
 import { TransactionService } from './transaction/transaction.service';
 import { Transaction, TransactionStatus } from './transaction/transaction.entity';
 import { TransactionLineService } from './transaction-line/transaction-line.service';
@@ -52,6 +51,7 @@ describe('AccountService (persistence & rules)', () => {
         AccountService,
         { provide: getRepositoryToken(Account), useValue: mockRepo },
         { provide: getRepositoryToken(TransactionLine), useValue: mockTlRepo },
+        { provide: TransactionService, useValue: { save: jest.fn() } },
       ],
     }).compile();
     service = moduleRef.get(AccountService);
@@ -90,7 +90,7 @@ describe('AccountService (persistence & rules)', () => {
       id: 1,
       type: AccountType.ASSET,
       normalBalance: normalBalanceType.DEBIT,
-    } as Account);
+    });
     await expect(
       service.save({
         name: 'Child',
@@ -131,7 +131,7 @@ describe('AccountService (persistence & rules)', () => {
       id: 10,
       type: AccountType.ASSET,
       normalBalance: normalBalanceType.DEBIT,
-    } as Account);
+    });
     mockRepo.save.mockImplementation((a: Account) => Promise.resolve({ ...a, id: 11 }));
     await service.save({
       name: 'Cash',
@@ -147,7 +147,7 @@ describe('AccountService (persistence & rules)', () => {
       id: 10,
       type: AccountType.ASSET,
       normalBalance: normalBalanceType.DEBIT,
-    } as Account);
+    });
     mockTlRepo.createQueryBuilder.mockReturnValue({
       innerJoin: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
@@ -158,7 +158,7 @@ describe('AccountService (persistence & rules)', () => {
       service.save({
         name: 'Late leaf',
         type: AccountType.CASH,
-        openingBalance: 100 as unknown as number,
+        openingBalance: 100,
         parentAccount: { id: 10 } as Account,
         isLeaf: true,
       } as Account),
@@ -183,7 +183,7 @@ describe('AccountService (persistence & rules)', () => {
     mockRepo.findOne.mockResolvedValue({
       id: 1,
       isLeaf: false,
-    } as Account);
+    });
     mockRepo.count.mockResolvedValue(0);
     await expect(service.ensureAccountAcceptsJournalLines(1)).rejects.toThrow(/not a leaf account/);
   });
@@ -192,7 +192,7 @@ describe('AccountService (persistence & rules)', () => {
     mockRepo.findOne.mockResolvedValue({
       id: 1,
       isLeaf: true,
-    } as Account);
+    });
     mockRepo.count.mockResolvedValue(1);
     await expect(service.ensureAccountAcceptsJournalLines(1)).rejects.toThrow(/not a leaf account/);
   });
@@ -204,9 +204,9 @@ describe('AccountService (persistence & rules)', () => {
     await expect(service.ensureAccountAcceptsJournalLines(7)).resolves.toBe(acc);
   });
 
-  it('setOpeningBalance forbids system accounts', async () => {
-    mockRepo.findOne.mockResolvedValue({ id: 1, isSystem: true } as Account);
-    await expect(service.setOpeningBalance(1, 100)).rejects.toThrow(ForbiddenException);
+  it('setOpeningBalance rejects a non-leaf account before other checks', async () => {
+    mockRepo.findOne.mockResolvedValue({ id: 1, isSystem: true });
+    await expect(service.setOpeningBalance(1, 100)).rejects.toThrow(/leaf accounts/);
   });
 
   it('setOpeningBalance rejects non-leaf accounts (V1)', async () => {
@@ -214,9 +214,9 @@ describe('AccountService (persistence & rules)', () => {
       id: 1,
       isSystem: false,
       isLeaf: false,
-      openingBalance: 0 as unknown as number,
+      openingBalance: 0,
       openingBalanceLocked: false,
-    } as Account);
+    });
     mockRepo.count.mockResolvedValue(0);
     await expect(service.setOpeningBalance(1, 100)).rejects.toThrow(/leaf accounts/);
   });
@@ -227,7 +227,7 @@ describe('AccountService (persistence & rules)', () => {
       isSystem: false,
       isLeaf: true,
       openingBalanceLocked: true,
-    } as Account);
+    });
     mockRepo.count.mockResolvedValue(0);
     await expect(service.setOpeningBalance(1, 50)).rejects.toThrow(/already been set/);
   });
@@ -238,14 +238,14 @@ describe('AccountService (persistence & rules)', () => {
         id: 2,
         isSystem: false,
         isLeaf: true,
-        openingBalance: 0 as unknown as number,
+        openingBalance: 0,
         openingBalanceLocked: false,
-      } as Account)
+      })
       .mockResolvedValueOnce({
         id: 2,
         openingBalance: 250,
         openingBalanceLocked: true,
-      } as Account);
+      });
     const updated = await service.setOpeningBalance(2, 250, 'u1');
     expect(updated.openingBalance).toBe(250);
     expect(mockRepo.update).toHaveBeenCalledWith(
@@ -263,7 +263,7 @@ describe('AccountService (persistence & rules)', () => {
       id: 1,
       isSystem: true,
       parentAccount: null,
-    } as unknown as Account);
+    });
     await expect(service.update({ id: 1, name: 'x' } as Account)).rejects.toThrow(
       ForbiddenException,
     );
@@ -276,7 +276,7 @@ describe('AccountService (persistence & rules)', () => {
       isSystem: false,
       childAccounts: [{ id: 2 }],
       transactionLines: [],
-    } as unknown as Account);
+    });
     await expect(service.delete(1)).rejects.toThrow(/child account/);
   });
 
@@ -287,7 +287,7 @@ describe('AccountService (persistence & rules)', () => {
       isSystem: false,
       childAccounts: [],
       transactionLines: [{ id: 9 }],
-    } as unknown as Account);
+    });
     await expect(service.delete(1)).rejects.toThrow(/transaction line/);
   });
 
@@ -299,7 +299,7 @@ describe('AccountService (persistence & rules)', () => {
       childAccounts: [],
       transactionLines: [],
       parentAccount: { id: 5 } as Account,
-    } as unknown as Account);
+    });
     mockRepo.count.mockResolvedValue(0);
     await service.delete(10);
     expect(mockRepo.delete).toHaveBeenCalledWith(10);
@@ -331,7 +331,7 @@ describe('AccountService (persistence & rules)', () => {
       getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
     };
     mockRepo.createQueryBuilder.mockReturnValue(qb);
-    await service.findAndCount({ page: 2, pageSize: 5 } as QueryAccountDTO);
+    await service.findAndCount({ page: 2, pageSize: 5 });
     expect(qb.skip).toHaveBeenCalledWith(5);
     expect(qb.take).toHaveBeenCalledWith(5);
   });
@@ -393,6 +393,7 @@ describe('TransactionService (save / update / delete)', () => {
     expect(mockRepo.save).toHaveBeenCalled();
     expect(accountServiceMock.lockOpeningBalancesAfterJournalActivity).toHaveBeenCalledWith(
       expect.objectContaining({ transactionLines: expect.any(Array) }),
+      undefined,
     );
   });
 
@@ -454,7 +455,7 @@ describe('TransactionLineService (CRUD)', () => {
   });
 
   it('findByFields proxies findOne', async () => {
-    mockRepo.findOne.mockResolvedValue({ id: 2 } as TransactionLine);
+    mockRepo.findOne.mockResolvedValue({ id: 2 });
     await expect(service.findByFields({ where: { id: 2 } })).resolves.toEqual({ id: 2 });
   });
 });

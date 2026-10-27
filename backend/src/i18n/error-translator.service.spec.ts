@@ -49,9 +49,9 @@ describe('ErrorTranslatorService', () => {
   });
 
   it('translates office request custody approval errors', () => {
-    expect(
-      service.translate('Cannot approve custody request after invoice is issued', 'ar'),
-    ).toBe('لا يمكن الموافقة على طلب العهدة بعد إصدار الفاتورة');
+    expect(service.translate('Cannot approve custody request after invoice is issued', 'ar')).toBe(
+      'لا يمكن الموافقة على طلب العهدة بعد إصدار الفاتورة',
+    );
     expect(
       service.translate(
         'Cannot approve end-of-shift custody transfer before policy is collected',
