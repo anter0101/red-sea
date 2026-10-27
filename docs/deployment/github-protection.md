@@ -1,41 +1,15 @@
-# GitHub protection for production
+# GitHub settings for production
 
-One-time settings for `anter0101/red-sea`. Workflow files cannot turn these on. An admin applies them in the GitHub UI. VPS bootstrap (Docker, SSH, `/opt/redsea`) is stage 8.
+One-time settings for `anter0101/red-sea`. This repository is private on a free account. Rulesets, branch protection, and environment reviewers are not available, so nothing in GitHub blocks a direct push or waits for a reviewer. The workflow `guard` job is what limits a release to a commit on `main`.
 
 The workflows in this repo:
 
-- [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs on a pull request into `main`. The check name to require is `ci`. It does not push an image and it does not SSH.
-- [`.github/workflows/release.yml`](../../.github/workflows/release.yml) runs when a Release is published, or when someone starts it by hand. The `guard` job accepts a manual run only from `main`, and accepts a Release only when the tagged commit is on `main`. The `deploy` job uses the `production` environment. After approval it builds both images, scans them, pushes the digests to GHCR, then SSHs to the VPS. The VPS starts only the idle color, checks it, switches Nginx, and watches for about three minutes.
+- [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs on every push to `main` and on a pull request into `main`. It does not push an image and it does not SSH.
+- [`.github/workflows/release.yml`](../../.github/workflows/release.yml) runs when a Release is published, or when someone starts it by hand from `main`. The `guard` job rejects any other ref. There is no `production` environment. When the quality jobs pass, `deploy` builds both images, scans them, pushes the digests to GHCR, then SSHs to the VPS. The VPS starts only the idle color, checks it, switches Nginx, and watches for about three minutes.
 
-## Protect `main`
+## Who can push and release
 
-Settings → Rules → Rulesets → New ruleset → New branch ruleset.
-
-- Name: `protect-main`
-- Enforcement: Active
-- Target branches: include the default branch, or branch name `main`
-- Restrict deletions
-- Block force pushes
-- Require a pull request before merging, at least 1 approval
-- Require status checks to pass, required check `ci`
-- Include administrators, so a direct push to `main` is rejected for everyone
-
-The `ci` check appears in the list after the first pull request runs `.github/workflows/ci.yml`. Add it once that run exists.
-
-## Environment `production`
-
-Settings → Environments → New environment → name `production`.
-
-- Required reviewers: the people allowed to approve a production deploy
-- Deployment branches and tags: selected branches and tags
-  - Branch: `main` (manual run)
-  - Tag: `v*` (a published Release runs as `refs/tags/…`, so a branch-only rule would skip the deploy job)
-
-The workflow still rejects a tag whose commit is not on `main`. Reviewers are required after that check passes. With a single admin, leave “Prevent self-review” off, or that admin can never approve their own release. Turn it on when two people can approve.
-
-## Who can start a release
-
-Write access on the repo can publish a Release. Keep Write to the people who may start production. The environment reviewers still have to approve before `deploy` runs.
+Anyone with Write access can push to `main` and can publish a Release. Keep Write to the people who may change production. `docs/deployment/protect-main-ruleset.json` is the ruleset for a later public repository or a paid plan. Importing it on this private repository does not enforce it.
 
 ## Actions variables and GHCR
 
@@ -62,7 +36,7 @@ Do this once on the new Linux VPS, before the first release.
 - Open firewall ports 22 and 80 only. The color ports bind to `127.0.0.1`.
 - From `/opt/redsea`, start the shared services: `docker compose up -d postgres redis minio minio-init`. The first release starts Nginx if it is not already running, after it writes an upstream file that names the blue containers. Starting Nginx earlier fails while those names do not exist.
 
-GitHub secrets on the `production` environment:
+GitHub repository secrets, under Settings → Secrets and variables → Actions → Secrets. Do not put them on an environment. This plan cannot use environment secrets.
 
 - `DEPLOY_HOST`
 - `DEPLOY_USER`
@@ -72,7 +46,6 @@ Database passwords, `APP_SECRET_KEY`, `NEXTAUTH_SECRET`, MinIO keys, and the smo
 
 ## Check that it works
 
-1. Open a pull request into `main` and confirm the `ci` check runs.
-2. Push straight to `main` and confirm GitHub rejects it.
-3. Run `release` by hand from a branch other than `main`. `guard` fails and GitHub does not ask for production approval.
-4. Run `release` by hand from `main`. `deploy` stays waiting until a `production` reviewer approves. The job then builds, scans, and pushes. A critical or high CVE fails the job and leaves GHCR unchanged. After a clean scan the job SSHs to the VPS, starts the idle color, and the summary names the live color, SHA, and both digests, with links to the scan report and the SBOM.
+1. Push to `main` and confirm the `ci` workflow starts on that push.
+2. Run `release` by hand from a branch other than `main`. `guard` fails and `deploy` does not run.
+3. Run `release` by hand from `main`. Nobody has to approve it. A critical or high CVE fails the job and leaves GHCR unchanged. After a clean scan the job SSHs to the VPS, starts the idle color, and the summary names the live color, SHA, and both digests, with links to the scan report and the SBOM.

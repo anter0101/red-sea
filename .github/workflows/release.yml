@@ -1,5 +1,6 @@
-# Production entry. A reviewer of the production environment must approve the deploy job first.
-# After approval this workflow builds each image once, scans that image, writes a CycloneDX SBOM,
+# Production entry. This free private repository cannot use a protected environment,
+# so the deploy job starts as soon as the quality jobs pass. There is no reviewer gate.
+# The job builds each image once, scans that image, writes a CycloneDX SBOM,
 # pushes to GHCR, then SSHs to the VPS to start the idle color and switch Nginx.
 # Manual runs are limited to main. A Release tag must point at a commit on main.
 
@@ -118,8 +119,6 @@ jobs:
     if: ${{ needs.guard.result == 'success' && needs.backend.result == 'success' && needs.frontend.result == 'success' && needs.security.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    environment:
-      name: production
     permissions:
       contents: read
       packages: write
@@ -284,7 +283,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_SSH_KEY" ]; then
-            echo "Set DEPLOY_HOST, DEPLOY_USER, and DEPLOY_SSH_KEY on the production environment."
+            echo "Set repository secrets DEPLOY_HOST, DEPLOY_USER, and DEPLOY_SSH_KEY."
             exit 1
           fi
           printf '%s' "$BACKEND_REF" | grep -Eq '^[^[:space:]]+@sha256:[0-9a-f]{64}$'

@@ -1,10 +1,14 @@
-# Pull requests into main. Required status check name: ci
+# Runs on a push to main and on a pull request into main.
+# This private repository is on a free account, so GitHub cannot require this check.
 # The ci job fails unless backend, frontend, the security scan, and the unpushed Docker builds succeed.
 # This workflow must not push images or open an SSH session to the VPS.
 
 name: ci
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -13,7 +17,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number }}
+  group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
