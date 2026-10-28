@@ -185,7 +185,7 @@ jobs:
           remote "mkdir -p /opt/redsea/scripts /opt/redsea/nginx /opt/redsea/zap /opt/redsea/smoke/scripts /opt/redsea/smoke/postman /opt/redsea/state /opt/redsea/log"
           copy deployment/docker-compose.yml deployment/docker-compose.apps.yml "${target}:/opt/redsea/"
           # upstreams.conf on the VPS names the live color. switch-color.sh owns it.
-          tar -C deployment --exclude=nginx/upstreams.conf -cf - scripts nginx \
+          tar -C deployment --exclude=nginx/upstreams.conf -cf - scripts nginx minio \
             | remote "tar -C /opt/redsea -xf -"
           copy deployment/zap/api-auth.yaml "${target}:/opt/redsea/zap/api-auth.yaml"
           copy backend/scripts/run-newman-smoke.mjs "${target}:/opt/redsea/smoke/scripts/run-newman-smoke.mjs"
