@@ -1,7 +1,7 @@
-# Blue and green application containers. Images are registry digests, never a build.
-# Used with docker-compose.yml:
-#   docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d --no-deps backend-blue frontend-blue
-# The prepare script starts only the inactive color. Loopback ports are not on the public interface.
+# Application containers. Images are registry digests, never a build.
+# Used with docker-compose.yml on the VPS:
+#   docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
+# BACKEND_IMAGE, FRONTEND_IMAGE, and APP_RELEASE_SHA come from .env. scripts/deploy.sh writes them.
 
 x-shared-depends: &shared-depends
   postgres:
@@ -11,91 +11,59 @@ x-shared-depends: &shared-depends
   minio:
     condition: service_healthy
 
-x-backend-health: &backend-health
-  test:
-    - CMD
-    - node
-    - -e
-    - "fetch('http://127.0.0.1:8080/api/health').then((res) => process.exit(res.ok ? 0 : 1)).catch(() => process.exit(1))"
-  interval: 10s
-  timeout: 5s
-  retries: 12
-  start_period: 40s
-
-x-frontend-health: &frontend-health
-  test:
-    - CMD
-    - node
-    - -e
-    - "fetch('http://127.0.0.1:3000/health').then((res) => process.exit(res.ok ? 0 : 1)).catch(() => process.exit(1))"
-  interval: 10s
-  timeout: 5s
-  retries: 12
-  start_period: 40s
-
 services:
-  backend-blue:
+  backend:
     image: ${BACKEND_IMAGE:?BACKEND_IMAGE must be name@sha256:...}
     env_file:
       - .env
     environment:
       PORT: "8080"
       GPS_API_HashKey: ${GPS_API_HASH}
-      APP_COLOR: blue
       APP_RELEASE_SHA: ${APP_RELEASE_SHA:?APP_RELEASE_SHA must be the full git SHA}
     ports:
       - "127.0.0.1:18080:8080"
     depends_on: *shared-depends
-    healthcheck: *backend-health
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8080/api/health').then((res) => process.exit(res.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
     restart: unless-stopped
     networks:
       - redsea
 
-  backend-green:
-    image: ${BACKEND_IMAGE:?BACKEND_IMAGE must be name@sha256:...}
-    env_file:
-      - .env
-    environment:
-      PORT: "8080"
-      GPS_API_HashKey: ${GPS_API_HASH}
-      APP_COLOR: green
-      APP_RELEASE_SHA: ${APP_RELEASE_SHA:?APP_RELEASE_SHA must be the full git SHA}
-    ports:
-      - "127.0.0.1:28080:8080"
-    depends_on: *shared-depends
-    healthcheck: *backend-health
-    restart: unless-stopped
-    networks:
-      - redsea
-
-  frontend-blue:
+  frontend:
     image: ${FRONTEND_IMAGE:?FRONTEND_IMAGE must be name@sha256:...}
     env_file:
       - .env
     environment:
       PORT: "3000"
-      APP_COLOR: blue
       APP_RELEASE_SHA: ${APP_RELEASE_SHA:?APP_RELEASE_SHA must be the full git SHA}
     ports:
       - "127.0.0.1:13000:3000"
     depends_on: *shared-depends
-    healthcheck: *frontend-health
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then((res) => process.exit(res.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
     restart: unless-stopped
     networks:
       - redsea
 
-  frontend-green:
-    image: ${FRONTEND_IMAGE:?FRONTEND_IMAGE must be name@sha256:...}
-    env_file:
-      - .env
-    environment:
-      PORT: "3000"
-      APP_COLOR: green
-      APP_RELEASE_SHA: ${APP_RELEASE_SHA:?APP_RELEASE_SHA must be the full git SHA}
-    ports:
-      - "127.0.0.1:23000:3000"
-    depends_on: *shared-depends
-    healthcheck: *frontend-health
-    restart: unless-stopped
-    networks:
-      - redsea
+  nginx:
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy

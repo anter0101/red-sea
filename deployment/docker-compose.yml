@@ -1,7 +1,7 @@
 # Shared services. Images only. From this directory:
 #   Workstation: docker compose up --build
 #     (no -f flag also loads docker-compose.override.yml, which includes docker-compose.local.yml)
-#   One color:   bash scripts/prepare-inactive.sh
+#   VPS:         bash scripts/deploy.sh (run by the release workflow)
 # Compose loads .env automatically from this directory for ${VAR} substitution.
 #
 # DB export: nginx stream proxies TCP postgres:5432. Host bind/port use POSTGRES_EXPORT_*

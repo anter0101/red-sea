@@ -1,6 +1,6 @@
 # Release or a manual run.
 # Stages: guard → deploy.
-# Deploy builds each image once, pushes to GHCR, then SSHs to the VPS.
+# Deploy builds each image once, pushes to GHCR, then SSHs to the VPS to pull, run, and check health.
 # Test and audit run in the ci workflow on main. Manual runs are limited to main.
 
 name: release
@@ -154,7 +154,7 @@ jobs:
           retention-days: 90
           path: release-digests.json
 
-      - name: Start the idle color and switch traffic
+      - name: Upload, run, and check health
         id: ship
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -179,58 +179,14 @@ jobs:
           remote() {
             ssh "${ssh_opts[@]}" "$target" "$@"
           }
-          copy() {
-            scp "${ssh_opts[@]}" "$@"
-          }
-          remote "mkdir -p /opt/redsea/scripts /opt/redsea/nginx /opt/redsea/zap /opt/redsea/smoke/scripts /opt/redsea/smoke/postman /opt/redsea/state /opt/redsea/log"
-          copy deployment/docker-compose.yml deployment/docker-compose.apps.yml "${target}:/opt/redsea/"
-          # upstreams.conf on the VPS names the live color. switch-color.sh owns it.
-          tar -C deployment --exclude=nginx/upstreams.conf -cf - scripts nginx minio \
+          remote "mkdir -p /opt/redsea"
+          tar -C deployment -cf - docker-compose.yml docker-compose.apps.yml scripts nginx minio \
             | remote "tar -C /opt/redsea -xf -"
-          copy deployment/zap/api-auth.yaml "${target}:/opt/redsea/zap/api-auth.yaml"
-          copy backend/scripts/run-newman-smoke.mjs "${target}:/opt/redsea/smoke/scripts/run-newman-smoke.mjs"
-          copy backend/red-sea.postman.json "${target}:/opt/redsea/smoke/red-sea.postman.json"
-          copy backend/postman/Red-Sea.local.postman_environment.json "${target}:/opt/redsea/smoke/postman/Red-Sea.local.postman_environment.json"
           # The job token can pull the private images only while this job runs.
           printf '%s' "$GHCR_TOKEN" | remote "docker login ghcr.io --username $(printf '%q' "$GITHUB_ACTOR") --password-stdin"
           set +e
-          remote "BACKEND_IMAGE=$(printf '%q' "$BACKEND_REF") FRONTEND_IMAGE=$(printf '%q' "$FRONTEND_REF") APP_RELEASE_SHA=$(printf '%q' "$GITHUB_SHA") bash /opt/redsea/scripts/release-remote.sh" | tee "$RUNNER_TEMP/release-result.txt"
-          ship_status=${PIPESTATUS[0]}
+          remote "BACKEND_IMAGE=$(printf '%q' "$BACKEND_REF") FRONTEND_IMAGE=$(printf '%q' "$FRONTEND_REF") APP_RELEASE_SHA=$(printf '%q' "$GITHUB_SHA") bash /opt/redsea/scripts/deploy.sh"
+          status=$?
           remote "docker logout ghcr.io" || true
           set -e
-          cp "$RUNNER_TEMP/release-result.txt" release-result.txt
-          exit "$ship_status"
-
-      - name: Write the release summary
-        if: always()
-        run: |
-          set -euo pipefail
-          result="failed"
-          color=""
-          sha=""
-          backend="${{ steps.push.outputs.backend_ref }}"
-          frontend="${{ steps.push.outputs.frontend_ref }}"
-          if [ -f release-result.txt ]; then
-            parsed=$(sed -n 's/^result=//p' release-result.txt | tail -n 1)
-            if [ -n "$parsed" ]; then
-              result="$parsed"
-            fi
-            live_color=$(sed -n 's/^color=//p' release-result.txt | tail -n 1)
-            live_sha=$(sed -n 's/^sha=//p' release-result.txt | tail -n 1)
-            live_backend=$(sed -n 's/^backend=//p' release-result.txt | tail -n 1)
-            live_frontend=$(sed -n 's/^frontend=//p' release-result.txt | tail -n 1)
-            if [ -n "$live_color" ]; then color="$live_color"; fi
-            if [ -n "$live_sha" ]; then sha="$live_sha"; fi
-            if [ "$result" = "rolled_back" ]; then
-              backend="$live_backend"
-              frontend="$live_frontend"
-            fi
-          fi
-          {
-            echo "### Release ${result}"
-            echo "Color: \`${color:-unknown}\`"
-            echo "Git SHA: \`${sha:-$GITHUB_SHA}\`"
-            echo "Backend: \`${backend}\`"
-            echo "Frontend: \`${frontend}\`"
-            echo "Digests: [release-digests](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
