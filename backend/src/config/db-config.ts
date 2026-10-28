@@ -7,14 +7,23 @@ import * as path from 'path';
 export default class PostgresTypeorm implements TypeOrmOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
 
+  // Env values arrive as strings, so "false" must not be read as truthy.
+  private flag(key: string, fallback: boolean): boolean {
+    const value = this.configService.get<string | boolean>(key);
+    if (value === undefined || value === null || value === '') {
+      return fallback;
+    }
+    return String(value).trim().toLowerCase() === 'true';
+  }
+
   createTypeOrmOptions(): TypeOrmModuleOptions {
-    const isSslEnabled = this.configService.get<boolean>('DATABASE_SSL', false);
+    const isSslEnabled = this.flag('DATABASE_SSL', false);
 
     return {
       type: 'postgres',
-      logging: this.configService.get<boolean>('DATABASE_LOGGING', true),
-      synchronize: this.configService.get<boolean>('DATABASE_SYNCHRONIZE', false),
-      migrationsRun: this.configService.get<boolean>('DATABASE_MIGRATIONS_RUN', true),
+      logging: this.flag('DATABASE_LOGGING', true),
+      synchronize: this.flag('DATABASE_SYNCHRONIZE', false),
+      migrationsRun: this.flag('DATABASE_MIGRATIONS_RUN', true),
       entities: [path.join(__dirname, '..', '**', '*.entity.{ts,js}')],
       migrations: [path.join(__dirname, '..', 'database/migrations', '**', '*{.ts,.js}')],
       database: this.configService.get<string>('DATABASE_NAME'),
