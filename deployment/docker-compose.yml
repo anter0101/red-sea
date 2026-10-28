@@ -61,8 +61,8 @@ services:
       - --console-address
       - "${MINIO_CONSOLE_ADDRESS}"
     ports:
-      - "127.0.0.1:9000:9000"
-      - "127.0.0.1:9001:9001"
+      - "${MINIO_BIND:-127.0.0.1}:9000:9000"
+      - "${MINIO_BIND:-127.0.0.1}:9001:9001"
     volumes:
       - minio_data:/data
     healthcheck:
