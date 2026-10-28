@@ -6,7 +6,7 @@ export const users: UserDTO[] = [
   {
     id: 1,
     email: 'admin@admin.com',
-    password: '12345',
+    password: process.env.SEED_ADMIN_PASSWORD || '12345',
     username: 'Administrator',
     role: UserRole.ADMIN,
     activated: true,
@@ -16,7 +16,7 @@ export const users: UserDTO[] = [
   {
     id: 2,
     email: 'user@user.com',
-    password: '12345',
+    password: process.env.SEED_USER_PASSWORD || '12345',
     username: 'Standard-User',
     role: UserRole.USER,
     activated: true,

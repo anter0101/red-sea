@@ -30,7 +30,7 @@ The release workflow, after stages 2 and 3 succeed:
 
 Pull-request `docker build` from stage 2 is a separate validation build. It is not retagged and shipped. Only the release workflow’s image is promoted.
 
-`GITHUB_TOKEN` with `packages: write` pushes to GHCR for this repository. The VPS logs in to GHCR with a read credential stored on the server, not printed in the job log.
+`GITHUB_TOKEN` with `packages: write` pushes to GHCR for this repository. The VPS pulls with the same token. The job logs the VPS in to GHCR before the release script and logs it out afterwards.
 
 ## Done when
 

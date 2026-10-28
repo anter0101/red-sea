@@ -41,7 +41,7 @@ This is done once on the new VPS, before the first release, and written in `docs
 
 - Install Docker and the Compose plugin.
 - Create a deploy user that can run Docker, with the SSH public key that matches `DEPLOY_SSH_KEY`.
-- Create `/opt/redsea`, put the Compose files and `.env` there, and `docker login` to GHCR as a read-only user.
+- Create `/opt/redsea`, and put the Compose files and `.env` there. The release job logs the VPS in to GHCR for each run.
 - Open firewall ports 22 and 80.
 - Start the shared services (`postgres`, `redis`, `minio`, `nginx`) so the first release only has to start blue.
 

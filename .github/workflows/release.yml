@@ -191,9 +191,12 @@ jobs:
           copy backend/scripts/run-newman-smoke.mjs "${target}:/opt/redsea/smoke/scripts/run-newman-smoke.mjs"
           copy backend/red-sea.postman.json "${target}:/opt/redsea/smoke/red-sea.postman.json"
           copy backend/postman/Red-Sea.local.postman_environment.json "${target}:/opt/redsea/smoke/postman/Red-Sea.local.postman_environment.json"
+          # The job token can pull the private images only while this job runs.
+          printf '%s' "$GHCR_TOKEN" | remote "docker login ghcr.io --username $(printf '%q' "$GITHUB_ACTOR") --password-stdin"
           set +e
           remote "BACKEND_IMAGE=$(printf '%q' "$BACKEND_REF") FRONTEND_IMAGE=$(printf '%q' "$FRONTEND_REF") APP_RELEASE_SHA=$(printf '%q' "$GITHUB_SHA") bash /opt/redsea/scripts/release-remote.sh" | tee "$RUNNER_TEMP/release-result.txt"
           ship_status=${PIPESTATUS[0]}
+          remote "docker logout ghcr.io" || true
           set -e
           cp "$RUNNER_TEMP/release-result.txt" release-result.txt
           exit "$ship_status"

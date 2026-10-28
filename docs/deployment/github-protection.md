@@ -22,7 +22,7 @@ The release job stops before `docker build` when either variable is empty. These
 
 Settings → Actions → General → Workflow permissions: Read and write permissions.
 
-The workflow files still set their own `permissions`. Pull-request CI only requests `contents: read`, so it cannot push packages. The release `deploy` job requests `packages: write`, which `GITHUB_TOKEN` uses to push to GHCR. A repository setting of “Read repository contents” ignores that request and the push fails. After the first successful push, confirm the two packages are linked to this repository and are not public unless that is intended. The VPS read login is a separate credential stored on the server. It is not this token.
+The workflow files still set their own `permissions`. Pull-request CI only requests `contents: read`, so it cannot push packages. The release `deploy` job requests `packages: write`, which `GITHUB_TOKEN` uses to push to GHCR. A repository setting of “Read repository contents” ignores that request and the push fails. After the first successful push, confirm the two packages are linked to this repository and are not public unless that is intended. The VPS pulls with this same token: `deploy` logs the VPS in to GHCR before the release script and logs it out afterwards, so no registry credential stays on the server.
 
 ## VPS bootstrap
 
@@ -31,8 +31,7 @@ Do this once on the new Linux VPS, before the first release.
 - Install Docker, the Compose plugin, python3, and curl.
 - Create a deploy user that can run Docker. Put the SSH public key for `DEPLOY_SSH_KEY` in that user's `authorized_keys`.
 - Create `/opt/redsea`. The release job copies Compose, Nginx, and the scripts there. It does not copy `.env`.
-- Put the real `.env` at `/opt/redsea/.env` from [deployment/.env.example](../../deployment/.env.example). Keep `DATABASE_SYNCHRONIZE=false`. Fill the database, Redis, MinIO, `APP_SECRET_KEY`, `NEXTAUTH_SECRET`, and the four `SMOKE_*` values.
-- `docker login ghcr.io` as a user that can pull these packages. That login stays on the VPS.
+- Put the real `.env` at `/opt/redsea/.env` from [deployment/.env.example](../../deployment/.env.example). Keep `DATABASE_SYNCHRONIZE=false`. Fill the database, Redis, MinIO, `APP_SECRET_KEY`, `NEXTAUTH_SECRET`, the four `SMOKE_*` values, and the two `SEED_*` passwords. The seed passwords must match the smoke passwords.
 - Open firewall ports 22 and 80 only. The color ports bind to `127.0.0.1`.
 - From `/opt/redsea`, start the shared services: `docker compose up -d postgres redis minio minio-init`. The first release starts Nginx if it is not already running, after it writes an upstream file that names the blue containers. Starting Nginx earlier fails while those names do not exist.
 
