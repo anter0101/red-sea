@@ -159,32 +159,34 @@ jobs:
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_SSH_PASS: ${{ secrets.DEPLOY_SSH_PASS }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           BACKEND_REF: ${{ steps.push.outputs.backend_ref }}
           FRONTEND_REF: ${{ steps.push.outputs.frontend_ref }}
         run: |
           set -euo pipefail
-          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_SSH_PASS" ]; then
-            echo "Set repository secrets DEPLOY_HOST, DEPLOY_USER, and DEPLOY_SSH_PASS."
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_SSH_KEY" ]; then
+            echo "Set repository secrets DEPLOY_HOST, DEPLOY_USER, and DEPLOY_SSH_KEY."
             exit 1
           fi
           printf '%s' "$BACKEND_REF" | grep -Eq '^[^[:space:]]+@sha256:[0-9a-f]{64}$'
           printf '%s' "$FRONTEND_REF" | grep -Eq '^[^[:space:]]+@sha256:[0-9a-f]{64}$'
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq sshpass
-          export SSHPASS="$DEPLOY_SSH_PASS"
-          ssh_opts=(-o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password -o PubkeyAuthentication=no)
+          key="$RUNNER_TEMP/redsea-deploy-key"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$key"
+          chmod 600 "$key"
+          trap 'rm -f "$key"' EXIT
+          ssh_opts=(-i "$key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new)
           target="${DEPLOY_USER}@${DEPLOY_HOST}"
           remote() {
-            sshpass -e ssh "${ssh_opts[@]}" "$target" "$@"
+            ssh "${ssh_opts[@]}" "$target" "$@"
           }
           copy() {
-            sshpass -e scp "${ssh_opts[@]}" "$@"
+            scp "${ssh_opts[@]}" "$@"
           }
           remote "mkdir -p /opt/redsea/scripts /opt/redsea/nginx /opt/redsea/zap /opt/redsea/smoke/scripts /opt/redsea/smoke/postman /opt/redsea/state /opt/redsea/log"
           copy deployment/docker-compose.yml deployment/docker-compose.apps.yml "${target}:/opt/redsea/"
-          copy deployment/scripts/. "${target}:/opt/redsea/scripts/"
-          copy deployment/nginx/. "${target}:/opt/redsea/nginx/"
+          # upstreams.conf on the VPS names the live color. switch-color.sh owns it.
+          tar -C deployment --exclude=nginx/upstreams.conf -cf - scripts nginx \
+            | remote "tar -C /opt/redsea -xf -"
           copy deployment/zap/api-auth.yaml "${target}:/opt/redsea/zap/api-auth.yaml"
           copy backend/scripts/run-newman-smoke.mjs "${target}:/opt/redsea/smoke/scripts/run-newman-smoke.mjs"
           copy backend/red-sea.postman.json "${target}:/opt/redsea/smoke/red-sea.postman.json"
