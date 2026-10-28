@@ -1,8 +1,7 @@
 # Release or a manual run.
-# Stages: test → audit, and guard → deploy.
-# Deploy builds, pushes to GHCR, then SSHs to the VPS.
-# The security gate is the audit job. Image CVEs do not block the deploy.
-# Manual runs are limited to main.
+# Stages: guard → deploy.
+# Deploy builds each image once, pushes to GHCR, then SSHs to the VPS.
+# Test and audit run in the ci workflow on main. Manual runs are limited to main.
 
 name: release
 
@@ -20,57 +19,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  test:
-    name: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Backend
-        working-directory: backend
-        run: |
-          pnpm install --frozen-lockfile
-          node --input-type=module -e "import { readFileSync } from 'node:fs'; JSON.parse(readFileSync('red-sea.postman.json', 'utf8'));"
-          pnpm lint:ci
-          pnpm typecheck
-          pnpm test:cov
-
-      - name: Frontend
-        working-directory: frontend
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm lint
-          pnpm typecheck
-          pnpm test:cov
-
-  audit:
-    name: audit
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: npm audit
-        run: |
-          pnpm --dir backend audit --audit-level=high
-          pnpm --dir frontend audit --audit-level=high
-
   guard:
     name: guard
     runs-on: ubuntu-latest
@@ -96,7 +44,7 @@ jobs:
 
   deploy:
     name: deploy
-    needs: [audit, guard]
+    needs: guard
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
@@ -196,7 +144,7 @@ jobs:
             echo "### Immutable release"
             echo "Backend: \`${backend_ref}\`"
             echo "Frontend: \`${frontend_ref}\`"
-            echo "The VPS pin is the digest, not the git tag. Dependency audit is the security gate."
+            echo "The VPS pin is the digest, not the git tag."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload release digests

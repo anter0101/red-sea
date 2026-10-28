@@ -4,8 +4,8 @@ One-time settings for `anter0101/red-sea`. This repository is private on a free 
 
 The workflows in this repo:
 
-- [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs on every push to `main` and on a pull request into `main`. It does not push an image and it does not SSH.
-- [`.github/workflows/release.yml`](../../.github/workflows/release.yml) runs when a Release is published, or when someone starts it by hand from `main`. It runs test, then audit. The `guard` job rejects any ref that is not on `main`. There is no `production` environment. When audit and guard pass, `deploy` builds both images, pushes the digests to GHCR, then SSHs to the VPS. The VPS starts only the idle color, checks it, switches Nginx, and watches for about three minutes.
+- [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs on every push to `main` and on a pull request into `main`. It runs test, then audit. It does not build Docker images, push, or SSH.
+- [`.github/workflows/release.yml`](../../.github/workflows/release.yml) runs when a Release is published, or when someone starts it by hand from `main`. The `guard` job rejects any ref that is not on `main`. There is no `production` environment. When guard passes, `deploy` builds each image once, pushes the digests to GHCR, then SSHs to the VPS. Let `ci` finish green on that commit before you release. The VPS starts only the idle color, checks it, switches Nginx, and watches for about three minutes.
 
 ## Who can push and release
 
@@ -48,4 +48,4 @@ Database passwords, `APP_SECRET_KEY`, `NEXTAUTH_SECRET`, MinIO keys, and the smo
 
 1. Push to `main` and confirm the `ci` workflow starts on that push.
 2. Run `release` by hand from a branch other than `main`. `guard` fails and `deploy` does not run.
-3. Run `release` by hand from `main`. Nobody has to approve it. The dependency audit is the security gate. After it passes, the job pushes the images and SSHs to the VPS, starts the idle color, and the summary names the live color, SHA, and both digests.
+3. Run `release` by hand from `main` after `ci` is green on that commit. Nobody has to approve it. The job builds each image once, pushes them, SSHs to the VPS, starts the idle color, and the summary names the live color, SHA, and both digests.

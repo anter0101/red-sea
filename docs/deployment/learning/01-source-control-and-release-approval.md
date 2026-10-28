@@ -24,7 +24,7 @@ Add two workflows.
 
 | Workflow | When it runs | What it is allowed to do |
 | --- | --- | --- |
-| `.github/workflows/ci.yml` | Pull request targeting `main` | Lint, test, scan, and a Docker build that is not pushed. No registry write and no SSH. |
+| `.github/workflows/ci.yml` | Pull request targeting `main` | Lint, test, and audit. No Docker build, registry write, or SSH. |
 | `.github/workflows/release.yml` | GitHub Release whose target is `main`, and `workflow_dispatch` only when `github.ref` is `refs/heads/main` | The same gates, then build, push, and deploy. The deploy job sets `environment: production`. |
 
 GitHub settings to turn on once, written up in `docs/deployment/github-protection.md`:

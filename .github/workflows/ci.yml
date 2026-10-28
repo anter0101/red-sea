@@ -1,6 +1,6 @@
 # Pull request and push to main.
-# Stages: test → audit → docker.
-# Does not push images and does not SSH.
+# Stages: test → audit.
+# Docker images are built only by the release workflow.
 
 name: ci
 
@@ -70,18 +70,3 @@ jobs:
         run: |
           pnpm --dir backend audit --audit-level=high
           pnpm --dir frontend audit --audit-level=high
-
-  docker:
-    name: docker
-    needs: audit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build images
-        run: |
-          docker build --tag red-sea-backend:ci backend
-          docker build --tag red-sea-frontend:ci \
-            --build-arg NEXT_PUBLIC_APP_URL=http://127.0.0.1 \
-            --build-arg NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1 \
-            frontend
