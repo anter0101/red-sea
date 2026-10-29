@@ -13,14 +13,4 @@ export const users: UserDTO[] = [
     status: UserStatus.AVAILABLE,
     createdBy: 'system',
   },
-  {
-    id: 2,
-    email: 'user@user.com',
-    password: process.env.SEED_USER_PASSWORD || '12345',
-    username: 'Standard-User',
-    role: UserRole.USER,
-    activated: true,
-    status: UserStatus.AVAILABLE,
-    createdBy: 'system',
-  },
 ];
