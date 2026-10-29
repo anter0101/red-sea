@@ -94,7 +94,8 @@ export const authConfig = {
 
       // Auth.js re-issues the cookie on every session read. loggedInAt is the
       // real clock, so the session still ends 6 hours after login.
-      if (isSessionPastMaxAge(token.loggedInAt, now)) {
+      const loggedInAt = typeof token.loggedInAt === 'number' ? token.loggedInAt : undefined;
+      if (isSessionPastMaxAge(loggedInAt, now)) {
         return null;
       }
 
@@ -107,7 +108,9 @@ export const authConfig = {
         session.token = token.token as string;
         session.user.role = token.role as string;
         if (typeof token.loggedInAt === 'number') {
-          session.expires = sessionExpiresAt(token.loggedInAt);
+          // The callback types this field as Date & string (database session intersected
+          // with the JWT session). At runtime it is an ISO string.
+          session.expires = sessionExpiresAt(token.loggedInAt) as typeof session.expires;
         }
       }
       return session;

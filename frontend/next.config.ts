@@ -2,7 +2,9 @@ import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // The image copies .next/standalone. That step recreates pnpm symlinks, which
+  // Windows blocks unless Developer Mode is on. The Docker build is Linux.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   reactStrictMode: true,
 
   images: {

@@ -36,3 +36,10 @@ declare module 'next-auth/jwt' {
     loggedInAt?: number;
   }
 }
+
+declare module '@auth/core/jwt' {
+  interface JWT {
+    /** Unix seconds when this login started. The session ends 6 hours later. */
+    loggedInAt?: number;
+  }
+}
