@@ -3,6 +3,11 @@ import Credentials from 'next-auth/providers/credentials';
 import { AxiosError } from 'axios';
 
 import client from '@/lib/client';
+import {
+  isSessionPastMaxAge,
+  SESSION_MAX_AGE_SECONDS,
+  sessionExpiresAt,
+} from '@/lib/session-lifetime';
 
 export const authConfig = {
   pages: {
@@ -71,33 +76,28 @@ export const authConfig = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 604800, // 7 days in seconds
+    maxAge: SESSION_MAX_AGE_SECONDS,
   },
-  ...(process.env.NODE_ENV === 'production'
-    ? {
-        cookies: {
-          sessionToken: {
-            name: `__Secure-next-auth.session-token`,
-            options: {
-              httpOnly: true,
-              sameSite: 'lax',
-              path: '/',
-              secure: true, // secure only in production
-            },
-          },
-        },
-      }
-    : {}),
   callbacks: {
     // Access control + locale redirects live in `src/middleware.ts`.
     authorized: () => true,
     async jwt({ token, user }) {
+      const now = Math.floor(Date.now() / 1000);
       if (user) {
         token.id = user.id as string;
         token.email = user.email;
         token.token = user.token;
         token.role = user.role || 'user';
+        token.loggedInAt = now;
+        return token;
       }
+
+      // Auth.js re-issues the cookie on every session read. loggedInAt is the
+      // real clock, so the session still ends 6 hours after login.
+      if (isSessionPastMaxAge(token.loggedInAt, now)) {
+        return null;
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -106,6 +106,9 @@ export const authConfig = {
         session.user.email = token.email as string;
         session.token = token.token as string;
         session.user.role = token.role as string;
+        if (typeof token.loggedInAt === 'number') {
+          session.expires = sessionExpiresAt(token.loggedInAt);
+        }
       }
       return session;
     },

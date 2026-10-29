@@ -32,5 +32,7 @@ declare module 'next-auth/jwt' {
     token: string;
     role?: string;
     permissions?: string[];
+    /** Unix seconds when this login started. The session ends 6 hours later. */
+    loggedInAt?: number;
   }
 }

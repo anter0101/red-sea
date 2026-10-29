@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { signIn, getSession } from 'next-auth/react';
 
 import { useTranslations } from 'next-intl';
@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { z } from 'zod';
 
 import { getApiErrorMessage } from '@/lib/api-error';
+import { DEFAULT_LOCALE, homeForRole } from '@/lib/auth-paths';
 export const createLoginSchema = (t: (key: string) => string) =>
   z.object({
     email: z.email(t('validation.email-invalid')).min(1, t('validation.email-required')),
@@ -24,7 +25,7 @@ export interface LoginResult {
 }
 
 export const useLogin = () => {
-  const router = useRouter();
+  const params = useParams();
   const t = useTranslations('auth');
   const [isPending, setIsPending] = useState(false);
 
@@ -40,8 +41,12 @@ export const useLogin = () => {
       if (result?.ok && !result?.error) {
         toast.success(t('login-successful'));
         const session = await getSession();
-        const home = session?.user?.role?.toUpperCase() === 'DATA_ENTRY' ? '/office' : '/home';
-        router.push(home);
+        const localeParam = params?.locale;
+        const locale =
+          (Array.isArray(localeParam) ? localeParam[0] : localeParam) || DEFAULT_LOCALE;
+        // Full navigation so the new session cookie is sent. A client-side
+        // push is bounced back to login when middleware still sees no session.
+        window.location.assign(`/${locale}/${homeForRole(session?.user?.role)}`);
         return { ok: true };
       } else {
         // Handle authentication failure

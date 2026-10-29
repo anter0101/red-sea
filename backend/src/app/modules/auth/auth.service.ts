@@ -7,6 +7,7 @@ import { AuthLoginDTO } from './dto/auth-login.dto';
 import { JwtPayload } from 'src/core/security/interfaces/jwt-payload.interface';
 import { UserDTO } from 'src/app/modules/user/dtos/user.dto';
 import { GeneratedToken } from 'src/core/security/interfaces/token.interface';
+import { ACCESS_TOKEN_TTL_SECONDS } from './access-token-ttl';
 
 @Injectable()
 export class AuthService {
@@ -48,7 +49,7 @@ export class AuthService {
       role: user.role,
     };
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, { expiresIn: ACCESS_TOKEN_TTL_SECONDS }),
     };
   }
 }

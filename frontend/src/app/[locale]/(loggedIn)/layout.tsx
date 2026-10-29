@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { auth } from '@/app/[locale]/authentication/auth';
 import Header from '@/components/layout/header';
 import SideMenu from '@/components/layout/side-menu';
+import SessionExpiryGuard from '@/components/auth/session-expiry-guard';
 import AuthTokenProvider from '@/components/providers/auth-token';
 import Provider from '@/components/providers/main';
 import { getLocaleMessages } from '@/i18n/i18n-helpers';
@@ -37,6 +38,7 @@ export default async function Layout({ children, params }: IPageProps) {
   return (
     <Provider locale={locale}>
       <AuthTokenProvider token={session?.token || ''}>
+        <SessionExpiryGuard />
         <Header user={session?.user} />
 
         <div className="flex min-h-[calc(100vh-5rem)] min-w-0">
