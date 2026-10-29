@@ -5,6 +5,7 @@ import { getMessages } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { ToastContainer } from 'react-toastify';
 
+import ServiceWorkerRegister from '@/components/providers/service-worker-register';
 import { ShadcnProvider } from '@/components/providers/shadcn';
 import queryClient from '@/lib/query-client';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,7 @@ export default async function Provider({ children, locale }: Readonly<Props>) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <body className={cn('bg-white')}>
+        <ServiceWorkerRegister />
         <SessionProvider session={session}>
           <NextIntlClientProvider messages={messages} locale={locale}>
             <QueryClientProvider client={queryClient}>

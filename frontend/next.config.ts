@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import withSerwistInit from '@serwist/next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
@@ -17,5 +18,16 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Serwist hooks webpack. `next dev` runs Turbopack, so the worker is built only
+// by `next build`.
+const withSerwist = withSerwistInit({
+  swSrc: 'src/sw.ts',
+  swDest: 'public/sw.js',
+  register: false,
+  reloadOnOnline: false,
+  disable: process.env.NODE_ENV !== 'production',
+  globPublicPatterns: ['icons/*', 'offline.html'],
+});
+
 const withNextIntl = createNextIntlPlugin();
-export default withNextIntl(nextConfig);
+export default withSerwist(withNextIntl(nextConfig));

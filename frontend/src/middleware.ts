@@ -46,5 +46,7 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|assets|health(?:/|$)).*)'],
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|assets|icons/|manifest\\.webmanifest|sw\\.js|swe-worker-|offline\\.html|health(?:/|$)).*)',
+  ],
 };

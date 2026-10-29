@@ -9,6 +9,7 @@ import Provider from '@/components/providers/main';
 import { getLocaleMessages } from '@/i18n/i18n-helpers';
 import type { IPageComponentProps, IPageProps } from '@/types/types';
 import { baseMetadata } from '@/utils/base-metadata';
+import { PWA_THEME_COLOR } from '@/utils/pwa';
 
 export async function generateMetadata({ params }: IPageComponentProps): Promise<Metadata> {
   const { locale } = await params;
@@ -26,6 +27,7 @@ export function generateViewport(): Viewport {
     initialScale: 1,
     maximumScale: 1,
     userScalable: false,
+    themeColor: PWA_THEME_COLOR,
   };
 }
 

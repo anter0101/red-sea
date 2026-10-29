@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2c3e56" />
+    <title>لا يوجد اتصال - منصة البحر الأحمر</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        color: #2c3e56;
+        font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+        text-align: center;
+        padding: 24px;
+      }
+      main {
+        max-width: 420px;
+      }
+      img {
+        width: 96px;
+        height: 96px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin: 16px 0 8px;
+      }
+      p {
+        margin: 0 0 24px;
+        color: #5c6b7d;
+        line-height: 1.6;
+      }
+      button {
+        border: 0;
+        border-radius: 8px;
+        background: #2c3e56;
+        color: #ffffff;
+        font: inherit;
+        padding: 10px 24px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/icon-192.png" alt="" />
+      <h1>لا يوجد اتصال بالإنترنت</h1>
+      <p>تحقق من الاتصال ثم أعد المحاولة. البيانات لا تُحفظ على الجهاز.</p>
+      <button type="button" onclick="location.reload()">إعادة المحاولة</button>
+    </main>
+  </body>
+</html>
