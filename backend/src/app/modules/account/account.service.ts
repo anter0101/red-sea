@@ -619,7 +619,6 @@ export class AccountService {
   async createSupplierAccount(
     supplierId: number,
     supplierName: string,
-    kind: 'transport' | 'custody',
     creator?: string,
     manager?: EntityManager,
   ): Promise<Account> {
@@ -628,14 +627,8 @@ export class AccountService {
       throw new BadRequestException('Supplier id and name are required to create a sub-account');
     }
     return this.ensureActorLeaf({
-      parentKey:
-        kind === 'transport'
-          ? AccountSystemKey.TRANSPORT_SUPPLIER
-          : AccountSystemKey.CUSTODY_SUPPLIER,
-      actorType:
-        kind === 'transport'
-          ? AccountActorType.TRANSPORT_SUPPLIER
-          : AccountActorType.CUSTODY_SUPPLIER,
+      parentKey: AccountSystemKey.TRANSPORT_SUPPLIER,
+      actorType: AccountActorType.TRANSPORT_SUPPLIER,
       actorId: supplierId,
       name: trimmed,
       creator,

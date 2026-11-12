@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindManyOptions, FindOneOptions } from 'typeorm';
+import { EntityManager, Repository, FindManyOptions, FindOneOptions } from 'typeorm';
 import { JourneyPolicy } from './journey-policy.entity';
 import { JourneyAttachmentType } from 'src/core/enums/journey';
 import { JourneyAttachment } from '../journey-attachment/journey-attachment.entity';
@@ -67,7 +67,11 @@ export class JourneyPolicyService {
     return qb.getManyAndCount();
   }
 
-  async save(entity: JourneyPolicy, creator?: string): Promise<JourneyPolicy> {
+  async save(
+    entity: JourneyPolicy,
+    creator?: string,
+    manager?: EntityManager,
+  ): Promise<JourneyPolicy> {
     const now = new Date();
     entity.createdAt = entity.createdAt ?? now;
     entity.updatedAt = now;
@@ -77,16 +81,22 @@ export class JourneyPolicyService {
       entity.updatedBy = creator;
     }
 
-    return await this.repo.save(entity);
+    const repo = manager ? manager.getRepository(JourneyPolicy) : this.repo;
+    return await repo.save(entity);
   }
 
-  async update(entity: JourneyPolicy, updater?: string): Promise<JourneyPolicy> {
+  async update(
+    entity: JourneyPolicy,
+    updater?: string,
+    manager?: EntityManager,
+  ): Promise<JourneyPolicy> {
     const now = new Date();
     entity.updatedAt = now;
 
     if (updater) entity.updatedBy = updater;
 
-    return await this.repo.save(entity);
+    const repo = manager ? manager.getRepository(JourneyPolicy) : this.repo;
+    return await repo.save(entity);
   }
 
   async delete(id: number): Promise<void> {

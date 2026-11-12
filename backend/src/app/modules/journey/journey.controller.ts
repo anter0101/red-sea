@@ -243,7 +243,6 @@ export class JourneyController {
           await this.accountService.createSupplierAccount(
             transportSupplier.id,
             transportSupplier.name,
-            'transport',
             user?.email,
             manager,
           );

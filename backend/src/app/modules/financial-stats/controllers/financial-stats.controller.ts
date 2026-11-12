@@ -136,7 +136,7 @@ export class FinancialStatsController {
     summary: 'Accounting totals for the home screen',
     description:
       'Revenue, cost, and net profit are the income statement for dateFrom–dateTo. ' +
-      'Clients is the closing balance of عملاء. Suppliers is the closing balance of مورد النقل and مورد العهدة, through dateTo.',
+      'Clients is the closing balance of عملاء. Suppliers is the closing balance of مورد النقل, through dateTo.',
   })
   @ApiOkResponse({ type: AccountingDashboardDTO })
   async getDashboard(@Query() query: DateRangeDTO): Promise<AccountingDashboardDTO> {

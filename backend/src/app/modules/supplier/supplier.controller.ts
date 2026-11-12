@@ -191,15 +191,7 @@ export class SupplierController {
     const entity = mapCreateSupplierDtoToEntity(dto);
     const saved = await this.supplierService.save(entity, user?.email);
     if (saved.type === SupplierType.TRANSPORTATION) {
-      await this.accountService.createSupplierAccount(
-        saved.id,
-        saved.name,
-        'transport',
-        user?.email,
-      );
-    }
-    if (saved.type === SupplierType.CUSTODY) {
-      await this.accountService.createSupplierAccount(saved.id, saved.name, 'custody', user?.email);
+      await this.accountService.createSupplierAccount(saved.id, saved.name, user?.email);
     }
     return saved;
   }

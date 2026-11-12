@@ -62,7 +62,7 @@ export class Account extends BaseEntity {
   @Column({ name: 'system_key', type: 'varchar', length: 64, nullable: true, unique: true })
   systemKey?: string | null;
 
-  /** CLIENT, BRANCH, TRANSPORT_SUPPLIER, or CUSTODY_SUPPLIER. */
+  /** CLIENT, BRANCH, or TRANSPORT_SUPPLIER. */
   @Column({ name: 'actor_type', type: 'varchar', length: 32, nullable: true })
   actorType?: string | null;
 

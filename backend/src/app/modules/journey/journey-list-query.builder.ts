@@ -138,16 +138,8 @@ export function buildJourneyListQuery(
       'dieselValue',
     )
     .addSelect(
-      `MAX(CASE WHEN trx.category = '${JourneyTransactionCategoryType.OTHER_EXPENSES}' THEN trx.amount END)`,
-      'otherExpenses',
-    )
-    .addSelect(
-      `MAX(CASE WHEN trx.category = '${JourneyTransactionCategoryType.PORT_FEES}' THEN trx.amount END)`,
-      'portFees',
-    )
-    .addSelect(
-      `MAX(CASE WHEN trx.category = '${JourneyTransactionCategoryType.CROSSING_FEES}' THEN trx.amount END)`,
-      'transitFees',
+      `MAX(CASE WHEN trx.category = '${JourneyTransactionCategoryType.TIPS_FEES}' THEN trx.amount END)`,
+      'tipsFees',
     )
     .addSelect(
       `MAX(CASE WHEN trx.category = '${JourneyTransactionCategoryType.SCALE_FEES}' THEN trx.amount END)`,

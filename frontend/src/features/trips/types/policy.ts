@@ -38,6 +38,18 @@ export interface ITripPolicyRes {
     fileName: string;
     type: string;
   }[];
+
+  expenses?: ITripPolicyExpenses;
+  postedExpenses?: string[];
+}
+
+export interface ITripPolicyExpenses {
+  dieselFees?: number; // سولار
+  fuelLiters?: number; // عدد اللترات
+  cardFees?: number; // كارته
+  cardName?: string; // اسم الكارته
+  scaleFees?: number; // ميزان
+  tipsFees?: number; // اكراميات
 }
 
 export interface ITripPolicyInfo {
@@ -68,4 +80,6 @@ export interface ITripPolicyInfo {
   policyFile?: string; // ملف البوليصة
 
   transportSupplierId?: number;
+
+  expenses?: ITripPolicyExpenses;
 }

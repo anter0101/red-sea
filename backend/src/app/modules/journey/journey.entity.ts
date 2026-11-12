@@ -92,19 +92,6 @@ export class Journey extends BaseEntity {
   @JoinColumn({ name: 'transport_supplier_id' })
   transportSupplier?: Supplier;
 
-  @ManyToOne(() => Supplier, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'custody_supplier_id' })
-  custodySupplier?: Supplier;
-
-  @Column({
-    name: 'custody_supplier_amount',
-    type: 'decimal',
-    precision: 14,
-    scale: 2,
-    nullable: true,
-  })
-  custodySupplierAmount?: number;
-
   @OneToMany(() => JourneyPolicy, (policy) => policy.journey)
   journeyPolicies?: JourneyPolicy[];
 

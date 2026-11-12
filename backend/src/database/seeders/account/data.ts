@@ -276,14 +276,6 @@ export const accounts: AccountSeed[] = [
     systemKey: 'TRANSPORT_SUPPLIER',
   },
   {
-    name: 'مورد العهدة',
-    type: AccountType.LIABILITY,
-    normalBalance: normalBalanceType.CREDIT,
-    isLeaf: false,
-    parentName: 'الالتزامات المتداوله',
-    systemKey: 'CUSTODY_SUPPLIER',
-  },
-  {
     name: 'ا.دفع',
     type: AccountType.LIABILITY,
     normalBalance: normalBalanceType.CREDIT,
@@ -505,6 +497,38 @@ export const accounts: AccountSeed[] = [
     isLeaf: true,
     parentName: 'المصروفات التشغيلية',
     systemKey: 'NOLON_CONTRACT_CARS',
+  },
+  {
+    name: 'سولار',
+    type: AccountType.EXPENSE,
+    normalBalance: normalBalanceType.DEBIT,
+    isLeaf: true,
+    parentName: 'المصروفات التشغيلية',
+    systemKey: 'TRIP_EXP_DIESEL',
+  },
+  {
+    name: 'كارته',
+    type: AccountType.EXPENSE,
+    normalBalance: normalBalanceType.DEBIT,
+    isLeaf: true,
+    parentName: 'المصروفات التشغيلية',
+    systemKey: 'TRIP_EXP_CARD',
+  },
+  {
+    name: 'ميزان',
+    type: AccountType.EXPENSE,
+    normalBalance: normalBalanceType.DEBIT,
+    isLeaf: true,
+    parentName: 'المصروفات التشغيلية',
+    systemKey: 'TRIP_EXP_SCALE',
+  },
+  {
+    name: 'اكراميات',
+    type: AccountType.EXPENSE,
+    normalBalance: normalBalanceType.DEBIT,
+    isLeaf: true,
+    parentName: 'المصروفات التشغيلية',
+    systemKey: 'TRIP_EXP_TIPS',
   },
 
   // ── Financing and tax leaves ─────────────────────────────────────────

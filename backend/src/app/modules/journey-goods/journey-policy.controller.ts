@@ -167,6 +167,8 @@ export class JourneyPolicyController {
       loadingGov: row.loadingGov,
       employee: row.employee,
       attachments: row.attachments,
+      expenses: await this.policyLedgerService.getExpenses(id),
+      postedExpenses: await this.policyLedgerService.postedExpenseCategories(id),
     };
   }
 
@@ -203,7 +205,7 @@ export class JourneyPolicyController {
 
     // Save
     const saved = await withTransaction(this.dataSource, async (manager) => {
-      const savedPolicy = await this.policyService.save(entity, user?.email);
+      const savedPolicy = await this.policyService.save(entity, user?.email, manager);
       await this.journeyService.transitionStatus(
         dto.journeyId,
         JourneyStatus.POLICY_COLLECTED,
@@ -211,6 +213,12 @@ export class JourneyPolicyController {
         manager,
       );
       await this.journeyRevenueService.applyFromPolicy(savedPolicy, user?.email, manager);
+      await this.policyLedgerService.saveExpenses(
+        dto.journeyId,
+        dto.expenses,
+        user?.email,
+        manager,
+      );
       await this.policyLedgerService.apply(
         dto.journeyId,
         { transportSupplierId: dto.transportSupplierId },
@@ -261,7 +269,7 @@ export class JourneyPolicyController {
 
     const updated = await withTransaction(this.dataSource, async (manager) => {
       const updatedEntity = mapUpdateJourneyPolicyDtoToEntity(dto, existing);
-      const savedPolicy = await this.policyService.update(updatedEntity, user?.email);
+      const savedPolicy = await this.policyService.update(updatedEntity, user?.email, manager);
 
       await this.journeyService.transitionStatus(
         existing.journey.id,
@@ -270,6 +278,12 @@ export class JourneyPolicyController {
         manager,
       );
       await this.journeyRevenueService.applyFromPolicy(savedPolicy, user?.email, manager);
+      await this.policyLedgerService.saveExpenses(
+        existing.journey.id,
+        dto.expenses,
+        user?.email,
+        manager,
+      );
       await this.policyLedgerService.apply(
         existing.journey.id,
         { transportSupplierId: dto.transportSupplierId },

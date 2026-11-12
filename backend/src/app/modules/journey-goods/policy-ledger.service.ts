@@ -3,23 +3,30 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
-import { AccountActorType, AccountSystemKey } from '../account/account-system-keys';
+import {
+  AccountActorType,
+  AccountSystemKey,
+  TRIP_EXPENSE_ACCOUNT_KEYS,
+} from '../account/account-system-keys';
 import { Journey } from '../journey/journey.entity';
 import { JourneyPolicy } from './journey-policy.entity';
 import { JourneyTransaction } from '../journey-transaction/journey-transaction.entity';
-import { JourneyTransactionCategoryType } from 'src/core/enums/journey';
+import { JourneyTransactionCategoryType, JourneyTransactionType } from 'src/core/enums/journey';
 import { OwnerShipType } from 'src/core/enums/ownerShip-types';
 import { Supplier } from '../supplier/supplier.entity';
 import { SupplierType } from '../supplier/enums/supplier-type.enum';
 import { Employee } from '../employee/employee.entity';
+import { Custody } from '../custody/custody.entity';
 import { Transaction, TransactionStatus } from '../transaction/transaction.entity';
 import { TransactionLine, EntryType } from '../transaction-line/transaction-line.entity';
 import { TransactionService } from '../transaction/transaction.service';
+import { PolicyExpensesDTO } from './dtos/policy-expenses.dto';
 
-export type LedgerKind = 'TRN1' | 'TRN2';
+export type LedgerKind = 'TRN1' | 'TRN2' | 'TRN3';
 
 export interface LedgerPreviewLine {
   kind: LedgerKind;
+  category?: string;
   amount: number;
   debitPath: string;
   creditPath: string;
@@ -52,6 +59,8 @@ export class PolicyLedgerService {
     private readonly employeeRepository: Repository<Employee>,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    @InjectRepository(Custody)
+    private readonly custodyRepository: Repository<Custody>,
     private readonly accountService: AccountService,
     private readonly transactionService: TransactionService,
   ) {}
@@ -63,6 +72,7 @@ export class PolicyLedgerService {
       journeyId: loaded.journey.id,
       lines: loaded.lines.map((line) => ({
         kind: line.kind,
+        category: line.category,
         amount: line.amount,
         debitPath: line.debitPath,
         creditPath: line.creditPath,
@@ -70,6 +80,119 @@ export class PolicyLedgerService {
       })),
       warnings: loaded.warnings,
     };
+  }
+
+  /** Expense categories whose TRN3 entry is already posted for the journey's policy. */
+  async postedExpenseCategories(journeyId: number, manager?: EntityManager): Promise<string[]> {
+    const policyRepo = manager ? manager.getRepository(JourneyPolicy) : this.policyRepository;
+    const txRepo = manager ? manager.getRepository(Transaction) : this.transactionRepository;
+    const policy = await policyRepo.findOne({ where: { journey: { id: journeyId } } });
+    if (!policy) return [];
+    const prefix = `${this.idempotencyKey(policy.id, journeyId, 'TRN3')}:`;
+    const rows = await txRepo
+      .createQueryBuilder('tx')
+      .select('tx.idempotencyKey', 'key')
+      .where('tx.idempotencyKey LIKE :prefix', { prefix: `${prefix}%` })
+      .getRawMany<{ key: string }>();
+    return rows.map((row) => row.key.slice(prefix.length));
+  }
+
+  async getExpenses(journeyId: number): Promise<PolicyExpensesDTO> {
+    const rows = await this.journeyTransactionRepository.find({
+      where: { journey: { id: journeyId } },
+    });
+    const row = (category: JourneyTransactionCategoryType) =>
+      rows.find((item) => item.category === category);
+    const amount = (category: JourneyTransactionCategoryType) => {
+      const found = row(category);
+      return found ? Number(found.amount) : undefined;
+    };
+    return {
+      dieselFees: amount(JourneyTransactionCategoryType.DIESEL_FEES),
+      fuelLiters: row(JourneyTransactionCategoryType.DIESEL_FEES)?.quantity ?? undefined,
+      cardFees: amount(JourneyTransactionCategoryType.CARD_FEES),
+      cardName: row(JourneyTransactionCategoryType.CARD_FEES)?.description ?? undefined,
+      scaleFees: amount(JourneyTransactionCategoryType.SCALE_FEES),
+      tipsFees: amount(JourneyTransactionCategoryType.TIPS_FEES),
+    };
+  }
+
+  /**
+   * Upserts the company-car trip expenses entered on the policy form.
+   * A category that is already posted cannot change its amount.
+   */
+  async saveExpenses(
+    journeyId: number,
+    expenses: PolicyExpensesDTO | undefined,
+    creator?: string,
+    manager?: EntityManager,
+  ): Promise<void> {
+    if (!expenses) return;
+    const journeyRepo = manager ? manager.getRepository(Journey) : this.journeyRepository;
+    const jtRepo = manager
+      ? manager.getRepository(JourneyTransaction)
+      : this.journeyTransactionRepository;
+
+    const journey = await journeyRepo.findOne({ where: { id: journeyId }, relations: ['car'] });
+    if (!journey) throw new NotFoundException(`Journey ${journeyId} not found`);
+    if (this.isSupplierCar(journey.car?.ownerShip)) return;
+
+    const posted = new Set(await this.postedExpenseCategories(journeyId, manager));
+    const inputs: Array<{
+      category: JourneyTransactionCategoryType;
+      amount?: number;
+      quantity?: number;
+      description?: string;
+    }> = [
+      {
+        category: JourneyTransactionCategoryType.DIESEL_FEES,
+        amount: expenses.dieselFees,
+        quantity: expenses.fuelLiters,
+      },
+      {
+        category: JourneyTransactionCategoryType.CARD_FEES,
+        amount: expenses.cardFees,
+        description: expenses.cardName,
+      },
+      { category: JourneyTransactionCategoryType.SCALE_FEES, amount: expenses.scaleFees },
+      { category: JourneyTransactionCategoryType.TIPS_FEES, amount: expenses.tipsFees },
+    ];
+
+    const now = new Date();
+    for (const input of inputs) {
+      if (input.amount == null) continue;
+      const amount = this.round(Number(input.amount));
+      const existing = await jtRepo.findOne({
+        where: { journey: { id: journeyId }, category: input.category },
+      });
+
+      if (posted.has(input.category)) {
+        if (this.round(Number(existing?.amount ?? 0)) !== amount) {
+          throw new BadRequestException('لا يمكن تعديل مصروف تم ترحيله');
+        }
+        continue;
+      }
+
+      if (amount <= 0) {
+        if (existing) await jtRepo.delete(existing.id);
+        continue;
+      }
+
+      const row = existing ?? new JourneyTransaction();
+      row.journey = { id: journeyId } as Journey;
+      row.transactionType = JourneyTransactionType.EXPENSE;
+      row.category = input.category;
+      row.amount = amount;
+      if (input.quantity !== undefined) row.quantity = input.quantity;
+      if (input.description !== undefined) row.description = input.description;
+      row.createdAt = row.createdAt ?? now;
+      row.updatedAt = now;
+      if (creator) {
+        row.createdBy = row.createdBy ?? creator;
+        row.updatedBy = creator;
+      }
+      await jtRepo.save(row);
+    }
   }
 
   async apply(
@@ -86,25 +209,32 @@ export class PolicyLedgerService {
     const txRepo = manager ? manager.getRepository(Transaction) : this.transactionRepository;
     for (const line of loaded.lines) {
       if (line.alreadyPosted || line.amount <= 0) continue;
-      const key = this.idempotencyKey(loaded.policy.id, loaded.journey.id, line.kind);
+      const key = this.idempotencyKey(
+        loaded.policy.id,
+        loaded.journey.id,
+        line.kind,
+        line.category,
+      );
       const existing = await txRepo.findOne({ where: { idempotencyKey: key } });
       if (existing) continue;
+
+      const label = line.category ? `${line.kind} ${line.category}` : line.kind;
 
       const debit = new TransactionLine();
       debit.account = line.debit;
       debit.entryType = EntryType.DEBIT;
       debit.amount = line.amount;
-      debit.description = line.kind;
+      debit.description = label;
 
       const credit = new TransactionLine();
       credit.account = line.credit;
       credit.entryType = EntryType.CREDIT;
       credit.amount = line.amount;
-      credit.description = line.kind;
+      credit.description = label;
 
       const transaction = new Transaction();
       transaction.date = new Date();
-      transaction.description = `${line.kind} policy ${loaded.policy.id}`;
+      transaction.description = `${label} policy ${loaded.policy.id}`;
       transaction.status = TransactionStatus.POSTED;
       transaction.idempotencyKey = key;
       transaction.transactionLines = [debit, credit];
@@ -117,6 +247,7 @@ export class PolicyLedgerService {
       journeyId: after.journey.id,
       lines: after.lines.map((line) => ({
         kind: line.kind,
+        category: line.category,
         amount: line.amount,
         debitPath: line.debitPath,
         creditPath: line.creditPath,
@@ -126,8 +257,22 @@ export class PolicyLedgerService {
     };
   }
 
-  private idempotencyKey(policyId: number, journeyId: number, kind: LedgerKind): string {
-    return `policy:${policyId}:journey:${journeyId}:${kind}`;
+  private idempotencyKey(
+    policyId: number,
+    journeyId: number,
+    kind: LedgerKind,
+    category?: string,
+  ): string {
+    const base = `policy:${policyId}:journey:${journeyId}:${kind}`;
+    return category ? `${base}:${category}` : base;
+  }
+
+  private isSupplierCar(ownerShip?: OwnerShipType | null): boolean {
+    return ownerShip === OwnerShipType.NOLON_CAR || ownerShip === OwnerShipType.CONTRACT_CAR;
+  }
+
+  private round(amount: number): number {
+    return Math.round(amount * 100) / 100;
   }
 
   private async load(journeyId: number, input: LedgerApplyInput, manager?: EntityManager) {
@@ -190,8 +335,51 @@ export class PolicyLedgerService {
       }
     }
 
-    const mode = journey.car?.ownerShip;
-    const postsExpense = mode === OwnerShipType.NOLON_CAR || mode === OwnerShipType.CONTRACT_CAR;
+    const postsExpense = this.isSupplierCar(journey.car?.ownerShip);
+
+    if (!postsExpense) {
+      const custodyRepo = manager ? manager.getRepository(Custody) : this.custodyRepository;
+      const custody = await custodyRepo.findOne({
+        where: { journey: { id: journeyId } },
+        relations: ['account', 'account.parentAccount'],
+        order: { id: 'DESC' },
+      });
+      const rows = await jtRepo.find({ where: { journey: { id: journeyId } } });
+      const sumOf = (category: JourneyTransactionCategoryType) =>
+        rows
+          .filter((row) => row.category === category)
+          .reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+
+      const expenseTotal = TRIP_EXPENSE_ACCOUNT_KEYS.reduce(
+        (sum, [category]) => sum + sumOf(category),
+        0,
+      );
+      if (expenseTotal > 0 && !custody?.account) {
+        warnings.push('لا توجد عهدة سائق للرحلة.');
+      } else if (custody?.account) {
+        const custodyAmount = sumOf(JourneyTransactionCategoryType.CUSTODY);
+        if (this.round(expenseTotal) > this.round(custodyAmount)) {
+          warnings.push('مصروفات الرحلة أكبر من العهدة.');
+        }
+        for (const [category, key] of TRIP_EXPENSE_ACCOUNT_KEYS) {
+          const amount = sumOf(category);
+          if (amount <= 0) continue;
+          const expenseAccount = await this.accountService.findBySystemKey(key, manager);
+          lines.push(
+            await this.pair(
+              'TRN3',
+              amount,
+              expenseAccount,
+              custody.account,
+              policy.id,
+              journey.id,
+              txRepo,
+              category,
+            ),
+          );
+        }
+      }
+    }
 
     if (postsExpense) {
       const nolonRows = await jtRepo.find({
@@ -226,7 +414,6 @@ export class PolicyLedgerService {
         await this.accountService.createSupplierAccount(
           transport.id,
           transport.name,
-          'transport',
           undefined,
           manager,
         );
@@ -273,13 +460,14 @@ export class PolicyLedgerService {
     policyId: number,
     journeyId: number,
     txRepo: Repository<Transaction>,
+    category?: string,
   ): Promise<LedgerPreviewLine & { debit: Account; credit: Account }> {
-    const key = this.idempotencyKey(policyId, journeyId, kind);
+    const key = this.idempotencyKey(policyId, journeyId, kind, category);
     const existing = await txRepo.findOne({ where: { idempotencyKey: key } });
-    const rounded = Math.round(amount * 100) / 100;
     return {
       kind,
-      amount: rounded,
+      category,
+      amount: this.round(amount),
       debit,
       credit,
       debitPath: this.path(debit),

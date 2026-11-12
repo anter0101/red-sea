@@ -242,7 +242,7 @@ export class AccountingDashboardDTO {
   clients: number;
   @ApiProperty({
     description:
-      'Closing balance of مورد النقل and مورد العهدة at dateTo. What we still owe suppliers.',
+      'Closing balance of مورد النقل at dateTo. What we still owe suppliers.',
     example: 6000,
   })
   suppliers: number;

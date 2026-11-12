@@ -462,8 +462,8 @@ export class JourneyService {
 
         `
     jsonb_build_object(
-      'id', transportSupplier.id,
-      'name', transportSupplier.name
+      'id', "transportSupplier".id,
+      'name', "transportSupplier".name
     ) AS transportSupplier
     `,
 
@@ -513,7 +513,7 @@ export class JourneyService {
       custodySource.id,
       custodySourceUser.id,
       client.id,
-      transportSupplier.id,
+      "transportSupplier".id,
       policy.id
     `);
 

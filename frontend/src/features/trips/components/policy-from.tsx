@@ -35,6 +35,12 @@ import { useGetOnePolicy } from '../api/get-one/get-one-policy';
 import { useGetOneTrip } from '../api/get-one/get-one';
 import { tripPolicySchema, type TripPolicyFormValues } from '../types/activity-schema';
 import type { ITripPolicyInfo, ITripPolicyRes } from '../types/policy';
+import {
+  buildPolicyExpenses,
+  hasDriverExpenses,
+  POLICY_EXPENSE_FIELDS,
+} from '../types/policy-expenses';
+import { TripTransactionCategory } from '../types/transactions';
 
 interface PolicyFormProps {
   journeyId: number;
@@ -63,6 +69,12 @@ const DEFAULT_VALUES: TripPolicyFormValues = {
   tripDistance: undefined,
   policyFile: '',
   transportSupplierId: '',
+  dieselFees: undefined,
+  fuelLiters: undefined,
+  cardFees: undefined,
+  cardName: '',
+  scaleFees: undefined,
+  tipsFees: undefined,
 };
 
 function nextDay(isoDate: string): string {
@@ -100,6 +112,13 @@ function mapPolicyToFormValues(policy: ITripPolicyRes): TripPolicyFormValues {
     tripDate: policy.tripDate ?? '',
     tripDistance: policy.tripDistance,
     policyFile: policy.attachments?.[0]?.fileName ?? '',
+
+    dieselFees: policy.expenses?.dieselFees,
+    fuelLiters: policy.expenses?.fuelLiters,
+    cardFees: policy.expenses?.cardFees,
+    cardName: policy.expenses?.cardName ?? '',
+    scaleFees: policy.expenses?.scaleFees,
+    tipsFees: policy.expenses?.tipsFees,
   };
 }
 
@@ -128,6 +147,8 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
   const ownerShip = tripResponse?.car?.ownerShip;
   const needsTransportSupplier = ownerShip === 'NOLON_CAR' || ownerShip === 'CONTRACT_CAR';
   const tripSupplier = tripResponse?.transportsupplier?.id ? tripResponse.transportsupplier : null;
+  const showExpenses = hasDriverExpenses(ownerShip);
+  const postedExpenses = new Set(isEditMode ? (policy?.postedExpenses ?? []) : []);
   const suppliers = useQuery({
     queryKey: ['ledger-suppliers'],
     queryFn: async () => {
@@ -177,18 +198,19 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
       policyNo: data.policyNo,
       policyDate: data.policyDate,
       loadingPermitNo: data.loadingPermitNo,
-      loadingDate: data.loadingDate,
+      loadingDate: data.loadingDate || undefined,
       bookWeight: data.bookWeight,
       actualWeight: data.actualWeight,
       deliveryWeight: data.deliveryWeight,
       shortageQty: data.shortageQty,
-      entryTimeFactory: data.entryTimeFactory,
-      exitTimeFactory: data.exitTimeFactory,
+      entryTimeFactory: data.entryTimeFactory || undefined,
+      exitTimeFactory: data.exitTimeFactory || undefined,
       archiveNo: data.archiveNo,
       tripDate: data.tripDate,
       tripDistance: data.tripDistance,
       policyFile: data.policyFile,
       transportSupplierId: tripSupplier ? undefined : toOptionalNumber(data.transportSupplierId),
+      expenses: buildPolicyExpenses(data, ownerShip),
     };
     if (isEditMode) {
       editTripPolicyMutation(
@@ -525,6 +547,87 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
             </FormItem>
           )}
         />
+
+        {showExpenses && (
+          <fieldset className="space-y-4 rounded-md border p-4">
+            <legend className="px-1 text-sm font-semibold">مصروفات الرحلة</legend>
+            <p className="text-muted-foreground text-xs">
+              تُخصم من عهدة السائق عند الحفظ، ولا يمكن تعديل المصروف بعد ترحيله.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {POLICY_EXPENSE_FIELDS.map((expense) => {
+                const locked = postedExpenses.has(expense.category);
+                return (
+                  <FormField
+                    key={expense.name}
+                    control={form.control}
+                    name={expense.name}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{expense.label}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={0}
+                            placeholder="0"
+                            disabled={locked}
+                            value={field.value ?? ''}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value === '' ? undefined : Number(e.target.value),
+                              )
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                );
+              })}
+              <FormField
+                control={form.control}
+                name="fuelLiters"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>عدد لترات السولار</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        placeholder="0"
+                        disabled={postedExpenses.has(TripTransactionCategory.DIESEL_FEES)}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cardName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>اسم الكارته</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="اسم الكارته"
+                        {...field}
+                        value={field.value ?? ''}
+                        disabled={postedExpenses.has(TripTransactionCategory.CARD_FEES)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </fieldset>
+        )}
 
         {needsTransportSupplier && tripSupplier && (
           <div className="flex flex-col gap-2">

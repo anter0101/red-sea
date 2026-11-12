@@ -15,6 +15,7 @@ import { JourneyTransaction } from '../journey-transaction/journey-transaction.e
 import { Supplier } from '../supplier/supplier.entity';
 import { Employee } from '../employee/employee.entity';
 import { Transaction } from '../transaction/transaction.entity';
+import { Custody } from '../custody/custody.entity';
 import { PolicyLedgerService } from './policy-ledger.service';
 
 @Module({
@@ -26,6 +27,7 @@ import { PolicyLedgerService } from './policy-ledger.service';
       Supplier,
       Employee,
       Transaction,
+      Custody,
     ]),
     JourneyModule,
     GovernmentModule,

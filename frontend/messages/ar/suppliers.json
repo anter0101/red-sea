@@ -70,8 +70,7 @@
   "types": {
     "GOODS": "بضائع",
     "SERVICES": "خدمات",
-    "TRANSPORTATION": "نقل",
-    "CUSTODY": "عهدة"
+    "TRANSPORTATION": "نقل"
   },
   "buttons": {
     "save": "حفظ",

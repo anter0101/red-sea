@@ -781,19 +781,20 @@ Same fields as `CreateJourneyDTO` but all optional (`PartialType`). Only include
 
 ### `JourneyTransactionCategoryType`
 
-| Value              |
-| ------------------ |
-| `Office Fees`      |
-| `Loading Fees`     |
-| `Weighing Fees`    |
-| `Card Fees`        |
-| `Toll Fees`        |
-| `Crossing Fees`    |
-| `Port Permit Fees` |
-| `Port Fees`        |
-| `Diesel Fees`      |
-| `Other Expenses`   |
-| `Custody`          |
+| Value                      |
+| -------------------------- |
+| `Diesel Fees`              |
+| `Card Fees`                |
+| `Weighing Fees`            |
+| `Tips Fees`                |
+| `Custody`                  |
+| `Nolon Fees`               |
+| `Driver Commission`        |
+| `Assistant Commission`     |
+| `Driver Daily Work`        |
+| `Assistant Daily Work`     |
+| `Driver Employee Nolon`    |
+| `Assistant Employee Nolon` |
 
 ---
 

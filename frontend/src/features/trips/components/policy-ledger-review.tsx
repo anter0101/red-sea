@@ -4,8 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 
 import client from '@/lib/client';
 
+import { TripTransactionCategoryLabels } from './transactions-table';
+
 interface LedgerLine {
   kind: string;
+  category?: string;
   amount: number;
   debitPath: string;
   creditPath: string;
@@ -22,6 +25,7 @@ interface LedgerPreview {
 const KIND_LABEL: Record<string, string> = {
   TRN1: 'TRN1 إيراد',
   TRN2: 'TRN2 مصروف نولون / عقد',
+  TRN3: 'TRN3 تصفية عهدة السائق',
 };
 
 export function PolicyLedgerReview({ journeyId }: { journeyId: number }) {
@@ -47,9 +51,13 @@ export function PolicyLedgerReview({ journeyId }: { journeyId: number }) {
 
       <div className="space-y-3">
         {(preview.data?.lines ?? []).map((line) => (
-          <div key={line.kind} className="rounded-lg border p-3 text-sm">
+          <div key={`${line.kind}-${line.category ?? ''}`} className="rounded-lg border p-3 text-sm">
             <div className="font-medium">
-              {KIND_LABEL[line.kind] ?? line.kind} — {line.amount}
+              {KIND_LABEL[line.kind] ?? line.kind}
+              {line.category
+                ? ` (${TripTransactionCategoryLabels[line.category] ?? line.category})`
+                : ''}{' '}
+              — {line.amount}
               {line.alreadyPosted ? ' (مُرحّل)' : ''}
             </div>
             <div>مدين: {line.debitPath}</div>

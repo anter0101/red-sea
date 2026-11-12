@@ -1,6 +1,5 @@
 import { IAuditFields } from '@/types/audit-fields';
 import { ITripPolicyInfo } from './policy';
-import { ITripFees } from './transactions';
 
 export interface ITrip extends IAuditFields {
   delegationNumber?: string; // تفويض رقم
@@ -21,8 +20,6 @@ export interface ITrip extends IAuditFields {
   deliveryCompany?: string;
   saleOrderNumber?: string;
   deliveryInfo?: ITripPolicyInfo;
-
-  fees?: ITripFees;
 }
 
 export interface IContact {

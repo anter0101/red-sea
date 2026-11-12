@@ -20,6 +20,12 @@ export const tripPolicySchema = z.object({
   tripDistance: z.coerce.number().min(0).optional(), // مسافة الرحلة
   policyFile: z.string().optional(), // ملف البوليصة
   transportSupplierId: z.string().optional(),
+  dieselFees: z.coerce.number().min(0).optional(), // سولار
+  fuelLiters: z.coerce.number().min(0).optional(), // عدد اللترات
+  cardFees: z.coerce.number().min(0).optional(), // كارته
+  cardName: z.string().optional(), // اسم الكارته
+  scaleFees: z.coerce.number().min(0).optional(), // ميزان
+  tipsFees: z.coerce.number().min(0).optional(), // اكراميات
 });
 
 export type TripPolicyFormValues = z.infer<typeof tripPolicySchema>;

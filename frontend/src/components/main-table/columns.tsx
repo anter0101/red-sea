@@ -105,10 +105,10 @@ export type TripRow = {
 
   packingType: PackingType | null;
 
-  dieselValue: number;
-  otherExpenses: number;
-  portFees: number;
-  transitFees: number;
+  dieselValue: number | null;
+  cardFees: number | null;
+  scaleFees: number | null;
+  tipsFees: number | null;
 };
 
 export const columns: ColumnDef<TripRow>[] = [
@@ -419,28 +419,28 @@ export const columns: ColumnDef<TripRow>[] = [
     cell: ({ row }) => row.original.totalProfit ?? '-',
   },
   {
-    id: 'otherExpenses',
-    accessorKey: 'otherExpenses',
-    header: 'مصروفات أخرى',
-    cell: ({ row }) => row.original.otherExpenses ?? '-',
-  },
-  {
     id: 'dieselValue',
     accessorKey: 'dieselValue',
-    header: 'قيمة الديزل',
+    header: 'سولار',
     cell: ({ row }) => row.original.dieselValue ?? '-',
   },
   {
-    id: 'portFees',
-    accessorKey: 'portFees',
-    header: 'رسوم ميناء',
-    cell: ({ row }) => row.original.portFees ?? '-',
+    id: 'cardFees',
+    accessorKey: 'cardFees',
+    header: 'كارته',
+    cell: ({ row }) => row.original.cardFees ?? '-',
   },
   {
-    id: 'transitFees',
-    accessorKey: 'transitFees',
-    header: 'رسوم عبور',
-    cell: ({ row }) => row.original.transitFees ?? '-',
+    id: 'scaleFees',
+    accessorKey: 'scaleFees',
+    header: 'ميزان',
+    cell: ({ row }) => row.original.scaleFees ?? '-',
+  },
+  {
+    id: 'tipsFees',
+    accessorKey: 'tipsFees',
+    header: 'اكراميات',
+    cell: ({ row }) => row.original.tipsFees ?? '-',
   },
   {
     id: 'packingType',

@@ -35,7 +35,6 @@ const typeBadgeClass: Record<SupplierType, string> = {
   [SupplierType.GOODS]: 'bg-emerald-500 hover:bg-emerald-600',
   [SupplierType.SERVICES]: 'bg-violet-500 hover:bg-violet-600',
   [SupplierType.TRANSPORTATION]: 'bg-blue-500 hover:bg-blue-600',
-  [SupplierType.CUSTODY]: 'bg-amber-500 hover:bg-amber-600',
 };
 
 export default function SupplierTable({ suppliers }: SupplierTableProps) {

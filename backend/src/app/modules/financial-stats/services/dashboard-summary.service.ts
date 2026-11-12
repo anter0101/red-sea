@@ -43,10 +43,7 @@ export class DashboardSummaryService {
       flat: true,
     });
     const clients = await this.closingBalance([AccountSystemKey.CLIENTS], dateTo);
-    const suppliers = await this.closingBalance(
-      [AccountSystemKey.TRANSPORT_SUPPLIER, AccountSystemKey.CUSTODY_SUPPLIER],
-      dateTo,
-    );
+    const suppliers = await this.closingBalance([AccountSystemKey.TRANSPORT_SUPPLIER], dateTo);
     return {
       revenue: roundMoney(income.totalRevenue),
       cost: roundMoney(income.totalExpenses),

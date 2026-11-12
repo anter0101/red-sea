@@ -20,16 +20,10 @@ export enum JourneyAttachmentType {
 }
 
 export enum JourneyTransactionCategoryType {
-  OFFICE_FEES = 'Office Fees',
-  LOADING_FEES = 'Loading Fees',
-  SCALE_FEES = 'Weighing Fees',
-  CARD_FEES = 'Card Fees',
-  TOLL_FEES = 'Toll Fees',
-  CROSSING_FEES = 'Crossing Fees',
-  PORT_PERMIT_FEES = 'Port Permit Fees',
-  PORT_FEES = 'Port Fees',
   DIESEL_FEES = 'Diesel Fees',
-  OTHER_EXPENSES = 'Other Expenses',
+  CARD_FEES = 'Card Fees',
+  SCALE_FEES = 'Weighing Fees',
+  TIPS_FEES = 'Tips Fees',
   CUSTODY = 'Custody',
   NOLON_FEES = 'Nolon Fees',
   DRIVER_COMMISSION = 'Driver Commission',

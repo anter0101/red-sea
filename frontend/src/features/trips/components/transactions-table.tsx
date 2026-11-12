@@ -9,16 +9,18 @@ import {
 import type { IAuditFields } from '@/types/audit-fields';
 
 export const TripTransactionCategoryLabels: Record<string, string> = {
-  'Office Fees': 'الرسوم المكتبية',
-  'Loading Fees': 'رسوم التحميل',
-  'Weighing Fees': 'رسوم الوزن',
-  'Card Fees': 'رسوم الكارته',
-  'Crossing Fees': 'رسوم المعابر',
-  'Port Permit Fees': 'رسوم تصريح الميناء',
-  'Port Fees': 'رسوم الميناء',
-  'Diesel Fees': 'رسوم الديزل',
-  'Other Expenses': 'مصاريف أخرى',
+  'Diesel Fees': 'سولار',
+  'Card Fees': 'كارته',
+  'Weighing Fees': 'ميزان',
+  'Tips Fees': 'اكراميات',
   Custody: 'عهدة',
+  'Nolon Fees': 'نولون',
+  'Driver Commission': 'عمولة السائق',
+  'Assistant Commission': 'عمولة التابع',
+  'Driver Daily Work': 'يومية السائق',
+  'Assistant Daily Work': 'يومية التابع',
+  'Driver Employee Nolon': 'نولون السائق',
+  'Assistant Employee Nolon': 'نولون التابع',
 };
 
 export interface ITripActivity extends IAuditFields {

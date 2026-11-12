@@ -1,7 +1,9 @@
 // src/journey-policy/dtos/create-journey-policy.dto.ts
-import { OmitType } from '@nestjs/swagger';
+import { ApiPropertyOptional, OmitType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { JourneyPolicyDTO } from './journey-policy.dto';
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { PolicyExpensesDTO } from './policy-expenses.dto';
 
 export class CreateJourneyPolicyDTO extends OmitType(JourneyPolicyDTO, [
   'id',
@@ -35,4 +37,10 @@ export class CreateJourneyPolicyDTO extends OmitType(JourneyPolicyDTO, [
 
   @IsString()
   policyFile: string;
+
+  @ApiPropertyOptional({ type: PolicyExpensesDTO, description: 'مصروفات الرحلة (سيارات الشركة)' })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PolicyExpensesDTO)
+  expenses?: PolicyExpensesDTO;
 }
