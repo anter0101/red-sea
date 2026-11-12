@@ -3,7 +3,7 @@ import {
   actualRevenueFrom,
   commissionFromSalary,
   expectedRevenueFrom,
-  nolonExpenseRemainder,
+  nolonFeesFrom,
   unitPriceFromSheet,
 } from './journey-revenue.calculator';
 
@@ -38,11 +38,12 @@ describe('journey-revenue.calculator', () => {
     expect(expectedRevenueFrom(10, null)).toBeNull();
   });
 
-  it('subtracts custody already given from the sheet nolon and does not go below zero', () => {
-    expect(nolonExpenseRemainder(50, 20)).toBe(30);
-    expect(nolonExpenseRemainder(50, 50)).toBe(0);
-    expect(nolonExpenseRemainder(50, 80)).toBe(0);
-    expect(nolonExpenseRemainder(50.5, 0.2)).toBe(50.3);
+  it('multiplies the per-ton nolon by the booked weight', () => {
+    expect(nolonFeesFrom(150, 10)).toBe(1500);
+    expect(nolonFeesFrom(33.33, 3)).toBe(99.99);
+    expect(nolonFeesFrom(150, 0)).toBe(0);
+    expect(nolonFeesFrom(150, null)).toBeNull();
+    expect(nolonFeesFrom(150, undefined)).toBeNull();
   });
 
   it('computes salary commission as % of revenue or as a fixed amount', () => {

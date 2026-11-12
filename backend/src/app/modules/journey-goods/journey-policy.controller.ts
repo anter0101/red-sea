@@ -213,11 +213,7 @@ export class JourneyPolicyController {
       await this.journeyRevenueService.applyFromPolicy(savedPolicy, user?.email, manager);
       await this.policyLedgerService.apply(
         dto.journeyId,
-        {
-          transportSupplierId: dto.transportSupplierId,
-          custodySupplierId: dto.custodySupplierId,
-          custodySupplierAmount: dto.custodySupplierAmount,
-        },
+        { transportSupplierId: dto.transportSupplierId },
         user?.email,
         manager,
       );
@@ -276,11 +272,7 @@ export class JourneyPolicyController {
       await this.journeyRevenueService.applyFromPolicy(savedPolicy, user?.email, manager);
       await this.policyLedgerService.apply(
         existing.journey.id,
-        {
-          transportSupplierId: dto.transportSupplierId,
-          custodySupplierId: dto.custodySupplierId,
-          custodySupplierAmount: dto.custodySupplierAmount,
-        },
+        { transportSupplierId: dto.transportSupplierId },
         user?.email,
         manager,
       );

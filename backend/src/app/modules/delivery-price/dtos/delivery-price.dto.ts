@@ -35,7 +35,7 @@ export class DeliveryPriceDTO extends BaseDTO {
   @IsNumber()
   totalPrice?: number;
 
-  @ApiPropertyOptional({ description: 'سعر النولون (دفعة واحدة)', example: 1500 })
+  @ApiPropertyOptional({ description: 'سعر النولون للطن', example: 150 })
   @IsOptional()
   @IsNumber()
   nolonPrice?: number;

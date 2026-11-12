@@ -17,6 +17,34 @@ describe('officeJourneySchema', () => {
       vehicleMode: 'NOLON_CAR',
       clientId: '4',
       carId: '7',
+      transportSupplierId: '12',
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it.each(['NOLON_CAR', 'CONTRACT_CAR'] as const)(
+    '%s fails without a transport supplier',
+    (vehicleMode) => {
+      const r = schema.safeParse({
+        ...emptyOfficeJourneyValues,
+        vehicleMode,
+        clientId: '4',
+        carId: '7',
+      });
+      expect(r.success).toBe(false);
+      if (!r.success) {
+        const issue = r.error.issues.find((i) => i.path.includes('transportSupplierId'));
+        expect(issue?.message).toBe('مورد النقل مطلوب للنولون والعقد');
+      }
+    },
+  );
+
+  it('COMPANY passes without a transport supplier', () => {
+    const r = schema.safeParse({
+      ...emptyOfficeJourneyValues,
+      vehicleMode: 'COMPANY_CAR',
+      clientId: '4',
+      carId: '9',
     });
     expect(r.success).toBe(true);
   });
@@ -26,6 +54,7 @@ describe('officeJourneySchema', () => {
       ...emptyOfficeJourneyValues,
       vehicleMode: 'NOLON_CAR',
       clientId: '4',
+      transportSupplierId: '12',
       carInline: {
         plateNumber: '9901',
         plateLetters: 'ن',
@@ -52,6 +81,7 @@ describe('makeOfficeJourneySchema — custodyAmount max validation', () => {
     vehicleMode: 'NOLON_CAR' as const,
     clientId: '4',
     carId: '7',
+    transportSupplierId: '12',
   };
 
   it('empty custodyAmount is valid (field is optional)', () => {

@@ -18,10 +18,20 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 import type { VehicleMode } from '../enums/vehicle-mode';
 import { vehicleModeToSlug } from '../enums/vehicle-mode';
-import type { OfficeJourneyFormValues } from '../types/office-journey-schema';
+import {
+  paysTransportSupplier,
+  type OfficeJourneyFormValues,
+} from '../types/office-journey-schema';
 import { saveOfficeJourneyDraft } from '../utils/office-journey-draft';
 
 interface OfficeJourneyStepCustodyProps {
@@ -29,6 +39,7 @@ interface OfficeJourneyStepCustodyProps {
   vehicleMode: VehicleMode;
   officeCustody?: { custodyAmount?: number } | null;
   isCustodyAmountPending: boolean;
+  transportSuppliers: Array<{ id: number; name: string }>;
   isSubmitting: boolean;
   restoredFromDraft?: boolean;
   onPrevious: () => void;
@@ -40,6 +51,7 @@ export default function OfficeJourneyStepCustody({
   vehicleMode,
   officeCustody,
   isCustodyAmountPending,
+  transportSuppliers,
   isSubmitting,
   restoredFromDraft = false,
   onPrevious,
@@ -47,6 +59,7 @@ export default function OfficeJourneyStepCustody({
 }: OfficeJourneyStepCustodyProps) {
   const t = useTranslations('office.form');
   const router = useRouter();
+  const needsTransportSupplier = paysTransportSupplier(vehicleMode);
   const available = officeCustody?.custodyAmount ?? null;
   const hasNoCustody = !isCustodyAmountPending && available !== null && available <= 0;
   const [askCustodyOpen, setAskCustodyOpen] = useState(false);
@@ -103,6 +116,35 @@ export default function OfficeJourneyStepCustody({
             <Button type="button" className="mt-3" variant="secondary" onClick={goCreateAskForCustody}>
               {t('createAskForCustody')}
             </Button>
+          </div>
+        )}
+
+        {needsTransportSupplier && (
+          <div className="flex flex-col gap-1">
+            <Label>{t('transportSupplier')}</Label>
+            <Select
+              value={form.watch('transportSupplierId') || undefined}
+              onValueChange={(v) =>
+                form.setValue('transportSupplierId', v, { shouldValidate: true })
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t('transportSupplierPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                {transportSuppliers.map((supplier) => (
+                  <SelectItem key={supplier.id} value={String(supplier.id)}>
+                    {supplier.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">{t('transportSupplierHint')}</p>
+            {form.formState.errors.transportSupplierId && (
+              <p className="text-sm text-destructive">
+                {form.formState.errors.transportSupplierId.message as string}
+              </p>
+            )}
           </div>
         )}
 

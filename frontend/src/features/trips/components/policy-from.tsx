@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -62,8 +63,6 @@ const DEFAULT_VALUES: TripPolicyFormValues = {
   tripDistance: undefined,
   policyFile: '',
   transportSupplierId: '',
-  custodySupplierId: '',
-  custodySupplierAmount: undefined,
 };
 
 function nextDay(isoDate: string): string {
@@ -128,6 +127,7 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
   const { areas } = useGetAllAreasByGovernment(deliveryGovId || null);
   const ownerShip = tripResponse?.car?.ownerShip;
   const needsTransportSupplier = ownerShip === 'NOLON_CAR' || ownerShip === 'CONTRACT_CAR';
+  const tripSupplier = tripResponse?.transportsupplier?.id ? tripResponse.transportsupplier : null;
   const suppliers = useQuery({
     queryKey: ['ledger-suppliers'],
     queryFn: async () => {
@@ -135,7 +135,7 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
       const rows = res.data?.data ?? res.data ?? [];
       return (Array.isArray(rows) ? rows : []) as Array<{ id: number; name: string; type?: string }>;
     },
-    enabled: needsTransportSupplier,
+    enabled: needsTransportSupplier && !tripSupplier,
   });
 
   /* --------------------------- Reset Form Logic --------------------------- */
@@ -164,7 +164,7 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
       return;
     }
 
-    if (needsTransportSupplier && !toOptionalNumber(data.transportSupplierId)) {
+    if (needsTransportSupplier && !tripSupplier && !toOptionalNumber(data.transportSupplierId)) {
       toast.error('مورد النقل مطلوب للنولون والعقد');
       return;
     }
@@ -188,9 +188,7 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
       tripDate: data.tripDate,
       tripDistance: data.tripDistance,
       policyFile: data.policyFile,
-      transportSupplierId: toOptionalNumber(data.transportSupplierId),
-      custodySupplierId: toOptionalNumber(data.custodySupplierId),
-      custodySupplierAmount: data.custodySupplierAmount,
+      transportSupplierId: tripSupplier ? undefined : toOptionalNumber(data.transportSupplierId),
     };
     if (isEditMode) {
       editTripPolicyMutation(
@@ -528,81 +526,40 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
           )}
         />
 
-        {needsTransportSupplier && (
-          <>
-            <FormField
-              control={form.control}
-              name="transportSupplierId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>مورد النقل</FormLabel>
-                  <Select value={field.value || undefined} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="اختر مورد النقل" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {suppliers.data
-                        ?.filter((row) => row.type === 'TRANSPORTATION')
-                        .map((row) => (
-                          <SelectItem key={row.id} value={String(row.id)}>
-                            {row.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="custodySupplierId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>مورد العهدة</FormLabel>
-                  <Select value={field.value || undefined} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="اختياري" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {suppliers.data
-                        ?.filter((row) => row.type === 'CUSTODY')
-                        .map((row) => (
-                          <SelectItem key={row.id} value={String(row.id)}>
-                            {row.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="custodySupplierAmount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>مبلغ مورد العهدة</FormLabel>
+        {needsTransportSupplier && tripSupplier && (
+          <div className="flex flex-col gap-2">
+            <Label>مورد النقل</Label>
+            <Input value={tripSupplier.name ?? ''} disabled readOnly />
+          </div>
+        )}
+
+        {needsTransportSupplier && !tripSupplier && (
+          <FormField
+            control={form.control}
+            name="transportSupplierId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>مورد النقل</FormLabel>
+                <Select value={field.value || undefined} onValueChange={field.onChange}>
                   <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={field.value ?? ''}
-                      onChange={(e) =>
-                        field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
-                      }
-                    />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="اختر مورد النقل" />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
+                  <SelectContent>
+                    {suppliers.data
+                      ?.filter((row) => row.type === 'TRANSPORTATION')
+                      .map((row) => (
+                        <SelectItem key={row.id} value={String(row.id)}>
+                          {row.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         )}
 
         {/* Submit Button */}

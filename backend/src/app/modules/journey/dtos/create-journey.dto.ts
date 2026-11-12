@@ -107,6 +107,15 @@ export class CreateJourneyDTO extends OmitType(JourneyDTO, [
 
   @ApiPropertyOptional({
     description:
+      'Transport supplier (مورد النقل). Required for NOLON_CAR / CONTRACT_CAR; custody is paid to it.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  transportSupplierId?: number;
+
+  @ApiPropertyOptional({
+    description:
       'Delivery area chosen when the delegation is issued. Stored on the journey and copied onto the policy.',
   })
   @IsOptional()

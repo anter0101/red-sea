@@ -64,6 +64,10 @@ export const makeDriverInlineSchema = (t: T) =>
     }),
   });
 
+export function paysTransportSupplier(vehicleMode: VehicleMode): boolean {
+  return vehicleMode === 'NOLON_CAR' || vehicleMode === 'CONTRACT_CAR';
+}
+
 // --- Form values type ---
 
 export interface OfficeJourneyFormValues {
@@ -83,6 +87,7 @@ export interface OfficeJourneyFormValues {
   cementGrade: string;
   quantity: string;
   custodyAmount: string;
+  transportSupplierId: string;
 }
 
 export const emptyOfficeJourneyValues: OfficeJourneyFormValues = {
@@ -99,6 +104,7 @@ export const emptyOfficeJourneyValues: OfficeJourneyFormValues = {
   cementGrade: '',
   quantity: '',
   custodyAmount: '',
+  transportSupplierId: '',
 };
 
 // --- API payload type (object-key form: { id } for existing, { create } for inline) ---
@@ -120,6 +126,7 @@ export interface CreateOfficeJourneyPayload {
   cementGrade?: string;
   quantity?: number;
   custodyAmount?: number;
+  transportSupplierId?: number;
 }
 
 export function buildOfficeJourneyPayload(
@@ -151,6 +158,9 @@ export function buildOfficeJourneyPayload(
   if (values.cementGrade) payload.cementGrade = values.cementGrade;
   if (values.quantity) payload.quantity = Number(values.quantity);
   if (values.custodyAmount) payload.custodyAmount = Number(values.custodyAmount);
+  if (paysTransportSupplier(values.vehicleMode) && values.transportSupplierId) {
+    payload.transportSupplierId = Number(values.transportSupplierId);
+  }
 
   return payload;
 }
@@ -178,11 +188,19 @@ export function makeOfficeJourneySchema(maxCustody: number) {
       custodyAmount: z
         .string()
         .refine((v) => !v || Number(v) <= maxCustody, `لا يمكن أن يتجاوز ${maxCustody}`),
+      transportSupplierId: z.string(),
     })
     .superRefine((v, ctx) => {
       const hasCar = !!v.carId || !!v.carInline;
       if (!hasCar) {
         ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'السيارة مطلوبة', path: ['carId'] });
+      }
+      if (paysTransportSupplier(v.vehicleMode) && !v.transportSupplierId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'مورد النقل مطلوب للنولون والعقد',
+          path: ['transportSupplierId'],
+        });
       }
     });
 }

@@ -16,7 +16,7 @@ import { Transaction, TransactionStatus } from '../transaction/transaction.entit
 import { TransactionLine, EntryType } from '../transaction-line/transaction-line.entity';
 import { TransactionService } from '../transaction/transaction.service';
 
-export type LedgerKind = 'TRN1' | 'TRN2' | 'TRN3_OFFICE' | 'TRN3_CUSTODY_SUPPLIER';
+export type LedgerKind = 'TRN1' | 'TRN2';
 
 export interface LedgerPreviewLine {
   kind: LedgerKind;
@@ -35,8 +35,6 @@ export interface LedgerPreview {
 
 export interface LedgerApplyInput {
   transportSupplierId?: number;
-  custodySupplierId?: number;
-  custodySupplierAmount?: number;
 }
 
 @Injectable()
@@ -150,24 +148,12 @@ export class PolicyLedgerService {
 
     const journey = await journeyRepo.findOne({
       where: { id: journeyId },
-      relations: ['client', 'car', 'custodySource', 'transportSupplier', 'custodySupplier'],
+      relations: ['client', 'car', 'custodySource', 'transportSupplier'],
     });
     if (!journey) throw new NotFoundException(`Journey ${journeyId} not found`);
 
-    if (input.transportSupplierId) {
+    if (input.transportSupplierId && !journey.transportSupplier?.id) {
       journey.transportSupplier = { id: input.transportSupplierId } as Supplier;
-    }
-    if (input.custodySupplierId) {
-      journey.custodySupplier = { id: input.custodySupplierId } as Supplier;
-    }
-    if (input.custodySupplierAmount != null) {
-      journey.custodySupplierAmount = input.custodySupplierAmount;
-    }
-    if (
-      input.transportSupplierId ||
-      input.custodySupplierId ||
-      input.custodySupplierAmount != null
-    ) {
       await journeyRepo.save(journey);
     }
 
@@ -213,12 +199,6 @@ export class PolicyLedgerService {
       });
       const nolon = nolonRows.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
 
-      const custodyRows = await jtRepo.find({
-        where: { journey: { id: journeyId }, category: JourneyTransactionCategoryType.CUSTODY },
-      });
-      const officeAmount = custodyRows.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
-      const custodySupplierAmount = Number(journey.custodySupplierAmount ?? 0);
-
       let transport: Supplier | null = null;
       if (journey.transportSupplier?.id) {
         transport = await supplierRepo.findOne({
@@ -234,14 +214,6 @@ export class PolicyLedgerService {
           relations: ['branch'],
         });
         branchId = employee?.branch?.id;
-        if (branchId && employee?.branch?.name) {
-          await this.accountService.createBranchAccount(
-            branchId,
-            employee.branch.name,
-            undefined,
-            manager,
-          );
-        }
       }
 
       if (!transport) {
@@ -280,64 +252,6 @@ export class PolicyLedgerService {
               txRepo,
             ),
           );
-        }
-
-        if (supplierLeaf && branchId && officeAmount > 0) {
-          const officeLeaf = await this.accountService.findActorLeaf(
-            AccountSystemKey.CUSTODY,
-            AccountActorType.BRANCH,
-            branchId,
-            manager,
-          );
-          if (officeLeaf) {
-            lines.push(
-              await this.pair(
-                'TRN3_OFFICE',
-                officeAmount,
-                supplierLeaf,
-                officeLeaf,
-                policy.id,
-                journey.id,
-                txRepo,
-              ),
-            );
-          }
-        }
-
-        if (supplierLeaf && journey.custodySupplier?.id && custodySupplierAmount > 0) {
-          const custodySupplier = await supplierRepo.findOne({
-            where: { id: journey.custodySupplier.id },
-          });
-          if (!custodySupplier || custodySupplier.type !== SupplierType.CUSTODY) {
-            warnings.push('مورد العهدة غير موجود.');
-          } else {
-            await this.accountService.createSupplierAccount(
-              custodySupplier.id,
-              custodySupplier.name,
-              'custody',
-              undefined,
-              manager,
-            );
-            const custodyLeaf = await this.accountService.findActorLeaf(
-              AccountSystemKey.CUSTODY_SUPPLIER,
-              AccountActorType.CUSTODY_SUPPLIER,
-              custodySupplier.id,
-              manager,
-            );
-            if (custodyLeaf) {
-              lines.push(
-                await this.pair(
-                  'TRN3_CUSTODY_SUPPLIER',
-                  custodySupplierAmount,
-                  supplierLeaf,
-                  custodyLeaf,
-                  policy.id,
-                  journey.id,
-                  txRepo,
-                ),
-              );
-            }
-          }
         }
       }
     }

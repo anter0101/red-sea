@@ -72,5 +72,6 @@ export interface ITripResponse extends IAuditFields {
   driver?: IDriver;
   assistant?: IAssistant;
   custodysource?: ICustodySource;
+  transportsupplier?: { id: number | null; name: string | null };
   journeytransaction?: IJourneyTransaction;
 }

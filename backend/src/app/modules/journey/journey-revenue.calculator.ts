@@ -58,11 +58,10 @@ export function commissionFromSalary(
   return roundMoney(amount);
 }
 
-/** Sheet nolon still owed after the custody already given to the driver. Not below zero. */
-export function nolonExpenseRemainder(sheetNolon: number, custodyAlreadyGiven: number): number {
-  const sheet = Number.isFinite(sheetNolon) ? sheetNolon : 0;
-  const custody = Number.isFinite(custodyAlreadyGiven) ? custodyAlreadyGiven : 0;
-  return roundMoney(Math.max(0, sheet - custody));
+export function nolonFeesFrom(nolonPerTon: number, bookWeight?: number | null): number | null {
+  if (bookWeight == null || !Number.isFinite(Number(bookWeight))) return null;
+  const rate = Number.isFinite(nolonPerTon) ? nolonPerTon : 0;
+  return roundMoney(rate * Number(bookWeight));
 }
 
 export function roundMoney(value: number): number {

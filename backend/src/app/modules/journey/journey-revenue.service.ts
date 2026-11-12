@@ -11,7 +11,7 @@ import { SalaryType } from 'src/core/enums/salary';
 import { JourneyTransactionCategoryType, JourneyTransactionType } from 'src/core/enums/journey';
 import {
   actualRevenueFrom,
-  nolonExpenseRemainder,
+  nolonFeesFrom,
   unitPriceFromSheet,
 } from './journey-revenue.calculator';
 
@@ -69,27 +69,24 @@ export class JourneyRevenueService {
     const ownerShip = journey.car?.ownerShip;
     const nolonAlreadyPostedAsFees =
       ownerShip === OwnerShipType.NOLON_CAR || ownerShip === OwnerShipType.CONTRACT_CAR;
+    const nolonPerTon = Number(row.nolonPrice ?? 0);
+    const tripNolon = nolonFeesFrom(nolonPerTon, policy.bookWeight) ?? 0;
 
-    if (nolonAlreadyPostedAsFees) {
-      const sheetNolon = Number(row.nolonPrice ?? 0);
-      const custodyGiven = await this.custodyAlreadyGiven(journeyId, manager);
-      const nolon = nolonExpenseRemainder(sheetNolon, custodyGiven);
-      if (sheetNolon > 0) {
-        await this.upsertExpense(
-          journeyId,
-          JourneyTransactionCategoryType.NOLON_FEES,
-          nolon,
-          'نولون',
-          updater,
-          manager,
-        );
-      }
+    if (nolonAlreadyPostedAsFees && nolonPerTon > 0) {
+      await this.upsertExpense(
+        journeyId,
+        JourneyTransactionCategoryType.NOLON_FEES,
+        tripNolon,
+        'نولون',
+        updater,
+        manager,
+      );
     }
 
     await this.applySalarySchemeExpenses({
       journeyId,
       salary: journey.driver?.user?.salary,
-      sheetNolon: Number(row.nolonPrice ?? 0),
+      sheetNolon: tripNolon,
       nolonAlreadyPostedAsFees,
       role: 'driver',
       updater,
@@ -100,7 +97,7 @@ export class JourneyRevenueService {
       await this.applySalarySchemeExpenses({
         journeyId,
         salary: journey.assistant.salary,
-        sheetNolon: Number(row.nolonPrice ?? 0),
+        sheetNolon: tripNolon,
         nolonAlreadyPostedAsFees,
         role: 'assistant',
         updater,
@@ -190,14 +187,6 @@ export class JourneyRevenueService {
     }
 
     return (await qb.getOne()) ?? null;
-  }
-
-  private async custodyAlreadyGiven(journeyId: number, manager?: EntityManager): Promise<number> {
-    const repo = manager ? manager.getRepository(JourneyTransaction) : this.transactionRepository;
-    const rows = await repo.find({
-      where: { journey: { id: journeyId }, category: JourneyTransactionCategoryType.CUSTODY },
-    });
-    return rows.reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
   }
 
   private async upsertExpense(

@@ -11,6 +11,8 @@ import { useGetAllCars } from '@/features/cars/api/get-all';
 import { useGetAllClients } from '@/features/clients/api/get-all';
 import { useGetAllDriverAssistants } from '@/features/driver-assistants/api/get-all';
 import { useGetAllDrivers } from '@/features/drivers/api/get-all';
+import { useGetAllSuppliers } from '@/features/suppliers/api/get-all';
+import { SupplierType } from '@/features/suppliers/enums/supplier-type';
 import { useGetAllTrailers } from '@/features/trailers/api/get-all';
 
 import { useCreateOfficeJourney } from '../api/create-office-journey';
@@ -35,6 +37,10 @@ export function useOfficeJourneyForm(
   const { drivers } = useGetAllDrivers();
   const { clients } = useGetAllClients();
   const { driverAssistants, isGetDriverAssistantsPending } = useGetAllDriverAssistants();
+  const { suppliers: transportSuppliers } = useGetAllSuppliers({
+    type: SupplierType.TRANSPORTATION,
+    pageSize: 100,
+  });
   const { custodyAmount: officeCustody, isCustodyAmountPending } = useGetOfficeCustodyAmount();
   const { createOfficeJourneyMutation, isCreateOfficeJourneyPending } = useCreateOfficeJourney();
 
@@ -89,5 +95,6 @@ export function useOfficeJourneyForm(
     isGetDriverAssistantsPending,
     officeCustody,
     isCustodyAmountPending,
+    transportSuppliers,
   };
 }

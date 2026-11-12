@@ -22,8 +22,6 @@ interface LedgerPreview {
 const KIND_LABEL: Record<string, string> = {
   TRN1: 'TRN1 إيراد',
   TRN2: 'TRN2 مصروف نولون / عقد',
-  TRN3_OFFICE: 'TRN3 عهدة المكتب',
-  TRN3_CUSTODY_SUPPLIER: 'TRN3 مورد العهدة',
 };
 
 export function PolicyLedgerReview({ journeyId }: { journeyId: number }) {

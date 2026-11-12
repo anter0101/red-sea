@@ -377,6 +377,7 @@ export class JourneyService {
       .leftJoin('custodySource.user', 'custodySourceUser')
       .leftJoin('journey.journeyPolicies', 'policy')
       .leftJoin('journey.client', 'client')
+      .leftJoin('journey.transportSupplier', 'transportSupplier')
       .leftJoin('journey.journeyTransactions', 'trx');
 
     qb
@@ -459,6 +460,13 @@ export class JourneyService {
     ) AS custodySource
     `,
 
+        `
+    jsonb_build_object(
+      'id', transportSupplier.id,
+      'name', transportSupplier.name
+    ) AS transportSupplier
+    `,
+
         `jsonb_build_object(
           'id',
             MAX(
@@ -505,6 +513,7 @@ export class JourneyService {
       custodySource.id,
       custodySourceUser.id,
       client.id,
+      transportSupplier.id,
       policy.id
     `);
 

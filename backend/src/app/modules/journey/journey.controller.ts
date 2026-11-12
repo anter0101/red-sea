@@ -2,6 +2,7 @@ import { ClientService } from '../factory/client.service';
 import { JourneyTransactionService } from '../journey-transaction/journey-transaction.service';
 import { JourneyTransaction } from '../journey-transaction/journey-transaction.entity';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -46,8 +47,14 @@ import { UserService } from '../user/user.service';
 import { JourneyTransactionType, JourneyTransactionCategoryType } from 'src/core/enums/journey';
 import { EmployeeService } from '../employee/employee.service';
 import { withTransaction } from 'src/core/utils/transaction';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { Account } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
+import { AccountActorType, AccountSystemKey } from '../account/account-system-keys';
+import { JourneyVehicleMode } from 'src/core/enums/journey-vehicle-mode';
+import { Supplier } from '../supplier/supplier.entity';
+import { SupplierType } from '../supplier/enums/supplier-type.enum';
+import { Journey } from './journey.entity';
 import { CustodyService } from '../custody/custody.service';
 import { CustodyStatus } from 'src/core/enums/custody-status';
 import { Custody } from '../custody/custody.entity';
@@ -180,7 +187,7 @@ export class JourneyController {
 
       const emp = await manager.findOne(Employee, {
         where: { user: { id: user.id } },
-        relations: ['user'],
+        relations: ['user', 'branch'],
       });
 
       if (!emp) {
@@ -196,8 +203,16 @@ export class JourneyController {
         throw new NotFoundException(`Driver with id ${dto.driverId} not found`);
       }
 
+      const paysTransportSupplier =
+        dto.vehicleMode === JourneyVehicleMode.NOLON_CAR ||
+        dto.vehicleMode === JourneyVehicleMode.CONTRACT_CAR;
+      const transportSupplier = paysTransportSupplier
+        ? await this.resolveTransportSupplier(dto.transportSupplierId, emp, manager)
+        : null;
+
       const entity = mapCreateJourneyDtoToEntity(dto);
       entity.custodySource = emp;
+      if (transportSupplier) entity.transportSupplier = transportSupplier;
       if (dto.deliveryAreaId) {
         const area = await manager.findOne(Area, {
           where: { id: dto.deliveryAreaId },
@@ -218,44 +233,46 @@ export class JourneyController {
         txEntity.amount = dto.custodyAmount;
         await this.journeyTransactionService.save(txEntity, user?.email, manager);
 
-        const driverName = buildPersonAccountName(
-          driver.user.firstName,
-          driver.user.lastName,
-          `Driver ${driver.id}`,
-        );
-        await this.accountService.createPersonSubAccounts(
-          driverName,
-          PERSON_ACCOUNT_PARENTS[UserRole.DRIVER]!,
-          user?.email,
-          manager,
-        );
-
         const empAccount = await this.accountService.findPersonSubAccount(
           buildPersonAccountName(emp.user.firstName, emp.user.lastName, `Employee ${emp.id}`),
           ACCOUNT_PARENT_CUSTODY,
           manager,
         );
 
-        const driverAccount = await this.accountService.findPersonSubAccount(
-          driverName,
-          ACCOUNT_PARENT_CUSTODY,
-          manager,
-        );
-
-        await this.accountService.custodyMovement(
-          empAccount,
-          driverAccount,
-          dto.custodyAmount,
-          manager,
-        );
-
-        const custody = new Custody();
-        custody.employee = emp;
-        custody.account = driverAccount;
-        custody.journey = savedJourney;
-        custody.driver = driver;
-        custody.status = CustodyStatus.ACTIVE;
-        await this.custodyService.save(custody, user?.email, manager);
+        if (transportSupplier) {
+          await this.accountService.createSupplierAccount(
+            transportSupplier.id,
+            transportSupplier.name,
+            'transport',
+            user?.email,
+            manager,
+          );
+          const supplierAccount = await this.accountService.findActorLeaf(
+            AccountSystemKey.TRANSPORT_SUPPLIER,
+            AccountActorType.TRANSPORT_SUPPLIER,
+            transportSupplier.id,
+            manager,
+          );
+          if (!supplierAccount) {
+            throw new BadRequestException('حساب مورد النقل غير موجود.');
+          }
+          await this.accountService.custodyMovement(
+            empAccount,
+            supplierAccount,
+            dto.custodyAmount,
+            manager,
+          );
+        } else {
+          await this.giveCustodyToDriver(
+            emp,
+            empAccount,
+            driver,
+            savedJourney,
+            dto.custodyAmount,
+            user?.email,
+            manager,
+          );
+        }
       }
 
       await this.journeyDelegationPrintService.createForJourney(
@@ -268,6 +285,68 @@ export class JourneyController {
     });
 
     return mapJourneyToDtoSelective(saved);
+  }
+
+  private async resolveTransportSupplier(
+    supplierId: number | undefined,
+    emp: Employee,
+    manager: EntityManager,
+  ): Promise<Supplier> {
+    if (!supplierId) {
+      throw new BadRequestException('مورد النقل مطلوب للنولون والعقد.');
+    }
+    const supplier = await manager.findOne(Supplier, {
+      where: { id: supplierId },
+      relations: ['branch'],
+    });
+    if (!supplier) {
+      throw new NotFoundException(`Supplier with id ${supplierId} not found`);
+    }
+    if (supplier.type !== SupplierType.TRANSPORTATION) {
+      throw new BadRequestException('المورد المختار ليس مورد نقل.');
+    }
+    if (emp.branch?.id && supplier.branch?.id && supplier.branch.id !== emp.branch.id) {
+      throw new BadRequestException('مورد النقل مش تابع لفرع الموظف.');
+    }
+    return supplier;
+  }
+
+  private async giveCustodyToDriver(
+    emp: Employee,
+    empAccount: Account,
+    driver: Driver,
+    journey: Journey,
+    amount: number,
+    creator: string | undefined,
+    manager: EntityManager,
+  ): Promise<void> {
+    const driverName = buildPersonAccountName(
+      driver.user.firstName,
+      driver.user.lastName,
+      `Driver ${driver.id}`,
+    );
+    await this.accountService.createPersonSubAccounts(
+      driverName,
+      PERSON_ACCOUNT_PARENTS[UserRole.DRIVER]!,
+      creator,
+      manager,
+    );
+
+    const driverAccount = await this.accountService.findPersonSubAccount(
+      driverName,
+      ACCOUNT_PARENT_CUSTODY,
+      manager,
+    );
+
+    await this.accountService.custodyMovement(empAccount, driverAccount, amount, manager);
+
+    const custody = new Custody();
+    custody.employee = emp;
+    custody.account = driverAccount;
+    custody.journey = journey;
+    custody.driver = driver;
+    custody.status = CustodyStatus.ACTIVE;
+    await this.custodyService.save(custody, creator, manager);
   }
 
   // @Post('/')

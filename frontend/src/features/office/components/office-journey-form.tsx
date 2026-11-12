@@ -10,6 +10,7 @@ import { PrintDialog } from '@/features/trips/components/print-dialog';
 
 import type { VehicleMode } from '../enums/vehicle-mode';
 import { useOfficeJourneyForm } from '../hooks/use-office-journey-form';
+import { emptyOfficeJourneyValues } from '../types/office-journey-schema';
 import { loadOfficeJourneyDraft } from '../utils/office-journey-draft';
 import OfficeJourneyStepCustody from './office-journey-step-custody';
 import OfficeJourneyStepTrip from './office-journey-step-trip';
@@ -50,6 +51,7 @@ export default function OfficeJourneyForm({ vehicleMode }: OfficeJourneyFormProp
     isCustodyAmountPending,
     driverAssistants,
     isGetDriverAssistantsPending,
+    transportSuppliers,
   } = useOfficeJourneyForm(vehicleMode, handleCreated);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export default function OfficeJourneyForm({ vehicleMode }: OfficeJourneyFormProp
     const draft = loadOfficeJourneyDraft(vehicleMode);
     if (!draft) return;
     draftRestoredRef.current = true;
-    form.reset({ ...draft.values, vehicleMode });
+    form.reset({ ...emptyOfficeJourneyValues, ...draft.values, vehicleMode });
     setCurrentStep(Math.min(Math.max(draft.step, 0), 2));
     setRestoredFromDraft(true);
   }, [form, vehicleMode]);
@@ -110,6 +112,7 @@ export default function OfficeJourneyForm({ vehicleMode }: OfficeJourneyFormProp
           vehicleMode={vehicleMode}
           officeCustody={officeCustody}
           isCustodyAmountPending={isCustodyAmountPending}
+          transportSuppliers={transportSuppliers}
           isSubmitting={isSubmitting}
           restoredFromDraft={restoredFromDraft}
           onPrevious={goPrevious}

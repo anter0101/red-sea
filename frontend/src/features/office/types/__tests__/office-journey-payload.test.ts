@@ -118,4 +118,27 @@ describe('buildOfficeJourneyPayload', () => {
     expect(payload.driver).toEqual({ create: driverInline });
   });
 
+  it.each(['NOLON_CAR', 'CONTRACT_CAR'] as const)(
+    '%s: sends the transport supplier',
+    (vehicleMode) => {
+      const payload = buildOfficeJourneyPayload({
+        ...base,
+        vehicleMode,
+        carId: '7',
+        transportSupplierId: '12',
+      });
+      expect(payload.transportSupplierId).toBe(12);
+    },
+  );
+
+  it('COMPANY: never sends a transport supplier', () => {
+    const payload = buildOfficeJourneyPayload({
+      ...base,
+      vehicleMode: 'COMPANY_CAR',
+      carId: '9',
+      transportSupplierId: '12',
+    });
+    expect(payload.transportSupplierId).toBeUndefined();
+  });
+
 });

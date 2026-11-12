@@ -68,6 +68,4 @@ export interface ITripPolicyInfo {
   policyFile?: string; // ملف البوليصة
 
   transportSupplierId?: number;
-  custodySupplierId?: number;
-  custodySupplierAmount?: number;
 }

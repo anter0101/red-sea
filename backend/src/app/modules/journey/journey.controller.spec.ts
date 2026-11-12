@@ -31,6 +31,8 @@ import { JourneyDelegationPrintService } from '../journey-delegation-print/journ
 import { JourneyRevenueService } from './journey-revenue.service';
 import { NotFoundException } from '@nestjs/common';
 import { ACCOUNT_PARENT_CUSTODY } from '../account/person-account.constants';
+import { Supplier } from '../supplier/supplier.entity';
+import { SupplierType } from '../supplier/enums/supplier-type.enum';
 
 const EMPLOYEE_USER_ID = 10;
 
@@ -104,6 +106,7 @@ const MODE_BODIES: Record<JourneyVehicleMode, Record<string, unknown>> = {
     receivedCompany: 'Factory Co',
     sellingOrderNo: 'SO-002',
     tripStatus: JourneyStatus.DELEGATION_ISSUED,
+    transportSupplierId: 7,
   },
   [JourneyVehicleMode.NOLON_CAR]: {
     vehicleMode: JourneyVehicleMode.NOLON_CAR,
@@ -118,6 +121,7 @@ const MODE_BODIES: Record<JourneyVehicleMode, Record<string, unknown>> = {
     receivedCompany: 'Rental Client',
     sellingOrderNo: 'SO-003',
     tripStatus: JourneyStatus.DELEGATION_ISSUED,
+    transportSupplierId: 7,
   },
 };
 
@@ -145,6 +149,8 @@ describe('JourneyController — POST /api/journeys/office', () => {
     custodyMovement: jest.Mock;
     findPersonSubAccount: jest.Mock;
     createPersonSubAccounts: jest.Mock;
+    createSupplierAccount: jest.Mock;
+    findActorLeaf: jest.Mock;
   };
   let custodyService: { save: jest.Mock };
   let userService: { findByFields: jest.Mock };
@@ -162,6 +168,13 @@ describe('JourneyController — POST /api/journeys/office', () => {
 
   const mockEmpAccount = { id: 100, name: 'Office Employee' } as Account;
   const mockDriverAccount = { id: 200, name: 'Trip Driver' } as Account;
+  const mockSupplierAccount = { id: 300, name: 'Nolon Transport' } as Account;
+
+  const mockSupplier = {
+    id: 7,
+    name: 'Nolon Transport',
+    type: SupplierType.TRANSPORTATION,
+  } as Supplier;
 
   const savedJourney = {
     id: 42,
@@ -206,6 +219,8 @@ describe('JourneyController — POST /api/journeys/office', () => {
       custodyMovement: jest.fn().mockResolvedValue(undefined),
       findPersonSubAccount: jest.fn(),
       createPersonSubAccounts: jest.fn().mockResolvedValue(undefined),
+      createSupplierAccount: jest.fn().mockResolvedValue(mockSupplierAccount),
+      findActorLeaf: jest.fn().mockResolvedValue(mockSupplierAccount),
     };
     custodyService = { save: jest.fn().mockResolvedValue({ id: 1 }) };
     userService = { findByFields: jest.fn().mockResolvedValue({ id: 4 }) };
@@ -231,6 +246,10 @@ describe('JourneyController — POST /api/journeys/office', () => {
         if (entity === Driver) {
           const id = (options?.where as { id?: number })?.id;
           return id === mockDriver.id ? mockDriver : null;
+        }
+        if (entity === Supplier) {
+          const id = (options?.where as { id?: number })?.id;
+          return id === mockSupplier.id ? mockSupplier : null;
         }
         return null;
       },
@@ -478,6 +497,7 @@ describe('JourneyController — POST /api/journeys/office', () => {
           trailer: { id: 1 },
           receivedCompany: 'Rental',
           sellingOrderNo: 'SO-NOLON-NESTED',
+          transportSupplierId: 7,
         })
         .expect(201);
 
@@ -532,6 +552,91 @@ describe('JourneyController — POST /api/journeys/office', () => {
       const { custodyAmount: _, ...body } = officeCreateBody({ custodyAmount: 5000 });
       await request(app.getHttpServer()).post('/api/journeys/office').send(body).expect(201);
       expect(custodyService.save).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('transport supplier (nolon and contract cars)', () => {
+    it.each([JourneyVehicleMode.NOLON_CAR, JourneyVehicleMode.CONTRACT_CAR])(
+      '%s: pays custody from the employee straight to the transport supplier',
+      async (mode) => {
+        await request(app.getHttpServer())
+          .post('/api/journeys/office')
+          .send({ ...MODE_BODIES[mode], custodyAmount: 500 })
+          .expect(201);
+
+        expect(journeyService.save.mock.calls[0][0].transportSupplier).toBe(mockSupplier);
+        expect(journeyTransactionService.save.mock.calls[0][0].amount).toBe(500);
+        expect(accountService.custodyMovement).toHaveBeenCalledWith(
+          mockEmpAccount,
+          mockSupplierAccount,
+          500,
+          mockManager,
+        );
+        expect(accountService.findPersonSubAccount).not.toHaveBeenCalledWith(
+          'Trip Driver',
+          ACCOUNT_PARENT_CUSTODY,
+          mockManager,
+        );
+        expect(custodyService.save).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each([JourneyVehicleMode.NOLON_CAR, JourneyVehicleMode.CONTRACT_CAR])(
+      '%s: rejects a trip without a transport supplier',
+      async (mode) => {
+        const { transportSupplierId: _, ...body } = MODE_BODIES[mode];
+        const res = await request(app.getHttpServer())
+          .post('/api/journeys/office')
+          .send(body)
+          .expect(400);
+
+        expect(res.body.message).toBe('مورد النقل مطلوب للنولون والعقد.');
+        expect(journeyService.save).not.toHaveBeenCalled();
+      },
+    );
+
+    it('rejects a supplier that is not a transport supplier', async () => {
+      mockSupplier.type = SupplierType.GOODS;
+      try {
+        await request(app.getHttpServer())
+          .post('/api/journeys/office')
+          .send(MODE_BODIES[JourneyVehicleMode.NOLON_CAR])
+          .expect(400);
+      } finally {
+        mockSupplier.type = SupplierType.TRANSPORTATION;
+      }
+      expect(journeyService.save).not.toHaveBeenCalled();
+    });
+
+    it('rejects a supplier from another branch than the employee', async () => {
+      mockEmployee.branch = { id: 1 } as Employee['branch'];
+      mockSupplier.branch = { id: 2 } as Supplier['branch'];
+      try {
+        const res = await request(app.getHttpServer())
+          .post('/api/journeys/office')
+          .send(MODE_BODIES[JourneyVehicleMode.NOLON_CAR])
+          .expect(400);
+        expect(res.body.message).toBe('مورد النقل مش تابع لفرع الموظف.');
+      } finally {
+        mockEmployee.branch = undefined as unknown as Employee['branch'];
+        mockSupplier.branch = undefined;
+      }
+    });
+
+    it('COMPANY_CAR: keeps custody with the driver and ignores the supplier', async () => {
+      await request(app.getHttpServer())
+        .post('/api/journeys/office')
+        .send(officeCreateBody({ custodyAmount: 500, transportSupplierId: 7 }))
+        .expect(201);
+
+      expect(journeyService.save.mock.calls[0][0].transportSupplier).toBeUndefined();
+      expect(accountService.custodyMovement).toHaveBeenCalledWith(
+        mockEmpAccount,
+        mockDriverAccount,
+        500,
+        mockManager,
+      );
+      expect(custodyService.save).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -24,10 +24,12 @@ export function mapSupplierRow(supplier: ISupplier): ISupplierTableRow {
   };
 }
 
-export const useGetAllSuppliers = (params?: IQueryParams) => {
+type SupplierQueryParams = IQueryParams & { type?: SupplierType };
+
+export const useGetAllSuppliers = (params?: SupplierQueryParams) => {
   const { data, isPending: isGetSuppliersPending } = useGetPaginated<
     ISupplier,
-    IQueryParams
+    SupplierQueryParams
   >({
     endPoint: '/api/suppliers',
     queryKey: ['suppliers'],
