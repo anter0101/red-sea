@@ -138,14 +138,14 @@ export const accounts: AccountSeed[] = [
   },
   {
     name: 'الخزينه',
-    type: AccountType.CASH,
+    type: AccountType.ASSET,
     normalBalance: normalBalanceType.DEBIT,
     isLeaf: true,
     parentName: 'الاصول المتداوله',
   },
   {
     name: 'البنك',
-    type: AccountType.CASH,
+    type: AccountType.ASSET,
     normalBalance: normalBalanceType.DEBIT,
     isLeaf: true,
     parentName: 'الاصول المتداوله',
@@ -408,7 +408,7 @@ export const accounts: AccountSeed[] = [
     name: 'الايرادات',
     type: AccountType.REVENUE,
     normalBalance: normalBalanceType.CREDIT,
-    isLeaf: true,
+    isLeaf: false,
     parentName: 'الإيرادات',
   },
   {
@@ -416,7 +416,7 @@ export const accounts: AccountSeed[] = [
     type: AccountType.REVENUE,
     normalBalance: normalBalanceType.CREDIT,
     isLeaf: false,
-    parentName: 'الإيرادات',
+    parentName: 'الايرادات',
     systemKey: 'REVENUE_IN_PROGRESS',
   },
   {
@@ -424,7 +424,7 @@ export const accounts: AccountSeed[] = [
     type: AccountType.REVENUE,
     normalBalance: normalBalanceType.CREDIT,
     isLeaf: false,
-    parentName: 'الإيرادات',
+    parentName: 'الايرادات',
     systemKey: 'REVENUE_DONE',
   },
   {
