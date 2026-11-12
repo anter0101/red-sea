@@ -327,7 +327,8 @@ export class AccountService {
   }
 
   /**
-   * Sets the stored opening balance once. Not allowed for system chart accounts or if already locked.
+   * Sets or changes the opening balance of any leaf account, system accounts included,
+   * even after postings. Balances are opening + movements, so reports follow the new value.
    */
   async setOpeningBalance(id: number, amount: number, updater?: string): Promise<Account> {
     const account = await this.accountRepository.findOne({ where: { id } });
@@ -336,24 +337,6 @@ export class AccountService {
     }
     if (account.isLeaf !== true || (await this.hasChildAccounts(id))) {
       throw new BadRequestException('Opening balance can only be set on leaf accounts.');
-    }
-    if (account.openingBalanceLocked) {
-      throw new BadRequestException(
-        'Opening balance has already been set for this account and cannot be changed.',
-      );
-    }
-    if (Math.abs(toNumberAmount(account.openingBalance)) > 0.01) {
-      throw new BadRequestException(
-        'Opening balance can only be set when the current opening balance is zero.',
-      );
-    }
-    const lineCount = await this.transactionLineRepository.count({
-      where: { account: { id } },
-    });
-    if (lineCount > 0) {
-      throw new BadRequestException(
-        'Opening balance cannot be changed while the account has transaction lines.',
-      );
     }
     const now = new Date();
     await this.accountRepository.update(id, {

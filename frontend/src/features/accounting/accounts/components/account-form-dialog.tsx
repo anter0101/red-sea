@@ -35,6 +35,7 @@ import {
 
 import { useCreateAccount } from '../api/create';
 import { useUpdateAccount } from '../api/update';
+import { useSetOpeningBalance } from '../api/set-opening-balance';
 import AccountParentTreeSelect from './account-parent-tree-select';
 import { AccountType, NormalBalance } from '../enums';
 
@@ -80,7 +81,12 @@ interface AccountFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Table row may include `code` for read-only display while editing. */
-  editData?: { id: number; code?: string } & Partial<AccountFormData>;
+  editData?: {
+    id: number;
+    code?: string;
+    isLeaf?: boolean;
+    isSystem?: boolean;
+  } & Partial<AccountFormData>;
 }
 
 export default function AccountFormDialog({
@@ -90,11 +96,13 @@ export default function AccountFormDialog({
 }: AccountFormDialogProps) {
   const t = useTranslations('accounting.accounts');
   const isEditing = !!editData?.id;
+  const canEditOpeningBalance = isEditing && editData?.isLeaf === true;
 
   const [isChildUi, setIsChildUi] = useState(false);
 
   const { createAccountMutation, isCreateAccountPending } = useCreateAccount();
   const { updateAccountMutation, isUpdateAccountPending } = useUpdateAccount();
+  const { setOpeningBalanceMutation, isSetOpeningBalancePending } = useSetOpeningBalance();
 
   const form = useForm<AccountFormData>({
     resolver: zodResolver(accountFormSchema),
@@ -127,7 +135,8 @@ export default function AccountFormDialog({
         type: editData.type || undefined,
         normalBalance: editData.normalBalance || undefined,
         parentAccountId: editData.parentAccountId || null,
-        openingBalance: undefined,
+        openingBalance:
+          editData.openingBalance != null ? Number(editData.openingBalance) : undefined,
       });
       setIsChildUi(!!editData.parentAccountId);
     } else if (open && !editData) {
@@ -172,25 +181,38 @@ export default function AccountFormDialog({
     });
   };
 
-  /** Edit only sends `name`; full schema would still validate hidden fields and block submit. */
+  /**
+   * Edit sends `name`, then the opening balance (leaf accounts only) when it changed.
+   * Full schema would still validate hidden fields and block submit.
+   */
   const onSubmitEdit = (e: FormEvent) => {
     e.preventDefault();
     if (!editData?.id) return;
+    const id = editData.id;
     const name = form.getValues('name')?.trim() ?? '';
     if (!name) {
       form.setError('name', { message: 'مطلوب' });
       return;
     }
     form.clearErrors('name');
-    updateAccountMutation(
-      { id: editData.id, data: { name } },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-          form.reset();
-        },
-      },
-    );
+
+    const newOpening = form.getValues('openingBalance') ?? 0;
+    const oldOpening = Number(editData.openingBalance ?? 0);
+    const openingChanged = canEditOpeningBalance && Math.abs(newOpening - oldOpening) > 0.001;
+
+    const close = () => {
+      onOpenChange(false);
+      form.reset();
+    };
+
+    const saveOpening = () => {
+      if (!openingChanged) return close();
+      setOpeningBalanceMutation({ id, data: { amount: newOpening } }, { onSuccess: close });
+    };
+
+    // System accounts reject PUT /accounts/:id, so only send the name when it changed.
+    if (name === (editData.name ?? '').trim()) return saveOpening();
+    updateAccountMutation({ id, data: { name } }, { onSuccess: saveOpening });
   };
 
   return (
@@ -237,7 +259,7 @@ export default function AccountFormDialog({
                 <FormItem>
                   <FormLabel>{t('form.name')}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} readOnly={isEditing && editData?.isSystem === true} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -355,42 +377,49 @@ export default function AccountFormDialog({
                     )}
                   />
                 )}
-
-                {/* openingBalance — optional, locked once set */}
-                <FormField
-                  control={form.control}
-                  name="openingBalance"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('form.opening-balance')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0.00"
-                          value={field.value ?? ''}
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            field.onChange(isNaN(val) ? undefined : val);
-                          }}
-                        />
-                      </FormControl>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t('form.opening-balance-note')}
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </>
+            )}
+
+            {/* openingBalance — on create, and on edit for leaf accounts (changeable anytime) */}
+            {(!isEditing || canEditOpeningBalance) && (
+              <FormField
+                control={form.control}
+                name="openingBalance"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.opening-balance')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={field.value ?? ''}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          field.onChange(isNaN(val) ? undefined : val);
+                        }}
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t('form.opening-balance-note')}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 إلغاء
               </Button>
-              <Button type="submit" disabled={isCreateAccountPending || isUpdateAccountPending}>
+              <Button
+                type="submit"
+                disabled={
+                  isCreateAccountPending || isUpdateAccountPending || isSetOpeningBalancePending
+                }
+              >
                 حفظ
               </Button>
             </DialogFooter>

@@ -142,10 +142,10 @@ export class AccountController {
   @Put('/:id/opening-balance')
   @Roles(UserRole.ADMIN)
   @ApiOperation({
-    summary: 'Set opening balance (once)',
+    summary: 'Set or change opening balance',
     description:
-      'Stores the account opening balance used in financial reports before posted activity. ' +
-      'Can only be called once per non-system account. System accounts are set by the seeder.',
+      'Stores the opening balance used in balances and financial reports. ' +
+      'Any leaf account, system accounts included; can be changed at any time, even after postings.',
   })
   @ApiResponse({ status: 200, description: 'Opening balance saved', type: AccountDTO })
   async setOpeningBalance(

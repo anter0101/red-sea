@@ -221,15 +221,20 @@ describe('AccountService (persistence & rules)', () => {
     await expect(service.setOpeningBalance(1, 100)).rejects.toThrow(/leaf accounts/);
   });
 
-  it('setOpeningBalance rejects when already locked', async () => {
-    mockRepo.findOne.mockResolvedValue({
-      id: 1,
-      isSystem: false,
-      isLeaf: true,
-      openingBalanceLocked: true,
-    });
+  it('setOpeningBalance changes an already-set, locked balance on a system account', async () => {
+    mockRepo.findOne
+      .mockResolvedValueOnce({
+        id: 1,
+        isSystem: true,
+        isLeaf: true,
+        openingBalance: 100,
+        openingBalanceLocked: true,
+      })
+      .mockResolvedValueOnce({ id: 1, openingBalance: 50, openingBalanceLocked: true });
     mockRepo.count.mockResolvedValue(0);
-    await expect(service.setOpeningBalance(1, 50)).rejects.toThrow(/already been set/);
+    const updated = await service.setOpeningBalance(1, 50);
+    expect(updated.openingBalance).toBe(50);
+    expect(mockRepo.update).toHaveBeenCalledWith(1, expect.objectContaining({ openingBalance: 50 }));
   });
 
   it('setOpeningBalance updates and returns refreshed row', async () => {

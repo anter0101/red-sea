@@ -45,7 +45,7 @@
       "select-parent": "Select Parent Account",
       "no-parent": "No Parent Account",
       "opening-balance": "Opening Balance",
-      "opening-balance-note": "The initial balance for the account. Once set, it cannot be changed.",
+      "opening-balance-note": "The starting balance for the account. You can change it at any time.",
       "is-child": "Is this a child account?"
     },
     "status": {

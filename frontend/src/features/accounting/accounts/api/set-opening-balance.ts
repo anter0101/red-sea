@@ -14,12 +14,10 @@ export interface SetOpeningBalanceBody {
 /**
  * PUT /api/accounting/accounts/:id/opening-balance
  *
- * One-time only: sets opening balance on a leaf account.
- * Once set, `openingBalanceLocked = true` and cannot be changed.
+ * Sets or changes the opening balance of a leaf account (system accounts included), anytime.
  *
  * Errors:
- * - 400 if already locked
- * - 403 if system account
+ * - 400 if the account is not a leaf
  */
 export const useSetOpeningBalance = () => {
   const t = useTranslations('accounting.accounts');
