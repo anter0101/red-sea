@@ -57,7 +57,7 @@ export class SupplierController {
   // GET ALL (paginated)
   // ------------------------------------------------------------------------
   @Get('/')
-  @Roles(UserRole.ADMIN, UserRole.USER)
+  @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
   @ApiOperation({ summary: 'Get list of suppliers paginated' })
   @ApiResponse({
     status: 200,
