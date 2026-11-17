@@ -62,8 +62,33 @@ services:
       - redsea
 
   nginx:
+    # On the VPS Caddy owns 80 and 443, so nginx only keeps the Postgres export (server-only by default).
+    ports: !override
+      - "${POSTGRES_EXPORT_BIND:-127.0.0.1}:${POSTGRES_EXPORT_PORT:-15432}:5432"
     depends_on:
       backend:
         condition: service_healthy
       frontend:
         condition: service_healthy
+
+  # HTTPS edge. Gets and renews the certificate for SITE_DOMAIN (see caddy/Caddyfile).
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?SITE_DOMAIN must be the public domain, e.g. 13-140-130-87.sslip.io}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - nginx
+    restart: unless-stopped
+    networks:
+      - redsea
+
+volumes:
+  caddy_data:
+  caddy_config:
