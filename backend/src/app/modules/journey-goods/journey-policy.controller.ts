@@ -31,6 +31,10 @@ import {
 import { JourneyService } from '../journey/journey.service';
 import { Journey } from '../journey/journey.entity';
 import { JourneyRevenueService } from '../journey/journey-revenue.service';
+import { JourneyOfficeCreateService } from '../journey/journey-office-create.service';
+import { mapJourneyToDtoSelective } from '../journey/journey.mapper';
+import { CreateJourneyWithPolicyDTO } from './dtos/create-journey-with-policy.dto';
+import { JourneyPolicy } from './journey-policy.entity';
 import { AreaService } from '../area/area.service';
 import { HeaderUtil } from 'src/core/utils/header-util';
 import { PageRequest, pageRequestSortString } from 'src/core/utils/pagination.entity';
@@ -44,7 +48,7 @@ import { JourneyAttachmentType, JourneyStatus } from 'src/core/enums/journey';
 import { OwnerShipType } from 'src/core/enums/ownerShip-types';
 import { JourneyPolicyFormDTO } from './dtos/journey-policy-form.dto';
 import { withTransaction } from 'src/core/utils/transaction';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 
 @Controller('api/journey-policies')
 @ApiBearerAuth()
@@ -64,6 +68,7 @@ export class JourneyPolicyController {
     private readonly journeyRevenueService: JourneyRevenueService,
     private readonly policyLedgerService: PolicyLedgerService,
     private readonly dataSource: DataSource,
+    private readonly journeyOfficeCreate: JourneyOfficeCreateService,
   ) {}
 
   // ---------------------------
@@ -173,6 +178,35 @@ export class JourneyPolicyController {
   }
 
   // ---------------------------
+  // CREATE OFFICE JOURNEY + POLICY (admin, one transaction)
+  // ---------------------------
+  @Post('/with-journey')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Create an office journey and its policy in one transaction' })
+  async createWithJourney(@Body() dto: CreateJourneyWithPolicyDTO, @AuthUser() user: any) {
+    const result = await withTransaction(this.dataSource, async (manager) => {
+      const journey = await this.journeyOfficeCreate.createInTransaction(
+        dto.journey,
+        user,
+        manager,
+      );
+
+      const policyDto = { ...dto.policy, journeyId: journey.id };
+      await this.applyDelegationContext(policyDto, journey, user?.id);
+      await this.validatePolicyLinks(policyDto);
+      this.assertTransportSupplier(journey, policyDto.transportSupplierId);
+
+      const policy = await this.savePolicyInTransaction(policyDto, journey, user, manager);
+      return { journey, policy };
+    });
+
+    return {
+      journey: mapJourneyToDtoSelective(result.journey),
+      policy: mapJourneyPolicyToDtoSelective(result.policy),
+    };
+  }
+
+  // ---------------------------
   // CREATE (same structure as JourneyController)
   // ---------------------------
   @Post('/')
@@ -198,46 +232,52 @@ export class JourneyPolicyController {
     await this.validatePolicyReferences(dto.journeyId, dto);
     this.assertTransportSupplier(journey, dto.transportSupplierId);
 
-    // 2. Map to entity
+    const saved = await withTransaction(this.dataSource, (manager) =>
+      this.savePolicyInTransaction(dto, journey, user, manager),
+    );
+
+    return mapJourneyPolicyToDtoSelective(saved);
+  }
+
+  /**
+   * Saves a policy and its side effects (journey status, revenue, expenses, ledger, policy file)
+   * inside the given transaction. `journey` must be the journey as seen by that transaction.
+   */
+  private async savePolicyInTransaction(
+    dto: CreateJourneyPolicyDTO,
+    journey: Journey,
+    user: any,
+    manager: EntityManager,
+  ): Promise<JourneyPolicy> {
     const entity = mapCreateJourneyPolicyDtoToEntity(dto);
     // link to existing journey so relation (and id) is set
     entity.journey = journey;
 
-    // Save
-    const saved = await withTransaction(this.dataSource, async (manager) => {
-      const savedPolicy = await this.policyService.save(entity, user?.email, manager);
-      await this.journeyService.transitionStatus(
-        dto.journeyId,
-        JourneyStatus.POLICY_COLLECTED,
-        user?.email,
-        manager,
-      );
-      await this.journeyRevenueService.applyFromPolicy(savedPolicy, user?.email, manager);
-      await this.policyLedgerService.saveExpenses(
-        dto.journeyId,
-        dto.expenses,
-        user?.email,
-        manager,
-      );
-      await this.policyLedgerService.apply(
-        dto.journeyId,
-        { transportSupplierId: dto.transportSupplierId },
-        user?.email,
-        manager,
-      );
+    const savedPolicy = await this.policyService.save(entity, user?.email, manager);
+    await this.journeyService.transitionStatus(
+      dto.journeyId,
+      JourneyStatus.POLICY_COLLECTED,
+      user?.email,
+      manager,
+    );
+    await this.journeyRevenueService.applyFromPolicy(savedPolicy, user?.email, manager);
+    await this.policyLedgerService.saveExpenses(dto.journeyId, dto.expenses, user?.email, manager);
+    await this.policyLedgerService.apply(
+      dto.journeyId,
+      { transportSupplierId: dto.transportSupplierId },
+      user?.email,
+      manager,
+    );
 
-      if (dto.policyFile) {
-        const policyAttachment = new JourneyAttachment();
-        policyAttachment.journey = savedPolicy.journey;
-        policyAttachment.url = dto.policyFile;
-        policyAttachment.type = JourneyAttachmentType.POLICY;
-        await this.journeyAttachmentService.save(policyAttachment, user?.email);
-      }
+    if (dto.policyFile) {
+      const policyAttachment = new JourneyAttachment();
+      policyAttachment.journey = savedPolicy.journey;
+      policyAttachment.url = dto.policyFile;
+      policyAttachment.type = JourneyAttachmentType.POLICY;
+      await this.journeyAttachmentService.save(policyAttachment, user?.email, manager);
+    }
 
-      return savedPolicy;
-    });
-
-    return mapJourneyPolicyToDtoSelective(saved);
+    return savedPolicy;
   }
 
   // ---------------------------
@@ -341,6 +381,13 @@ export class JourneyPolicyController {
     const journey = await this.journeyService.findById(journeyId);
     if (!journey) throw new NotFoundException(`Journey with id ${journeyId} not found`);
 
+    await this.validatePolicyLinks(dto);
+  }
+
+  /** Checks the area, government and employee the policy points to (not the journey itself). */
+  private async validatePolicyLinks(
+    dto: CreateJourneyPolicyDTO | UpdateJourneyPolicyDTO,
+  ): Promise<void> {
     // Validate deliverySite if provided
     if (dto.deliveryAreaId !== undefined) {
       const deliverySite = await this.areaService.findById(dto.deliveryAreaId);

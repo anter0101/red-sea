@@ -4,24 +4,31 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import { useTranslations } from 'next-intl';
 
+import { Button } from '@/components/ui/button';
 import { MultiStepForm, type Step } from '@/components/ui/stepper';
+import { PolicyForm } from '@/features/trips/components/policy-from';
+import type { ITripPolicyInfo } from '@/features/trips/types/policy';
 import { PrintDialog } from '@/features/trips/components/print-dialog';
 
 import type { VehicleMode } from '../enums/vehicle-mode';
+import { useCreateJourneyWithPolicy } from '../api/create-journey-with-policy';
 import { useOfficeJourneyForm } from '../hooks/use-office-journey-form';
-import { emptyOfficeJourneyValues } from '../types/office-journey-schema';
-import { loadOfficeJourneyDraft } from '../utils/office-journey-draft';
+import { buildOfficeJourneyPayload, emptyOfficeJourneyValues } from '../types/office-journey-schema';
+import { clearOfficeJourneyDraft, loadOfficeJourneyDraft } from '../utils/office-journey-draft';
 import OfficeJourneyStepCustody from './office-journey-step-custody';
 import OfficeJourneyStepTrip from './office-journey-step-trip';
 import OfficeJourneyStepVehicle from './office-journey-step-vehicle';
 
 interface OfficeJourneyFormProps {
   vehicleMode: VehicleMode;
+  /** Admin combined flow: adds a policy step and saves the journey and policy together. */
+  withPolicy?: boolean;
 }
 
-export default function OfficeJourneyForm({ vehicleMode }: OfficeJourneyFormProps) {
+export default function OfficeJourneyForm({ vehicleMode, withPolicy = false }: OfficeJourneyFormProps) {
   const t = useTranslations('office');
   const router = useRouter();
   const { data: session } = useSession();
@@ -41,6 +48,10 @@ export default function OfficeJourneyForm({ vehicleMode }: OfficeJourneyFormProp
     if (!open) {
       const createdId = printJourneyId;
       setPrintJourneyId(null);
+      if (withPolicy && createdId) {
+        router.push(`/trips/${createdId}`);
+        return;
+      }
       router.push(isAdmin && createdId ? `/office/policy/${createdId}` : '/office');
     }
   };
@@ -70,13 +81,36 @@ export default function OfficeJourneyForm({ vehicleMode }: OfficeJourneyFormProp
     setRestoredFromDraft(true);
   }, [form, vehicleMode]);
 
-  const goNext = () => setCurrentStep((prev) => Math.min(prev + 1, 2));
+  const lastStep = withPolicy ? 3 : 2;
+  const goNext = () => setCurrentStep((prev) => Math.min(prev + 1, lastStep));
   const goPrevious = () => {
     if (currentStep === 0) {
       router.push('/office');
       return;
     }
     setCurrentStep((prev) => Math.max(prev - 1, 0));
+  };
+
+  const createWithPolicy = useCreateJourneyWithPolicy();
+
+  // Combined flow: the custody step moves on to the policy step instead of saving the journey alone.
+  const onStepSubmit = form.handleSubmit(
+    () => setCurrentStep(3),
+    () => toast.error('يرجى تعبئة الحقول المطلوبة'),
+  );
+
+  const submitWithPolicy = (policy: ITripPolicyInfo) => {
+    const { journeyId, ...policyFields } = policy;
+    void journeyId;
+    createWithPolicy.mutate(
+      { journey: buildOfficeJourneyPayload(form.getValues()), policy: policyFields },
+      {
+        onSuccess: (data) => {
+          clearOfficeJourneyDraft();
+          setPrintJourneyId(data.journey.id);
+        },
+      },
+    );
   };
 
   const steps: Step[] = [
@@ -122,10 +156,32 @@ export default function OfficeJourneyForm({ vehicleMode }: OfficeJourneyFormProp
           isSubmitting={isSubmitting}
           restoredFromDraft={restoredFromDraft}
           onPrevious={goPrevious}
-          onSubmit={onSubmit}
+          onSubmit={withPolicy ? onStepSubmit : onSubmit}
         />
       ),
     },
+    ...(withPolicy
+      ? [
+          {
+            label: 'البوليصة',
+            description: 'بيانات البوليصة وتُحفظ مع الرحلة',
+            content: (
+              <div className="flex flex-col gap-4" dir="rtl">
+                <div>
+                  <Button type="button" variant="outline" onClick={() => setCurrentStep(2)}>
+                    رجوع للعهدة
+                  </Button>
+                </div>
+                <PolicyForm
+                  mode="create"
+                  vehicleMode={vehicleMode}
+                  onPayload={submitWithPolicy}
+                />
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (

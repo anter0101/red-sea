@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import EntitiesToolbar from '@/components/common/entities-toolbar';
 import TableFilters from '@/components/common/table-filters';
 import TablePagination from '@/components/common/table-pagination';
+import BranchFilter from '@/components/common/branch-filter';
 import { usePaginationParams } from '@/hooks/use-pagination-params';
 import { useTableExport } from '@/hooks/use-table-export';
 
@@ -63,7 +64,9 @@ export default function OfficeRequestsPageClient() {
           onExport={exportData}
           isExporting={isExporting}
         />
-        <TableFilters applyDefaultDateRange={false} />
+        <TableFilters applyDefaultDateRange={false}>
+          <BranchFilter />
+        </TableFilters>
         {isGetOfficeRequestsPending ? (
           <p className="p-4 text-center">{t('loading')}</p>
         ) : (

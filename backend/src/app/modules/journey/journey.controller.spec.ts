@@ -29,6 +29,7 @@ import { Account } from '../account/account.entity';
 import { User } from '../user/user.entity';
 import { JourneyDelegationPrintService } from '../journey-delegation-print/journey-delegation-print.service';
 import { JourneyRevenueService } from './journey-revenue.service';
+import { JourneyOfficeCreateService } from './journey-office-create.service';
 import { NotFoundException } from '@nestjs/common';
 import { ACCOUNT_PARENT_CUSTODY } from '../account/person-account.constants';
 import { Supplier } from '../supplier/supplier.entity';
@@ -270,6 +271,7 @@ describe('JourneyController — POST /api/journeys/office', () => {
         { provide: AccountService, useValue: accountService },
         { provide: CustodyService, useValue: custodyService },
         { provide: JourneyDelegationPrintService, useValue: journeyDelegationPrintService },
+        JourneyOfficeCreateService,
         {
           provide: JourneyRevenueService,
           useValue: {
@@ -693,6 +695,10 @@ describe('JourneyController — GET /api/journeys/stats', () => {
         { provide: TrailerService, useValue: { findById: jest.fn() } },
         { provide: JourneyTransactionService, useValue: { save: jest.fn() } },
         { provide: ClientService, useValue: { findById: jest.fn() } },
+        {
+          provide: JourneyOfficeCreateService,
+          useValue: { createInTransaction: jest.fn(), validateJourneyReferences: jest.fn() },
+        },
         { provide: EmployeeService, useValue: { findByFields: jest.fn() } },
         {
           provide: AccountService,

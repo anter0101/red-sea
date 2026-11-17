@@ -26,6 +26,16 @@ export class OfficeRequestQueryDTO extends PaginateDTO {
   @Type(() => Number)
   requestedToId?: number;
 
+  @ApiProperty({
+    required: false,
+    description: 'Filter by branch: requests where either the requesting or the target employee belongs to it',
+  })
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
+  branchId?: number;
+
   @ApiProperty({ required: false, enum: OfficeRequestStatus })
   @IsOptional()
   @IsEnum(OfficeRequestStatus)

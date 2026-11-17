@@ -62,6 +62,7 @@ import { JourneyAssetsService } from './journey/journey-assets.service';
 import { JourneyTransactionService } from './journey-transaction/journey-transaction.service';
 import { JourneyDelegationPrintService } from './journey-delegation-print/journey-delegation-print.service';
 import { JourneyRevenueService } from './journey/journey-revenue.service';
+import { JourneyOfficeCreateService } from './journey/journey-office-create.service';
 import { OfficeRequestController } from './office-request/office-request.controller';
 import { OfficeRequestService } from './office-request/office-request.service';
 import { Car } from './car/car.entity';
@@ -269,6 +270,7 @@ const cases: SmokeCase[] = [
       { provide: DataSource, useValue: stub() },
       { provide: JourneyDelegationPrintService, useValue: stub() },
       { provide: JourneyRevenueService, useValue: stub() },
+      { provide: JourneyOfficeCreateService, useValue: stub() },
     ],
   },
   {

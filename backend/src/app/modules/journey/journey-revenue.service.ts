@@ -9,11 +9,7 @@ import { PricingSheetKind } from 'src/core/enums/pricing-sheet-kind';
 import { OwnerShipType } from 'src/core/enums/ownerShip-types';
 import { SalaryType } from 'src/core/enums/salary';
 import { JourneyTransactionCategoryType, JourneyTransactionType } from 'src/core/enums/journey';
-import {
-  actualRevenueFrom,
-  nolonFeesFrom,
-  unitPriceFromSheet,
-} from './journey-revenue.calculator';
+import { actualRevenueFrom, nolonFeesFrom, unitPriceFromSheet } from './journey-revenue.calculator';
 
 @Injectable()
 export class JourneyRevenueService {

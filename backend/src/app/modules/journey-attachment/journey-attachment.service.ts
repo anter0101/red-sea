@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { EntityManager, FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { JourneyAttachment } from './journey-attachment.entity';
 import { JourneyAttachmentQueryDTO } from './dtos/query-journey-attachment.dto';
 import { applyQueryFilters } from 'src/core/utils/query-builder.util';
@@ -48,7 +48,11 @@ export class JourneyAttachmentService {
     return qb.getManyAndCount();
   }
 
-  async save(entity: JourneyAttachment, creator?: string): Promise<JourneyAttachment> {
+  async save(
+    entity: JourneyAttachment,
+    creator?: string,
+    manager?: EntityManager,
+  ): Promise<JourneyAttachment> {
     const now = new Date();
     entity.createdAt = entity.createdAt ?? now;
     entity.updatedAt = now;
@@ -56,7 +60,8 @@ export class JourneyAttachmentService {
       entity.createdBy = entity.createdBy ?? creator;
       entity.updatedBy = creator;
     }
-    return await this.repo.save(entity);
+    const repo = manager ? manager.getRepository(JourneyAttachment) : this.repo;
+    return await repo.save(entity);
   }
 
   async update(entity: JourneyAttachment, updater?: string): Promise<JourneyAttachment> {

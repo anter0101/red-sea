@@ -21,6 +21,7 @@ import { CustodyModule } from '../custody/custody.module';
 import { DeliveryPrice } from '../delivery-price/delivery-price.entity';
 import { JourneyDelegationPrintModule } from '../journey-delegation-print/journey-delegation-print.module';
 import { JourneyRevenueService } from './journey-revenue.service';
+import { JourneyOfficeCreateService } from './journey-office-create.service';
 
 @Module({
   imports: [
@@ -45,7 +46,12 @@ import { JourneyRevenueService } from './journey-revenue.service';
     JourneyDelegationPrintModule,
   ],
   controllers: [JourneyController],
-  providers: [JourneyService, JourneyAssetsService, JourneyRevenueService],
-  exports: [JourneyService, JourneyRevenueService],
+  providers: [
+    JourneyService,
+    JourneyAssetsService,
+    JourneyRevenueService,
+    JourneyOfficeCreateService,
+  ],
+  exports: [JourneyService, JourneyRevenueService, JourneyOfficeCreateService],
 })
 export class JourneyModule {}

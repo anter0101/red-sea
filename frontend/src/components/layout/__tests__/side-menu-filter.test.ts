@@ -35,3 +35,22 @@ describe('filterMenuByRole', () => {
     expect(filterMenuByRole(items, undefined)).toHaveLength(3);
   });
 });
+
+describe('admin-only full policy link', () => {
+  const trips: SideMenuItem = {
+    key: 'trips',
+    alt: 'Trips',
+    href: '/trips',
+    subItems: [{ alt: 'full', href: '/office/full' }],
+  };
+
+  it('admin sees the full policy link under trips', () => {
+    const result = filterMenuByRole([trips], 'ADMIN');
+    expect(result[0].subItems?.map((s) => s.href)).toEqual(['/office/full']);
+  });
+
+  it('other roles do not see the full policy link', () => {
+    const result = filterMenuByRole([trips], 'USER');
+    expect(result[0].subItems).toEqual([]);
+  });
+});

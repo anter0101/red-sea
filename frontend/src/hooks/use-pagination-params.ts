@@ -36,6 +36,8 @@ export function usePaginationParams(options: UsePaginationParamsOptions = {}) {
   const createdAtFrom = searchParams.get('createdAtFrom') || undefined;
   const createdAtTo = searchParams.get('createdAtTo') || undefined;
   const tripStatus = searchParams.get('tripStatus') || undefined;
+  const branchIdParam = Number(searchParams.get('branchId'));
+  const branchId = branchIdParam > 0 ? branchIdParam : undefined;
 
   return {
     page,
@@ -46,5 +48,6 @@ export function usePaginationParams(options: UsePaginationParamsOptions = {}) {
     createdAtFrom,
     createdAtTo,
     tripStatus,
+    branchId,
   };
 }

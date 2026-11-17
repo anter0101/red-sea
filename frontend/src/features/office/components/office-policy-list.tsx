@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { ColumnDef } from '@tanstack/react-table';
 
+import BranchFilter from '@/components/common/branch-filter';
 import EntitiesToolbar from '@/components/common/entities-toolbar';
 import TableFilters from '@/components/common/table-filters';
 import TablePagination from '@/components/common/table-pagination';
@@ -183,6 +184,7 @@ export default function OfficePolicyList() {
       <EntitiesToolbar onExport={exportData} isExporting={isExporting} />
       <TableFilters>
         <PolicyStatusFilter />
+        <BranchFilter />
       </TableFilters>
       {isGetJourneysPending ? (
         <p className="p-4 text-center">جاري التحميل...</p>

@@ -43,9 +43,13 @@ import {
 import { TripTransactionCategory } from '../types/transactions';
 
 interface PolicyFormProps {
-  journeyId: number;
+  journeyId?: number;
   mode: 'update' | 'create';
   onSaved?: () => void;
+  /** Combined office flow: the journey does not exist yet, so hand the payload to the caller. */
+  onPayload?: (payload: ITripPolicyInfo) => void;
+  /** Vehicle mode of the journey being created (used when there is no saved journey yet). */
+  vehicleMode?: string;
 }
 
 /* ------------------------------ Default Values ----------------------------- */
@@ -123,7 +127,7 @@ function mapPolicyToFormValues(policy: ITripPolicyRes): TripPolicyFormValues {
 }
 
 /* --------------------------- Main Component ------------------------------- */
-export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
+export const PolicyForm = ({ journeyId, mode, onSaved, onPayload, vehicleMode }: PolicyFormProps) => {
   const router = useRouter();
 
   /* ---------------------------- Data Fetching ----------------------------- */
@@ -144,7 +148,7 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
   const deliveryGovId = form.watch('deliveryGovId');
   const { governments } = useGetAllGovernments();
   const { areas } = useGetAllAreasByGovernment(deliveryGovId || null);
-  const ownerShip = tripResponse?.car?.ownerShip;
+  const ownerShip = tripResponse?.car?.ownerShip ?? vehicleMode;
   const needsTransportSupplier = ownerShip === 'NOLON_CAR' || ownerShip === 'CONTRACT_CAR';
   const tripSupplier = tripResponse?.transportsupplier?.id ? tripResponse.transportsupplier : null;
   const showExpenses = hasDriverExpenses(ownerShip);
@@ -175,7 +179,7 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
   /* ----------------------------- Submit Logic ----------------------------- */
   const onSubmit = (data: TripPolicyFormValues) => {
     const normalizedJourneyId = toOptionalNumber(journeyId);
-    if (!normalizedJourneyId || !Number.isInteger(normalizedJourneyId)) {
+    if (!onPayload && (!normalizedJourneyId || !Number.isInteger(normalizedJourneyId))) {
       toast.error('رقم الرحلة غير صالح');
       return;
     }
@@ -191,7 +195,7 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
     }
 
     const payload: ITripPolicyInfo = {
-      journeyId: normalizedJourneyId,
+      journeyId: normalizedJourneyId as number,
       deliveryGovId: toOptionalNumber(data.deliveryGovId),
       deliveryAreaId: toOptionalNumber(data.deliveryAreaId),
       employeeId: toOptionalNumber(data.employeeId),
@@ -212,6 +216,10 @@ export const PolicyForm = ({ journeyId, mode, onSaved }: PolicyFormProps) => {
       transportSupplierId: tripSupplier ? undefined : toOptionalNumber(data.transportSupplierId),
       expenses: buildPolicyExpenses(data, ownerShip),
     };
+    if (onPayload) {
+      onPayload(payload);
+      return;
+    }
     if (isEditMode) {
       editTripPolicyMutation(
         {

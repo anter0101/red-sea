@@ -57,6 +57,12 @@ export class OfficeRequestService {
     if (query.requestedToId) {
       qb.andWhere('requestedTo.id = :requestedToId', { requestedToId: query.requestedToId });
     }
+    if (query.branchId) {
+      qb.andWhere(
+        '(requestedFrom."branchId" = :branchId OR requestedTo."branchId" = :branchId)',
+        { branchId: query.branchId },
+      );
+    }
 
     applyQueryFilters(qb, query, {
       alias: 'officeRequest',
