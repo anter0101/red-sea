@@ -1,0 +1,34 @@
+# TLS edge on the VPS (docker-compose.apps.yml). Caddy gets and renews the certificate
+# for SITE_DOMAIN by itself, then hands every request to nginx, which keeps the routing.
+# Certificates live in the caddy_data volume, so restarts do not request new ones.
+
+{
+	# Caddy's own admin API stays off: nothing needs it and it would be one more open door.
+	admin off
+}
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	reverse_proxy nginx:80
+}
+
+# Plain HTTP. scripts/deploy.sh checks health on http://127.0.0.1 from the VPS itself;
+# Docker hands those requests over from a private address. Everyone else goes to HTTPS.
+:80 {
+	@internal remote_ip private_ranges
+	handle @internal {
+		reverse_proxy nginx:80
+	}
+	handle {
+		redir https://{$SITE_DOMAIN}{uri} permanent
+	}
+}

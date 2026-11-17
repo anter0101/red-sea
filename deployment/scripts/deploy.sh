@@ -29,7 +29,7 @@ set_env APP_RELEASE_SHA "$APP_RELEASE_SHA"
 
 compose=(docker compose --file docker-compose.yml --file docker-compose.apps.yml)
 "${compose[@]}" pull backend frontend
-"${compose[@]}" up -d --remove-orphans --wait --wait-timeout 300 postgres redis minio backend frontend nginx
+"${compose[@]}" up -d --remove-orphans --wait --wait-timeout 300 postgres redis minio backend frontend nginx caddy
 # Nginx keeps the container IPs it resolved at start. Reload so it finds the new containers.
 "${compose[@]}" exec -T nginx nginx -s reload
 

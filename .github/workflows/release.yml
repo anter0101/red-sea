@@ -160,27 +160,36 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          # Output of `ssh-keyscan -t ed25519 <host>`, checked once by hand. Pinning it means the
+          # job refuses to talk to (and hand the GHCR token to) any server that is not the VPS.
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
           BACKEND_REF: ${{ steps.push.outputs.backend_ref }}
           FRONTEND_REF: ${{ steps.push.outputs.frontend_ref }}
         run: |
           set -euo pipefail
-          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_SSH_KEY" ]; then
-            echo "Set repository secrets DEPLOY_HOST, DEPLOY_USER, and DEPLOY_SSH_KEY."
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_SSH_KEY" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
+            echo "Set repository secrets DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, and DEPLOY_KNOWN_HOSTS."
+            exit 1
+          fi
+          if [ "$DEPLOY_USER" = "root" ]; then
+            echo "Deploy as the unprivileged deploy user, not root."
             exit 1
           fi
           printf '%s' "$BACKEND_REF" | grep -Eq '^[^[:space:]]+@sha256:[0-9a-f]{64}$'
           printf '%s' "$FRONTEND_REF" | grep -Eq '^[^[:space:]]+@sha256:[0-9a-f]{64}$'
           key="$RUNNER_TEMP/redsea-deploy-key"
+          known_hosts="$RUNNER_TEMP/redsea-known-hosts"
           printf '%s\n' "$DEPLOY_SSH_KEY" > "$key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$known_hosts"
           chmod 600 "$key"
-          trap 'rm -f "$key"' EXIT
-          ssh_opts=(-i "$key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new)
+          trap 'rm -f "$key" "$known_hosts"' EXIT
+          ssh_opts=(-i "$key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$known_hosts")
           target="${DEPLOY_USER}@${DEPLOY_HOST}"
           remote() {
             ssh "${ssh_opts[@]}" "$target" "$@"
           }
           remote "mkdir -p /opt/redsea"
-          tar -C deployment -cf - docker-compose.yml docker-compose.apps.yml scripts nginx minio \
+          tar -C deployment -cf - docker-compose.yml docker-compose.apps.yml scripts nginx minio caddy \
             | remote "tar -C /opt/redsea -xf -"
           # The job token can pull the private images only while this job runs.
           printf '%s' "$GHCR_TOKEN" | remote "docker login ghcr.io --username $(printf '%q' "$GITHUB_ACTOR") --password-stdin"
