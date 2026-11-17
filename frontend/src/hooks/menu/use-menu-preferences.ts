@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import client from '@/lib/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-type MenuPreferences = { hidden: string[] };
+export type MenuPreferences = { hidden: string[]; order: string[] };
 
 const QUERY_KEY = ['menu-preferences'];
 const STALE_TIME_MS = 5 * 60 * 1000;
@@ -21,8 +21,8 @@ export function useMenuPreferences() {
   });
 
   const save = useMutation({
-    mutationFn: async (hidden: string[]) => {
-      const res = await client.put<MenuPreferences>('/api/users/me/menu-preferences', { hidden });
+    mutationFn: async (prefs: MenuPreferences) => {
+      const res = await client.put<MenuPreferences>('/api/users/me/menu-preferences', prefs);
       return res.data;
     },
     onSuccess: (data) => {
@@ -34,5 +34,9 @@ export function useMenuPreferences() {
     },
   });
 
-  return { hidden: query.data?.hidden ?? [], save };
+  return {
+    hidden: query.data?.hidden ?? [],
+    order: query.data?.order ?? [],
+    save,
+  };
 }

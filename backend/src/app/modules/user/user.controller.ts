@@ -14,7 +14,7 @@ import {
   BadRequestException,
   ParseIntPipe,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { MenuPreferences, UserService } from './user.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard, Roles, RolesGuard, AuthUser } from 'src/core/security';
 import { UserDTO } from './dtos/user.dto';
@@ -109,27 +109,26 @@ export class UserController {
 
   @Get('/me/menu-preferences')
   @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
-  @ApiOperation({ summary: 'Get the side-menu items the current user hid' })
-  async getMyMenuPreferences(@AuthUser() user: User): Promise<{ hidden: string[] }> {
+  @ApiOperation({ summary: 'Get the side-menu hidden items and order for the current user' })
+  async getMyMenuPreferences(@AuthUser() user: User): Promise<MenuPreferences> {
     return this.userService.getMenuPreferences(user.id);
   }
 
   @Put('/me/menu-preferences')
   @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
-  @ApiOperation({ summary: 'Save the side-menu items the current user hides' })
+  @ApiOperation({ summary: 'Save the side-menu items the current user hides and their order' })
   async setMyMenuPreferences(
-    @Body() body: { hidden?: unknown },
+    @Body() body: { hidden?: unknown; order?: unknown },
     @AuthUser() user: User,
-  ): Promise<{ hidden: string[] }> {
-    const hidden = Array.isArray(body?.hidden) ? body.hidden : null;
-    if (
-      !hidden ||
-      hidden.length > 200 ||
-      !hidden.every((k) => typeof k === 'string' && k.length <= 200)
-    ) {
-      throw new BadRequestException('hidden must be a list of up to 200 menu keys');
+  ): Promise<MenuPreferences> {
+    const isKeyList = (v: unknown): v is string[] =>
+      Array.isArray(v) &&
+      v.length <= 200 &&
+      v.every((k) => typeof k === 'string' && k.length <= 200);
+    if (!isKeyList(body?.hidden) || !isKeyList(body?.order)) {
+      throw new BadRequestException('hidden and order must be lists of up to 200 menu keys');
     }
-    return this.userService.setMenuPreferences(user.id, hidden as string[]);
+    return this.userService.setMenuPreferences(user.id, body.hidden, body.order);
   }
 
   @Get('/:id')

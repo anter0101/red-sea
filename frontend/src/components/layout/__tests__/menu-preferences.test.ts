@@ -1,4 +1,4 @@
-import { applyHiddenMenu, menuItemKeys } from '../menu-preferences';
+import { applyHiddenMenu, applyMenuOrder, menuItemKeys } from '../menu-preferences';
 import type { SideMenuItem } from '@/utils/icons';
 
 const items: SideMenuItem[] = [
@@ -38,5 +38,25 @@ describe('applyHiddenMenu', () => {
   it('drops a group when every sub-item is hidden', () => {
     const result = applyHiddenMenu(items, ['/office/issue', '/office/policy']);
     expect(result.map((i) => i.key)).toEqual(['trips']);
+  });
+});
+
+describe('applyMenuOrder', () => {
+  const ordered: SideMenuItem[] = [
+    { key: 'home', alt: 'Home', href: '/home' },
+    { key: 'drivers', alt: 'Drivers', href: '/drivers' },
+    { key: 'cars', alt: 'Cars', href: '/cars' },
+  ];
+
+  it('keeps default order when no order is saved', () => {
+    expect(applyMenuOrder(ordered, []).map((i) => i.key)).toEqual(['home', 'drivers', 'cars']);
+  });
+
+  it('sorts items by the saved order', () => {
+    expect(applyMenuOrder(ordered, ['cars', 'home', 'drivers']).map((i) => i.key)).toEqual(['cars', 'home', 'drivers']);
+  });
+
+  it('puts items missing from the saved order after the ordered ones', () => {
+    expect(applyMenuOrder(ordered, ['cars']).map((i) => i.key)).toEqual(['cars', 'home', 'drivers']);
   });
 });

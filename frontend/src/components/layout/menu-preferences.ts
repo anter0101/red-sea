@@ -22,3 +22,21 @@ export function applyHiddenMenu(items: SideMenuItem[], hidden: string[]): SideMe
     return [{ ...item, subItems }];
   });
 }
+
+/**
+ * Sorts top-level items by the saved order. Items not in the saved order keep their
+ * default position and go after the ordered ones.
+ */
+export function applyMenuOrder(items: SideMenuItem[], order: string[]): SideMenuItem[] {
+  if (order.length === 0) {return items;}
+  const rank = new Map(order.map((key, index) => [key, index]));
+  const fallback = order.length;
+  return items
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => {
+      const ra = rank.get(a.item.key) ?? fallback;
+      const rb = rank.get(b.item.key) ?? fallback;
+      return ra - rb || a.index - b.index;
+    })
+    .map(({ item }) => item);
+}

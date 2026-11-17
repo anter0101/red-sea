@@ -14,7 +14,7 @@ import { icons, sideMenuIcons } from '@/utils/icons';
 
 import CustomizeMenuDialog from './customize-menu-dialog';
 import { filterMenuByRole } from './filter-menu-by-role';
-import { applyHiddenMenu } from './menu-preferences';
+import { applyHiddenMenu, applyMenuOrder } from './menu-preferences';
 
 export { filterMenuByRole };
 
@@ -23,12 +23,12 @@ export default function SideMenu() {
   const { data: session } = useSession();
   const cleanPath = pathname.replace(/^\/(ar|en)/, '');
   const [customizeOpen, setCustomizeOpen] = useState(false);
-  const { hidden, save } = useMenuPreferences();
+  const { hidden, order, save } = useMenuPreferences();
   const allowed = filterMenuByRole(
     sideMenuIcons,
     (session?.user as { role?: string } | undefined)?.role,
   );
-  const items = applyHiddenMenu(allowed, hidden);
+  const items = applyHiddenMenu(applyMenuOrder(allowed, order), hidden);
   return (
     <aside
       className="flex min-h-[calc(100vh+80px)] w-20 shrink-0 flex-col items-center gap-6 border-r border-border bg-sidebar px-2 py-8"
@@ -125,7 +125,7 @@ export default function SideMenu() {
         open={customizeOpen}
         onOpenChange={setCustomizeOpen}
         items={allowed}
-        hidden={hidden}
+        prefs={{ hidden, order }}
         isSaving={save.isPending}
         onSave={(next) => save.mutateAsync(next)}
       />

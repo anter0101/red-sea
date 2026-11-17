@@ -21,6 +21,8 @@ export type UserWithCurrentJourney = User & {
   currentCarCode?: string;
 };
 
+export type MenuPreferences = { hidden: string[]; order: string[] };
+
 @Injectable()
 export class UserService {
   constructor(
@@ -31,15 +33,22 @@ export class UserService {
     private journeyRepository: Repository<Journey>,
   ) {}
 
-  async getMenuPreferences(userId: number): Promise<{ hidden: string[] }> {
+  async getMenuPreferences(userId: number): Promise<MenuPreferences> {
     const row = await this.userRepository.findOne({ where: { id: userId } });
-    return { hidden: row?.menuPreferences?.hidden ?? [] };
+    return {
+      hidden: row?.menuPreferences?.hidden ?? [],
+      order: row?.menuPreferences?.order ?? [],
+    };
   }
 
-  async setMenuPreferences(userId: number, hidden: string[]): Promise<{ hidden: string[] }> {
-    const unique = [...new Set(hidden)];
-    await this.userRepository.update(userId, { menuPreferences: { hidden: unique } });
-    return { hidden: unique };
+  async setMenuPreferences(
+    userId: number,
+    hidden: string[],
+    order: string[],
+  ): Promise<MenuPreferences> {
+    const prefs = { hidden: [...new Set(hidden)], order: [...new Set(order)] };
+    await this.userRepository.update(userId, { menuPreferences: prefs });
+    return prefs;
   }
 
   async findById(id: number): Promise<UserDTO | undefined> {

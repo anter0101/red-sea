@@ -56,9 +56,9 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 50, nullable: true })
   code?: string;
 
-  /** Side-menu items this user chose to hide, by item key or href. */
+  /** Side-menu items this user hid (by item key or href) and their top-level order. */
   @Column({ name: 'menu_preferences', type: 'jsonb', nullable: true })
-  menuPreferences?: { hidden: string[] } | null;
+  menuPreferences?: { hidden: string[]; order?: string[] } | null;
 
   /** Relations **/
   @OneToMany(() => Contact, (contact) => contact.user)
