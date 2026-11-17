@@ -140,6 +140,11 @@ export default function CarsTable({ data }: CarsTableProps) {
         data={data ?? []}
         pageKey={pageKey}
         onRowDoubleClick={(row) => router.push(`/cars/${row.id}`)}
+        getRowClassName={(row) =>
+          row.original.ownership === OwnerShipTypes.COMPANY_CAR
+            ? 'bg-sky-100 hover:bg-sky-200'
+            : undefined
+        }
       />
 
       <UpdateVehicleStatusDialog

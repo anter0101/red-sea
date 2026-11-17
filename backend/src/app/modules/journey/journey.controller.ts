@@ -167,7 +167,7 @@ export class JourneyController {
   }
 
   @Post('/office')
-  @Roles(UserRole.DATA_ENTRY)
+  @Roles(UserRole.DATA_ENTRY, UserRole.ADMIN)
   @ApiOperation({ summary: 'Create a new journey' })
   @ApiResponse({ status: 201, description: 'Journey created', type: JourneyDTO })
   async officeCreate(
@@ -505,6 +505,17 @@ export class JourneyController {
       changedBy: event.changedBy,
       createdAt: event.createdAt,
     }));
+  }
+
+  @Get('/:id/financial-activity')
+  @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
+  @ApiOperation({ summary: 'Get accountant postings made for a journey' })
+  @ApiResponse({ status: 200, description: 'Posted accounting lines for the journey' })
+  async getJourneyFinancialActivity(@Param('id', ParseIntPipe) id: number) {
+    const journey = await this.journeyService.findById(id);
+    if (!journey) throw new NotFoundException(`Journey with id ${id} not found`);
+
+    return this.journeyService.getFinancialActivity(id);
   }
 
   @Get('/:id/info')

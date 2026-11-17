@@ -13,8 +13,9 @@ describe('filterMenuByRole', () => {
     expect(result.map((i) => i.key)).toEqual(['office']);
   });
 
-  it('ADMIN sees all items including office', () => {
-    expect(filterMenuByRole(items, 'ADMIN')).toHaveLength(3);
+  it('ADMIN does not see the office item', () => {
+    const result = filterMenuByRole(items, 'ADMIN');
+    expect(result.map((i) => i.key)).toEqual(['trips', 'cars']);
   });
 
   it('unknown/other roles see all items (fallback)', () => {

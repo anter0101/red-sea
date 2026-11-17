@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -23,6 +24,7 @@ interface OfficeJourneyFormProps {
 export default function OfficeJourneyForm({ vehicleMode }: OfficeJourneyFormProps) {
   const t = useTranslations('office');
   const router = useRouter();
+  const { data: session } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [printJourneyId, setPrintJourneyId] = useState<number | null>(null);
   const [restoredFromDraft, setRestoredFromDraft] = useState(false);
@@ -32,10 +34,14 @@ export default function OfficeJourneyForm({ vehicleMode }: OfficeJourneyFormProp
     setPrintJourneyId(journeyId);
   };
 
+  // Admins go straight from the saved journey to its policy form (one flow, no separate delegation step).
+  const isAdmin = session?.user?.role?.toUpperCase() === 'ADMIN';
+
   const handlePrintDialogClose = (open: boolean) => {
     if (!open) {
+      const createdId = printJourneyId;
       setPrintJourneyId(null);
-      router.push('/office');
+      router.push(isAdmin && createdId ? `/office/policy/${createdId}` : '/office');
     }
   };
 

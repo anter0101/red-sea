@@ -14,6 +14,7 @@ import { EmployeeModule } from '../employee/employee.module';
 import { JourneyStatusEvent } from './journey-status-event.entity';
 import { JourneyPolicy } from '../journey-goods/journey-policy.entity';
 import { JourneyTransaction } from '../journey-transaction/journey-transaction.entity';
+import { Transaction } from '../transaction/transaction.entity';
 import { JourneyAttachment } from '../journey-attachment/journey-attachment.entity';
 import { AccountModule } from '../account/account.module';
 import { CustodyModule } from '../custody/custody.module';
@@ -30,6 +31,7 @@ import { JourneyRevenueService } from './journey-revenue.service';
       JourneyAttachment,
       JourneyStatusEvent,
       DeliveryPrice,
+      Transaction,
     ]),
     DriverModule,
     CarModule,

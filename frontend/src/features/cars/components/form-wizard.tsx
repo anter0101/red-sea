@@ -135,8 +135,8 @@ function buildSteps(
 
     case OwnerShipTypes.CONTRACT_CAR:
       return hasContractOwner
-        ? [typeStep, infoStep, axleStep, documentsStep]
-        : [typeStep, contractOwnerStep, infoStep, axleStep, documentsStep];
+        ? [typeStep, infoStep, documentsStep]
+        : [typeStep, contractOwnerStep, infoStep, documentsStep];
 
     case OwnerShipTypes.COMPANY_CAR:
       return [typeStep, infoStep, axleStep, documentsStep];

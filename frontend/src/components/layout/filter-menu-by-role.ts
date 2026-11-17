@@ -4,14 +4,13 @@ export function filterMenuByRole(
   menuItems: SideMenuItem[],
   role: string | undefined,
 ): SideMenuItem[] {
-  const isDataEntry = role?.toUpperCase() === 'DATA_ENTRY';
+  const normalized = role?.toUpperCase();
 
-  if (isDataEntry) return menuItems.filter((item) => item.key === 'office');
+  // Data entry only works in the office area.
+  if (normalized === 'DATA_ENTRY') return menuItems.filter((item) => item.key === 'office');
 
-  return menuItems.map((item) => {
-    if (item.key === 'office' && item.subItems) {
-      return { ...item, subItems: item.subItems.filter((sub) => sub.href !== '/office') };
-    }
-    return item;
-  });
+  // Admins do not get the office menu.
+  if (normalized === 'ADMIN') return menuItems.filter((item) => item.key !== 'office');
+
+  return menuItems;
 }

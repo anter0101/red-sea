@@ -2,13 +2,12 @@
 import InfoSection from '@/components/common/info-section';
 import EntityToggleTabs from '@/components/common/toggle-tabs';
 import { mapToInfoItems } from '@/utils/generic-field-mapper';
-import ActivityToolbar from './transactions-toolbar';
 import TransactionsTable from './transactions-table';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useGetJourneyHistory } from '../api/get-one/get-journey-history';
+import { useGetJourneyFinancialActivity } from '../api/get-one/get-financial-activity';
 
-import { useGetAllTransactionsByJourney } from '../api/get-all/get-all-transactions';
 import { useGetOneEmployee } from '../api/get-one/get-one-employee';
 import { useGetOneInfo } from '../api/get-one/get-one-info';
 import { useGetOneVehicle } from '../api/get-one/get-one-vehicle';
@@ -17,32 +16,16 @@ import { employeeFields } from '../mappers/employee-info.fields';
 import { logisticsInfoFields } from '../mappers/logistics-info.fields';
 import { tripInfoFields } from '../mappers/trip-info.fields';
 import { vehicleFields } from '../mappers/vehicle-info.fields';
-import {
-  mapTripTransactionRow,
-  tripTransactionsExportColumns,
-} from '../transactions-export.config';
-import { useTableExport } from '@/hooks/use-table-export';
 import { JOURNEY_STATUS_LABELS } from '../constants/journey-status';
 
 export default function TripClientPage({ journeyId }: { journeyId: number }) {
-  const { transactions } = useGetAllTransactionsByJourney(String(journeyId));
+  const { data: activity } = useGetJourneyFinancialActivity(journeyId);
   const { tripInfo } = useGetOneInfo(journeyId);
   const { vehicleInfo } = useGetOneVehicle(journeyId);
   const { employeeInfo } = useGetOneEmployee(journeyId);
   const { data: history, isPending: isHistoryPending } = useGetJourneyHistory(journeyId);
 
   const [activeTab, setActiveTab] = useState('trip-info');
-
-  const transactionExportParams = useMemo(() => ({ journeyId }), [journeyId]);
-
-  const { exportData, isExporting } = useTableExport({
-    endPoint: '/api/journey-transactions',
-    params: transactionExportParams,
-    columns: tripTransactionsExportColumns(),
-    mapRow: mapTripTransactionRow,
-    fileName: `trip-${journeyId}-transactions`,
-    enabled: !!journeyId,
-  });
 
   const tabs = [
     { id: 'trip-info', label: 'معلومات الرحلة' },
@@ -63,10 +46,7 @@ export default function TripClientPage({ journeyId }: { journeyId: number }) {
       </div>
 
       {activeTab === 'activities' && (
-        <div className="flex flex-col gap-2">
-          <ActivityToolbar onExport={exportData} isExporting={isExporting} />
-          <TransactionsTable data={transactions} />
-        </div>
+        <TransactionsTable data={activity} />
       )}
 
       {activeTab === 'trip-info' && (

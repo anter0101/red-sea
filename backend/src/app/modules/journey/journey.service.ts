@@ -11,8 +11,20 @@ import { JourneyListScope } from './journey-list-scope.types';
 import { buildJourneyCountQuery } from './journey-count-query.builder';
 import { buildJourneyListQuery } from './journey-list-query.builder';
 import { runJourneyStatsQuery } from './journey-stats.query';
+import { Transaction, TransactionStatus } from '../transaction/transaction.entity';
 
 export type { JourneyListScope };
+
+export interface JourneyFinancialActivityRow {
+  id: number;
+  date: Date;
+  code: string;
+  description: string;
+  accountCode: string;
+  accountName: string;
+  entryType: 'DEBIT' | 'CREDIT';
+  amount: number;
+}
 
 @Injectable()
 export class JourneyService {
@@ -21,6 +33,8 @@ export class JourneyService {
     private readonly journeyRepository: Repository<Journey>,
     @InjectRepository(JourneyStatusEvent)
     private readonly statusEventRepository: Repository<JourneyStatusEvent>,
+    @InjectRepository(Transaction)
+    private readonly transactionRepository: Repository<Transaction>,
   ) {}
 
   async findById(id: number): Promise<Journey | undefined> {
@@ -105,6 +119,37 @@ export class JourneyService {
       where: { journey: { id: journeyId } },
       order: { createdAt: 'ASC', id: 'ASC' },
     });
+  }
+
+  /**
+   * Accountant postings made for this journey (policy ledger TRN1/TRN3 and
+   * other journey-keyed entries). Keys look like `policy:<policyId>:journey:<journeyId>:<kind>`.
+   * Returns one row per posted transaction line, oldest first.
+   */
+  async getFinancialActivity(journeyId: number): Promise<JourneyFinancialActivityRow[]> {
+    const transactions = await this.transactionRepository
+      .createQueryBuilder('tx')
+      .leftJoinAndSelect('tx.transactionLines', 'line')
+      .leftJoinAndSelect('line.account', 'account')
+      .where('tx.idempotencyKey LIKE :prefix', { prefix: `policy:%:journey:${journeyId}:%` })
+      .andWhere('tx.status = :status', { status: TransactionStatus.POSTED })
+      .orderBy('tx.date', 'ASC')
+      .addOrderBy('tx.id', 'ASC')
+      .addOrderBy('line.id', 'ASC')
+      .getMany();
+
+    return transactions.flatMap((tx) =>
+      (tx.transactionLines ?? []).map((line) => ({
+        id: line.id,
+        date: tx.date,
+        code: tx.code,
+        description: line.description ?? tx.description,
+        accountCode: line.account?.code ?? '',
+        accountName: line.account?.name ?? '',
+        entryType: line.entryType,
+        amount: Number(line.amount),
+      })),
+    );
   }
 
   private async recordStatusEvent(
