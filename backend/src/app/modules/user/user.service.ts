@@ -31,6 +31,17 @@ export class UserService {
     private journeyRepository: Repository<Journey>,
   ) {}
 
+  async getMenuPreferences(userId: number): Promise<{ hidden: string[] }> {
+    const row = await this.userRepository.findOne({ where: { id: userId } });
+    return { hidden: row?.menuPreferences?.hidden ?? [] };
+  }
+
+  async setMenuPreferences(userId: number, hidden: string[]): Promise<{ hidden: string[] }> {
+    const unique = [...new Set(hidden)];
+    await this.userRepository.update(userId, { menuPreferences: { hidden: unique } });
+    return { hidden: unique };
+  }
+
   async findById(id: number): Promise<UserDTO | undefined> {
     const result = await this.userRepository.findOne({
       where: { id, deletedAt: IsNull() },

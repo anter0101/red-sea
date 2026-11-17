@@ -107,6 +107,31 @@ export class UserController {
     return this.userService.getStats(role);
   }
 
+  @Get('/me/menu-preferences')
+  @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
+  @ApiOperation({ summary: 'Get the side-menu items the current user hid' })
+  async getMyMenuPreferences(@AuthUser() user: User): Promise<{ hidden: string[] }> {
+    return this.userService.getMenuPreferences(user.id);
+  }
+
+  @Put('/me/menu-preferences')
+  @Roles(UserRole.ADMIN, UserRole.USER, UserRole.DATA_ENTRY)
+  @ApiOperation({ summary: 'Save the side-menu items the current user hides' })
+  async setMyMenuPreferences(
+    @Body() body: { hidden?: unknown },
+    @AuthUser() user: User,
+  ): Promise<{ hidden: string[] }> {
+    const hidden = Array.isArray(body?.hidden) ? body.hidden : null;
+    if (
+      !hidden ||
+      hidden.length > 200 ||
+      !hidden.every((k) => typeof k === 'string' && k.length <= 200)
+    ) {
+      throw new BadRequestException('hidden must be a list of up to 200 menu keys');
+    }
+    return this.userService.setMenuPreferences(user.id, hidden as string[]);
+  }
+
   @Get('/:id')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get user by id' })

@@ -1,16 +1,20 @@
 ﻿'use client';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
 import { useSession } from 'next-auth/react';
+import { Settings } from 'lucide-react';
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useMenuPreferences } from '@/hooks/menu/use-menu-preferences';
 import { cn } from '@/lib/utils';
 import { icons, sideMenuIcons } from '@/utils/icons';
 
+import CustomizeMenuDialog from './customize-menu-dialog';
 import { filterMenuByRole } from './filter-menu-by-role';
+import { applyHiddenMenu } from './menu-preferences';
 
 export { filterMenuByRole };
 
@@ -18,10 +22,13 @@ export default function SideMenu() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const cleanPath = pathname.replace(/^\/(ar|en)/, '');
-  const items = filterMenuByRole(
+  const [customizeOpen, setCustomizeOpen] = useState(false);
+  const { hidden, save } = useMenuPreferences();
+  const allowed = filterMenuByRole(
     sideMenuIcons,
     (session?.user as { role?: string } | undefined)?.role,
   );
+  const items = applyHiddenMenu(allowed, hidden);
   return (
     <aside
       className="flex min-h-[calc(100vh+80px)] w-20 shrink-0 flex-col items-center gap-6 border-r border-border bg-sidebar px-2 py-8"
@@ -103,6 +110,25 @@ export default function SideMenu() {
           </Tooltip>
         );
       })}
+
+      <button
+        type="button"
+        onClick={() => setCustomizeOpen(true)}
+        className="text-side-icon mt-auto flex flex-col items-center gap-1 text-[10px] font-medium hover:text-foreground"
+        aria-label="تخصيص القائمة"
+      >
+        <Settings className="size-5" />
+        تخصيص
+      </button>
+
+      <CustomizeMenuDialog
+        open={customizeOpen}
+        onOpenChange={setCustomizeOpen}
+        items={allowed}
+        hidden={hidden}
+        isSaving={save.isPending}
+        onSave={(next) => save.mutateAsync(next)}
+      />
     </aside>
   );
 }
