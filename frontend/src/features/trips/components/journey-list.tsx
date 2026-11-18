@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import type { RowSelectionState } from '@tanstack/react-table';
 
 import EntitiesToolbar from '@/components/common/entities-toolbar';
@@ -174,6 +176,8 @@ export default function JourneyList({
   detailPathPrefix = '/trips',
 }: JourneyListProps) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role?.toUpperCase() === 'ADMIN';
   const searchParams = useSearchParams();
   const pageKey = usePageKey();
   const params = usePaginationParams();
@@ -284,6 +288,14 @@ export default function JourneyList({
       )}
 
       {showExport && <EntitiesToolbar onExport={exportData} isExporting={isExporting} />}
+
+      {isAdmin && (
+        <div>
+          <Button asChild variant="outline">
+            <Link href="/office/full">بوليصة + تفويض (إدخال كامل)</Link>
+          </Button>
+        </div>
+      )}
 
       {enableInvoicing && (
         <div className="flex flex-wrap items-center gap-4">

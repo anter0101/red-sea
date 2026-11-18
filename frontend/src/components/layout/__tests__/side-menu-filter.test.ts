@@ -23,11 +23,11 @@ describe('filterMenuByRole', () => {
     expect(result.map((i) => i.key)).toEqual(['office']);
   });
 
-  it('ADMIN keeps the office menu but only requests and policy links', () => {
+  it('ADMIN keeps the office menu but only the requests link', () => {
     const result = filterMenuByRole(items, 'ADMIN');
     expect(result.map((i) => i.key)).toEqual(['trips', 'cars', 'office']);
     const office = result.find((i) => i.key === 'office');
-    expect(office?.subItems?.map((s) => s.href)).toEqual(['/office/policy', '/office-requests']);
+    expect(office?.subItems?.map((s) => s.href)).toEqual(['/office-requests']);
   });
 
   it('unknown/other roles see all items (fallback)', () => {

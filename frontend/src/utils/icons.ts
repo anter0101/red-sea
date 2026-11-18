@@ -45,12 +45,7 @@ export type SideMenuItem = {
 
 export const sideMenuIcons: SideMenuItem[] = [
   { key: 'home', alt: 'الصفحة الرئيسية', href: '/home' },
-  {
-    key: 'trips',
-    alt: 'الرحلات',
-    href: '/trips',
-    subItems: [{ alt: 'بوليصة + تفويض (إدخال كامل)', href: '/office/full' }],
-  },
+  { key: 'trips', alt: 'الرحلات', href: '/trips' },
   { key: 'drivers', alt: 'السائقين', href: '/drivers' },
   { key: 'driverAssistants', alt: 'التباعين', href: '/driver-assistants' },
   { key: 'cars', alt: 'السيارات', href: '/cars' },

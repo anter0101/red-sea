@@ -14,12 +14,14 @@ const toText = (value: unknown) => {
 };
 
 /**
- * Numeric field shown as a text box with − / + steppers.
+ * Numeric field shown as a plain text box (no steppers).
+ * - Only digits, one decimal point and a leading minus are accepted.
  * - Empty stays empty (no forced "0" on the left).
  * - Leading zeros are dropped as the user types ("05" → "5").
+ * - On blur the value is clamped to min/max.
  * - Still reports a string event so existing `Number(e.target.value)` handlers keep working.
  */
-function NumberStepperInput({
+function NumericTextInput({
   className,
   value,
   onChange,
@@ -52,66 +54,38 @@ function NumberStepperInput({
     emit(raw.replace(/^(-?)0+(?=\d)/, '$1'));
   };
 
-  const bump = (direction: 1 | -1) => {
-    let next = (text === '' ? 0 : Number(text)) + direction * Number(step);
-    if (max !== undefined && max !== '' && next > Number(max)) next = Number(max);
-    if (min !== undefined && min !== '' && next < Number(min)) next = Number(min);
-    emit(String(next));
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (text !== '' && !Number.isNaN(Number(text))) {
+      let next = Number(text);
+      if (max !== undefined && max !== '' && next > Number(max)) next = Number(max);
+      if (min !== undefined && min !== '' && next < Number(min)) next = Number(min);
+      if (String(next) !== text) emit(String(next));
+    }
+    onBlur?.(e);
   };
 
-  const stepperClass =
-    'text-muted-foreground hover:text-foreground flex h-full w-8 shrink-0 items-center justify-center text-lg disabled:opacity-40';
-
   return (
-    <div
-      className={cn(
-        'border-input dark:bg-input/30 flex h-9 w-full min-w-0 items-center overflow-hidden rounded-md border bg-transparent shadow-xs',
-        'focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
-        disabled && 'pointer-events-none cursor-not-allowed opacity-50',
-        className,
-      )}
-    >
-      <button
-        type="button"
-        tabIndex={-1}
-        className={stepperClass}
-        onClick={() => bump(-1)}
-        disabled={disabled || readOnly}
-        aria-label="decrease"
-      >
-        −
-      </button>
-      <input
-        id={id}
-        name={name}
-        type="text"
-        inputMode={Number.isInteger(Number(step)) ? 'numeric' : 'decimal'}
-        dir="ltr"
-        value={text}
-        placeholder={placeholder}
-        disabled={disabled}
-        readOnly={readOnly}
-        onBlur={onBlur}
-        onChange={(e) => handleTyped(e.target.value)}
-        className="placeholder:text-muted-foreground h-full w-full min-w-0 bg-transparent px-1 text-center text-base outline-none md:text-sm"
-      />
-      <button
-        type="button"
-        tabIndex={-1}
-        className={stepperClass}
-        onClick={() => bump(1)}
-        disabled={disabled || readOnly}
-        aria-label="increase"
-      >
-        +
-      </button>
-    </div>
+    <input
+      id={id}
+      name={name}
+      type="text"
+      inputMode={Number.isInteger(Number(step)) ? 'numeric' : 'decimal'}
+      dir="ltr"
+      value={text}
+      placeholder={placeholder}
+      disabled={disabled}
+      readOnly={readOnly}
+      onBlur={handleBlur}
+      onChange={(e) => handleTyped(e.target.value)}
+      data-slot="input"
+      className={cn(INPUT_CLASS, 'text-start', className)}
+    />
   );
 }
 
 function Input({ className, type, ...props }: InputProps) {
   if (type === 'number') {
-    return <NumberStepperInput className={className} {...props} />;
+    return <NumericTextInput className={className} {...props} />;
   }
 
   return <input type={type} data-slot="input" className={cn(INPUT_CLASS, className)} {...props} />;

@@ -1,7 +1,7 @@
 import type { SideMenuItem } from '@/utils/icons';
 
-// Admin sees only these office links: office requests and the policy registration flow.
-const ADMIN_OFFICE_HREFS = ['/office-requests', '/office/policy'];
+// Admin sees only these office links: office requests.
+const ADMIN_OFFICE_HREFS = ['/office-requests'];
 
 // Links only admins should see.
 const ADMIN_ONLY_HREFS = ['/office/full'];
