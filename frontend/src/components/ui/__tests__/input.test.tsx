@@ -49,9 +49,10 @@ describe('Input (type="number") as a text field', () => {
 
   it('clamps to max on blur', () => {
     const onChange = jest.fn();
-    render(<Input type="number" placeholder="n" value="" max={5} onChange={onChange} />);
+    const { rerender } = render(<Input type="number" placeholder="n" value="" max={5} onChange={onChange} />);
     const field = screen.getByPlaceholderText('n');
     fireEvent.change(field, { target: { value: '9' } });
+    rerender(<Input type="number" placeholder="n" value="9" max={5} onChange={onChange} />);
     fireEvent.blur(field);
     expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ target: expect.objectContaining({ value: '5' }) }));
   });
