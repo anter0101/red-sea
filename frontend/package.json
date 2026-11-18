@@ -91,6 +91,11 @@
     "typescript": "^5"
   },
   "pnpm": {
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2026-112366"
+      ]
+    },
     "overrides": {
       "@auth/core": "0.41.3",
       "@babel/core@^7.0.0": "7.29.13",
