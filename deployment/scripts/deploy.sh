@@ -28,7 +28,20 @@ set_env FRONTEND_IMAGE "$FRONTEND_IMAGE"
 set_env APP_RELEASE_SHA "$APP_RELEASE_SHA"
 
 compose=(docker compose --file docker-compose.yml --file docker-compose.apps.yml)
-"${compose[@]}" pull backend frontend
+# Registry pulls can drop mid-download on the VPS network, so retry before failing the release.
+pull_images() {
+  local attempt
+  for attempt in 1 2 3 4 5; do
+    if "${compose[@]}" pull backend frontend; then
+      return 0
+    fi
+    echo "Image pull failed (attempt ${attempt}/5). Retrying..." >&2
+    sleep $((attempt * 10))
+  done
+  echo "Image pull failed after 5 attempts." >&2
+  return 1
+}
+pull_images
 "${compose[@]}" up -d --remove-orphans --wait --wait-timeout 300 postgres redis minio backend frontend nginx caddy
 # Nginx keeps the container IPs it resolved at start. Reload so it finds the new containers.
 "${compose[@]}" exec -T nginx nginx -s reload
