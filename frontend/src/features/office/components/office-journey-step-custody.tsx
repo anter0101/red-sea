@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { UseFormReturn } from 'react-hook-form';
@@ -29,10 +28,12 @@ import {
 import type { VehicleMode } from '../enums/vehicle-mode';
 import { vehicleModeToSlug } from '../enums/vehicle-mode';
 import {
-  paysTransportSupplier,
   type OfficeJourneyFormValues,
+  paysTransportSupplier,
 } from '../types/office-journey-schema';
 import { saveOfficeJourneyDraft } from '../utils/office-journey-draft';
+
+import CustodyEmployeePicker from './custody-employee-picker';
 
 interface OfficeJourneyStepCustodyProps {
   form: UseFormReturn<OfficeJourneyFormValues>;
@@ -42,6 +43,8 @@ interface OfficeJourneyStepCustodyProps {
   transportSuppliers: Array<{ id: number; name: string }>;
   isSubmitting: boolean;
   restoredFromDraft?: boolean;
+  /** Admins pick the office and employee the custody is taken from instead of using their own. */
+  isAdmin?: boolean;
   onPrevious: () => void;
   onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void> | void;
 }
@@ -54,6 +57,7 @@ export default function OfficeJourneyStepCustody({
   transportSuppliers,
   isSubmitting,
   restoredFromDraft = false,
+  isAdmin = false,
   onPrevious,
   onSubmit,
 }: OfficeJourneyStepCustodyProps) {
@@ -61,7 +65,11 @@ export default function OfficeJourneyStepCustody({
   const router = useRouter();
   const needsTransportSupplier = paysTransportSupplier(vehicleMode);
   const available = officeCustody?.custodyAmount ?? null;
-  const hasNoCustody = !isCustodyAmountPending && available !== null && available <= 0;
+  const balanceIsZero = !isCustodyAmountPending && available !== null && available <= 0;
+  // An office user with no custody must ask for some first; an admin can pick another employee.
+  const hasNoCustody = !isAdmin && balanceIsZero;
+  const pickedEmployeeHasNoCustody = isAdmin && balanceIsZero;
+  const hasPickedEmployee = !!form.watch('custodyEmployeeId');
   const [askCustodyOpen, setAskCustodyOpen] = useState(false);
 
   const custodyMessage = restoredFromDraft
@@ -89,7 +97,9 @@ export default function OfficeJourneyStepCustody({
 
   const handleDialogOpenChange = (open: boolean) => {
     // Require creating a custody request — do not dismiss to continue without custody
-    if (!open && hasNoCustody) return;
+    if (!open && hasNoCustody) {
+      return;
+    }
     setAskCustodyOpen(open);
   };
 
@@ -109,11 +119,24 @@ export default function OfficeJourneyStepCustody({
       >
         <p className="text-sm text-muted-foreground">{t('delegateNumberAutoHint')}</p>
 
+        {isAdmin && <CustodyEmployeePicker form={form} />}
+
+        {pickedEmployeeHasNoCustody && (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+            {t('employeeNoCustody')}
+          </div>
+        )}
+
         {hasNoCustody && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
             <p className="font-medium">{t('noCustodyTitle')}</p>
             <p className="mt-1 text-muted-foreground dark:text-amber-100/80">{custodyMessage}</p>
-            <Button type="button" className="mt-3" variant="secondary" onClick={goCreateAskForCustody}>
+            <Button
+              type="button"
+              className="mt-3"
+              variant="secondary"
+              onClick={goCreateAskForCustody}
+            >
               {t('createAskForCustody')}
             </Button>
           </div>
@@ -155,9 +178,19 @@ export default function OfficeJourneyStepCustody({
             placeholder={
               isCustodyAmountPending ? '...' : String(officeCustody?.custodyAmount ?? '')
             }
-            disabled={isCustodyAmountPending || hasNoCustody}
+            disabled={
+              isCustodyAmountPending ||
+              hasNoCustody ||
+              pickedEmployeeHasNoCustody ||
+              (isAdmin && !hasPickedEmployee)
+            }
             {...form.register('custodyAmount')}
           />
+          {isAdmin && hasPickedEmployee && available !== null && !isCustodyAmountPending && (
+            <p className="text-xs text-muted-foreground">
+              {t('employeeBalance')}: {available}
+            </p>
+          )}
           {form.formState.errors.custodyAmount && (
             <p className="text-sm text-destructive">
               {form.formState.errors.custodyAmount.message as string}

@@ -88,6 +88,10 @@ export interface OfficeJourneyFormValues {
   quantity: string;
   custodyAmount: string;
   transportSupplierId: string;
+  /** Admin only: office (branch) used to narrow the custody employee list. */
+  custodyBranchId: string;
+  /** Admin only: employee whose custody funds the journey. */
+  custodyEmployeeId: string;
 }
 
 export const emptyOfficeJourneyValues: OfficeJourneyFormValues = {
@@ -105,6 +109,8 @@ export const emptyOfficeJourneyValues: OfficeJourneyFormValues = {
   quantity: '',
   custodyAmount: '',
   transportSupplierId: '',
+  custodyBranchId: '',
+  custodyEmployeeId: '',
 };
 
 // --- API payload type (object-key form: { id } for existing, { create } for inline) ---
@@ -127,6 +133,7 @@ export interface CreateOfficeJourneyPayload {
   quantity?: number;
   custodyAmount?: number;
   transportSupplierId?: number;
+  custodyEmployeeId?: number;
 }
 
 export function buildOfficeJourneyPayload(
@@ -161,13 +168,17 @@ export function buildOfficeJourneyPayload(
   if (paysTransportSupplier(values.vehicleMode) && values.transportSupplierId) {
     payload.transportSupplierId = Number(values.transportSupplierId);
   }
+  if (values.custodyEmployeeId) payload.custodyEmployeeId = Number(values.custodyEmployeeId);
 
   return payload;
 }
 
 // --- Validation schema ---
 
-export function makeOfficeJourneySchema(maxCustody: number) {
+export function makeOfficeJourneySchema(
+  maxCustody: number,
+  options: { requireCustodyEmployee?: boolean } = {},
+) {
   return z
     .object({
       vehicleMode: z.enum(['NOLON_CAR', 'CONTRACT_CAR', 'COMPANY_CAR']),
@@ -189,8 +200,26 @@ export function makeOfficeJourneySchema(maxCustody: number) {
         .string()
         .refine((v) => !v || Number(v) <= maxCustody, `لا يمكن أن يتجاوز ${maxCustody}`),
       transportSupplierId: z.string(),
+      custodyBranchId: z.string(),
+      custodyEmployeeId: z.string(),
     })
     .superRefine((v, ctx) => {
+      if (options.requireCustodyEmployee) {
+        if (!v.custodyBranchId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'اختر المكتب',
+            path: ['custodyBranchId'],
+          });
+        }
+        if (!v.custodyEmployeeId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'اختر الموظف صاحب العهدة',
+            path: ['custodyEmployeeId'],
+          });
+        }
+      }
       const hasCar = !!v.carId || !!v.carInline;
       if (!hasCar) {
         ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'السيارة مطلوبة', path: ['carId'] });

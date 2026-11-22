@@ -107,6 +107,15 @@ export class CreateJourneyDTO extends OmitType(JourneyDTO, [
 
   @ApiPropertyOptional({
     description:
+      'Employee whose custody funds the journey. Required for admins, who pick the office and the employee; ignored for other roles, who always use their own employee.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  custodyEmployeeId?: number;
+
+  @ApiPropertyOptional({
+    description:
       'Transport supplier (مورد النقل). Required for NOLON_CAR / CONTRACT_CAR; custody is paid to it.',
   })
   @IsOptional()

@@ -73,14 +73,7 @@ export class JourneyOfficeCreateService {
     dto.trailerId = resolvedAssets.trailerId;
     await this.validateJourneyReferences(dto);
 
-    const emp = await manager.findOne(Employee, {
-      where: { user: { id: user.id } },
-      relations: ['user', 'branch'],
-    });
-
-    if (!emp) {
-      throw new NotFoundException(`Employee with user id ${user.id} not found`);
-    }
+    const emp = await this.resolveCustodyEmployee(dto, user, manager);
 
     const driver = await manager.findOne(Driver, {
       where: { id: dto.driverId },
@@ -169,6 +162,41 @@ export class JourneyOfficeCreateService {
     );
 
     return savedJourney;
+  }
+
+  /**
+   * The employee whose custody funds the journey. Admins pick the office and employee in the form
+   * (they usually have no employee record of their own); everyone else always uses their own.
+   */
+  private async resolveCustodyEmployee(
+    dto: CreateJourneyDTO,
+    user: any,
+    manager: EntityManager,
+  ): Promise<Employee> {
+    const isAdmin = (String(user?.role ?? '').toUpperCase() as UserRole) === UserRole.ADMIN;
+
+    if (isAdmin) {
+      if (!dto.custodyEmployeeId) {
+        throw new BadRequestException('اختر المكتب والموظف اللي هتتصرف العهدة منه.');
+      }
+      const chosen = await manager.findOne(Employee, {
+        where: { id: dto.custodyEmployeeId },
+        relations: ['user', 'branch'],
+      });
+      if (!chosen) {
+        throw new NotFoundException(`Employee with id ${dto.custodyEmployeeId} not found`);
+      }
+      return chosen;
+    }
+
+    const emp = await manager.findOne(Employee, {
+      where: { user: { id: user.id } },
+      relations: ['user', 'branch'],
+    });
+    if (!emp) {
+      throw new NotFoundException(`Employee with user id ${user.id} not found`);
+    }
+    return emp;
   }
 
   private async resolveTransportSupplier(

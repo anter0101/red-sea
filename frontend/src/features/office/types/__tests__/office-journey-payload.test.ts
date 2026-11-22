@@ -22,6 +22,23 @@ const carInline = {
 };
 
 describe('buildOfficeJourneyPayload', () => {
+  it('sends the admin-picked custody employee as a number and never the office', () => {
+    const payload = buildOfficeJourneyPayload({
+      ...base,
+      vehicleMode: 'COMPANY_CAR',
+      carId: '7',
+      custodyBranchId: '2',
+      custodyEmployeeId: '9',
+    });
+    expect(payload.custodyEmployeeId).toBe(9);
+    expect(payload).not.toHaveProperty('custodyBranchId');
+  });
+
+  it('omits custodyEmployeeId when none was picked', () => {
+    const payload = buildOfficeJourneyPayload({ ...base, vehicleMode: 'COMPANY_CAR', carId: '7' });
+    expect(payload).not.toHaveProperty('custodyEmployeeId');
+  });
+
   it('NOLON: existing assets are sent as flat id fields, plus assistant/sellingOrderNo', () => {
     const payload = buildOfficeJourneyPayload({
       ...base,
@@ -140,5 +157,4 @@ describe('buildOfficeJourneyPayload', () => {
     });
     expect(payload.transportSupplierId).toBeUndefined();
   });
-
 });

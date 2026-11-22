@@ -217,7 +217,7 @@ export class JourneyPolicyController {
     // 1. Validate FK relations
     const journey = await this.journeyService.findByFields({
       where: { id: dto.journeyId },
-      relations: ['deliveryArea', 'deliveryGov', 'car', 'transportSupplier'],
+      relations: ['deliveryArea', 'deliveryGov', 'car', 'transportSupplier', 'custodySource'],
     });
     if (!journey) throw new NotFoundException(`Journey with id ${dto.journeyId} not found`);
 
@@ -301,7 +301,7 @@ export class JourneyPolicyController {
 
     const journey = await this.journeyService.findByFields({
       where: { id: existing.journey.id },
-      relations: ['deliveryArea', 'deliveryGov', 'car', 'transportSupplier'],
+      relations: ['deliveryArea', 'deliveryGov', 'car', 'transportSupplier', 'custodySource'],
     });
     await this.applyDelegationContext(dto, journey ?? existing.journey, user?.id);
     await this.validatePolicyReferences(existing.journey.id, dto);
@@ -416,16 +416,15 @@ export class JourneyPolicyController {
   ): Promise<void> {
     this.assertPolicyDateAfterDelegation(dto.policyDate, journey.delegateDate);
 
-    if (!userId) {
+    const employee = userId
+      ? await this.employeeService.findByFields({ where: { user: { id: userId } } })
+      : null;
+    // Admins usually have no employee record: fall back to the employee whose custody funds the journey.
+    const employeeId = employee?.id ?? journey.custodySource?.id;
+    if (!employeeId) {
       throw new BadRequestException('لا يوجد موظف مرتبط بهذا المستخدم');
     }
-    const employee = await this.employeeService.findByFields({
-      where: { user: { id: userId } },
-    });
-    if (!employee) {
-      throw new BadRequestException('لا يوجد موظف مرتبط بهذا المستخدم');
-    }
-    dto.employeeId = employee.id;
+    dto.employeeId = employeeId;
     if (dto.deliveryAreaId == null && journey.deliveryArea?.id) {
       dto.deliveryAreaId = journey.deliveryArea.id;
     }

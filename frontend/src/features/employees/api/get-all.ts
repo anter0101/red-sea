@@ -16,15 +16,16 @@ export function mapEmployeeRow(employee: IEmployee): IEmployeeTableRow {
     custody: employee.custody != null ? `${employee.custody} EGP` : '—',
     lastSeen: employee.updatedAt ? new Date(employee.updatedAt).toLocaleDateString('en-GB') : '—',
     status: employee.user?.status ?? 'UNAVAILABLE',
-    salary: employee.user?.salary?.salaryAmount
-      ? `${employee.user.salary.salaryAmount} EGP`
-      : '—',
+    salary: employee.user?.salary?.salaryAmount ? `${employee.user.salary.salaryAmount} EGP` : '—',
     salaryType: employee.user?.salary?.salaryType ?? 'MONTHLY',
     joinDate: employee.createdAt ? new Date(employee.createdAt).toLocaleDateString('en-GB') : '—',
   };
 }
 
-export const useGetAllEmployees = (params?: EmployeesQueryParams) => {
+export const useGetAllEmployees = (
+  params?: EmployeesQueryParams,
+  options?: { enabled?: boolean },
+) => {
   const { data, isPending: isGetEmployeesPending } = useGetPaginated<
     IEmployee,
     EmployeesQueryParams
@@ -32,6 +33,7 @@ export const useGetAllEmployees = (params?: EmployeesQueryParams) => {
     endPoint: `/api/employees`,
     queryKey: ['employees'],
     params,
+    enabled: options?.enabled ?? true,
   });
 
   const employees: IEmployeeTableRow[] = data?.data?.map(mapEmployeeRow) ?? [];
