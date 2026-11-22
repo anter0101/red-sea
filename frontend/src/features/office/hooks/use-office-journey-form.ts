@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
-
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useSession } from 'next-auth/react';
+import { type Resolver, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'react-toastify';
 
 import { useGetAllCars } from '@/features/cars/api/get-all';
@@ -14,6 +12,8 @@ import { useGetAllDrivers } from '@/features/drivers/api/get-all';
 import { useGetAllSuppliers } from '@/features/suppliers/api/get-all';
 import { SupplierType } from '@/features/suppliers/enums/supplier-type';
 import { useGetAllTrailers } from '@/features/trailers/api/get-all';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useCreateOfficeJourney } from '../api/create-office-journey';
 import { useGetOfficeCustodyAmount } from '../api/get-custody-amount';
@@ -24,8 +24,8 @@ import {
   makeOfficeJourneySchema,
   type OfficeJourneyFormValues,
 } from '../types/office-journey-schema';
-import { clearOfficeJourneyDraft } from '../utils/office-journey-draft';
 import { filterByOwnership } from '../utils/filter-by-ownership';
+import { clearOfficeJourneyDraft } from '../utils/office-journey-draft';
 
 export function useOfficeJourneyForm(
   vehicleMode: VehicleMode,
@@ -41,17 +41,40 @@ export function useOfficeJourneyForm(
     type: SupplierType.TRANSPORTATION,
     pageSize: 100,
   });
-  const { custodyAmount: officeCustody, isCustodyAmountPending } = useGetOfficeCustodyAmount();
+  const { data: session } = useSession();
+  // Admins have no custody of their own: they pick the office and the employee it is taken from.
+  const isAdmin = session?.user?.role?.toUpperCase() === 'ADMIN';
   const { createOfficeJourneyMutation, isCreateOfficeJourneyPending } = useCreateOfficeJourney();
 
-  const max = officeCustody?.custodyAmount ?? Infinity;
-  const schema = useMemo(() => makeOfficeJourneySchema(max), [max]);
+  // The schema depends on the custody balance, which depends on a form value, so the resolver
+  // reads the latest schema from a ref instead of the one captured when the form was created.
+  const schemaRef = useRef(makeOfficeJourneySchema(Infinity));
+  const resolver = useCallback<Resolver<OfficeJourneyFormValues>>(
+    (values, context, options) => zodResolver(schemaRef.current)(values, context, options),
+    [],
+  );
 
   const form = useForm<OfficeJourneyFormValues>({
-    resolver: zodResolver(schema),
+    resolver,
     defaultValues: { ...emptyOfficeJourneyValues, vehicleMode },
     mode: 'onChange',
   });
+
+  const custodyEmployeeId = Number(useWatch({ control: form.control, name: 'custodyEmployeeId' }));
+  const { custodyAmount: officeCustody, isCustodyAmountPending } = useGetOfficeCustodyAmount(
+    isAdmin
+      ? { enabled: custodyEmployeeId > 0, employeeId: custodyEmployeeId }
+      : { enabled: !!session },
+  );
+
+  const max = officeCustody?.custodyAmount ?? Infinity;
+  const schema = useMemo(
+    () => makeOfficeJourneySchema(max, { requireCustodyEmployee: isAdmin }),
+    [max, isAdmin],
+  );
+  useEffect(() => {
+    schemaRef.current = schema;
+  }, [schema]);
 
   useEffect(() => {
     void queryClient.invalidateQueries({ queryKey: ['office-custody-amount'] });
@@ -96,5 +119,6 @@ export function useOfficeJourneyForm(
     officeCustody,
     isCustodyAmountPending,
     transportSuppliers,
+    isAdmin,
   };
 }

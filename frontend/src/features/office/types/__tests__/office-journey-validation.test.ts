@@ -109,3 +109,35 @@ describe('makeOfficeJourneySchema — custodyAmount max validation', () => {
     }
   });
 });
+
+describe('makeOfficeJourneySchema — admin custody employee', () => {
+  const base = {
+    ...emptyOfficeJourneyValues,
+    vehicleMode: 'NOLON_CAR' as const,
+    clientId: '4',
+    carId: '7',
+    transportSupplierId: '12',
+  };
+
+  it('does not ask office users for an office or employee', () => {
+    expect(makeOfficeJourneySchema(Infinity).safeParse(base).success).toBe(true);
+  });
+
+  it('requires the admin to pick the office and the employee', () => {
+    const r = makeOfficeJourneySchema(Infinity, { requireCustodyEmployee: true }).safeParse(base);
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      const paths = r.error.issues.map((i) => i.path[0]);
+      expect(paths).toEqual(expect.arrayContaining(['custodyBranchId', 'custodyEmployeeId']));
+    }
+  });
+
+  it('accepts the admin form once office and employee are picked', () => {
+    const r = makeOfficeJourneySchema(Infinity, { requireCustodyEmployee: true }).safeParse({
+      ...base,
+      custodyBranchId: '2',
+      custodyEmployeeId: '9',
+    });
+    expect(r.success).toBe(true);
+  });
+});

@@ -16,7 +16,10 @@ import { PrintDialog } from '@/features/trips/components/print-dialog';
 import type { VehicleMode } from '../enums/vehicle-mode';
 import { useCreateJourneyWithPolicy } from '../api/create-journey-with-policy';
 import { useOfficeJourneyForm } from '../hooks/use-office-journey-form';
-import { buildOfficeJourneyPayload, emptyOfficeJourneyValues } from '../types/office-journey-schema';
+import {
+  buildOfficeJourneyPayload,
+  emptyOfficeJourneyValues,
+} from '../types/office-journey-schema';
 import { clearOfficeJourneyDraft, loadOfficeJourneyDraft } from '../utils/office-journey-draft';
 import OfficeJourneyStepCustody from './office-journey-step-custody';
 import OfficeJourneyStepTrip from './office-journey-step-trip';
@@ -28,7 +31,10 @@ interface OfficeJourneyFormProps {
   withPolicy?: boolean;
 }
 
-export default function OfficeJourneyForm({ vehicleMode, withPolicy = false }: OfficeJourneyFormProps) {
+export default function OfficeJourneyForm({
+  vehicleMode,
+  withPolicy = false,
+}: OfficeJourneyFormProps) {
   const t = useTranslations('office');
   const router = useRouter();
   const { data: session } = useSession();
@@ -69,6 +75,7 @@ export default function OfficeJourneyForm({ vehicleMode, withPolicy = false }: O
     driverAssistants,
     isGetDriverAssistantsPending,
     transportSuppliers,
+    isAdmin: pickCustodyEmployee,
   } = useOfficeJourneyForm(vehicleMode, handleCreated);
 
   useEffect(() => {
@@ -155,6 +162,7 @@ export default function OfficeJourneyForm({ vehicleMode, withPolicy = false }: O
           transportSuppliers={transportSuppliers}
           isSubmitting={isSubmitting}
           restoredFromDraft={restoredFromDraft}
+          isAdmin={pickCustodyEmployee}
           onPrevious={goPrevious}
           onSubmit={withPolicy ? onStepSubmit : onSubmit}
         />
@@ -172,11 +180,7 @@ export default function OfficeJourneyForm({ vehicleMode, withPolicy = false }: O
                     رجوع للعهدة
                   </Button>
                 </div>
-                <PolicyForm
-                  mode="create"
-                  vehicleMode={vehicleMode}
-                  onPayload={submitWithPolicy}
-                />
+                <PolicyForm mode="create" vehicleMode={vehicleMode} onPayload={submitWithPolicy} />
               </div>
             ),
           },

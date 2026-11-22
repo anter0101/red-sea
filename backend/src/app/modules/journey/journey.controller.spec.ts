@@ -36,15 +36,18 @@ import { Supplier } from '../supplier/supplier.entity';
 import { SupplierType } from '../supplier/enums/supplier-type.enum';
 
 const EMPLOYEE_USER_ID = 10;
+const ADMIN_USER_ID = 1;
+
+let currentUser: { id: number; email: string; role: UserRole } = {
+  id: EMPLOYEE_USER_ID,
+  email: 'employee@test.com',
+  role: UserRole.DATA_ENTRY,
+};
 
 const authGuardMock: CanActivate = {
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest();
-    req.user = {
-      id: EMPLOYEE_USER_ID,
-      email: 'employee@test.com',
-      role: UserRole.DATA_ENTRY,
-    };
+    req.user = currentUser;
     return true;
   },
 };
@@ -241,8 +244,9 @@ describe('JourneyController — POST /api/journeys/office', () => {
     mockManager.findOne.mockImplementation(
       async (entity: EntityTarget<unknown>, options?: { where?: Record<string, unknown> }) => {
         if (entity === Employee) {
-          const userId = (options?.where as { user?: { id?: number } })?.user?.id;
-          return userId === EMPLOYEE_USER_ID ? mockEmployee : null;
+          const where = options?.where as { id?: number; user?: { id?: number } };
+          if (where?.id !== undefined) return where.id === mockEmployee.id ? mockEmployee : null;
+          return where?.user?.id === EMPLOYEE_USER_ID ? mockEmployee : null;
         }
         if (entity === Driver) {
           const id = (options?.where as { id?: number })?.id;
@@ -296,6 +300,58 @@ describe('JourneyController — POST /api/journeys/office', () => {
 
   afterEach(async () => {
     await app?.close();
+    currentUser = { id: EMPLOYEE_USER_ID, email: 'employee@test.com', role: UserRole.DATA_ENTRY };
+  });
+
+  describe('as admin (no employee record of their own)', () => {
+    beforeEach(() => {
+      currentUser = { id: ADMIN_USER_ID, email: 'admin@test.com', role: UserRole.ADMIN };
+    });
+
+    it('takes the custody from the employee the admin picked', async () => {
+      await request(app.getHttpServer())
+        .post('/api/journeys/office')
+        .send(officeCreateBody({ custodyAmount: 5000, custodyEmployeeId: mockEmployee.id }))
+        .expect(201);
+
+      const saved = journeyService.save.mock.calls[0][0];
+      expect(saved.custodySource).toBe(mockEmployee);
+      expect(accountService.custodyMovement).toHaveBeenCalledWith(
+        mockEmpAccount,
+        mockDriverAccount,
+        5000,
+        mockManager,
+      );
+      expect(custodyService.save.mock.calls[0][0].employee).toBe(mockEmployee);
+    });
+
+    it('returns 400 when the admin did not pick an employee', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/journeys/office')
+        .send(officeCreateBody())
+        .expect(400);
+
+      expect(res.body.message).toContain('اختر المكتب والموظف');
+      expect(journeyService.save).not.toHaveBeenCalled();
+    });
+
+    it('returns 404 when the picked employee does not exist', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/journeys/office')
+        .send(officeCreateBody({ custodyEmployeeId: 999 }))
+        .expect(404);
+
+      expect(res.body.message).toContain('Employee with id 999 not found');
+    });
+  });
+
+  it('ignores custodyEmployeeId for data entry and uses their own employee', async () => {
+    await request(app.getHttpServer())
+      .post('/api/journeys/office')
+      .send(officeCreateBody({ custodyEmployeeId: 999 }))
+      .expect(201);
+
+    expect(journeyService.save.mock.calls[0][0].custodySource).toBe(mockEmployee);
   });
 
   it('creates a journey without custody and returns mapped dto', async () => {

@@ -132,12 +132,25 @@ export class JourneyController {
   @ApiOperation({
     summary: 'Get office employee custody balance for journey create',
     description:
-      'Returns custody balance for the employee linked to the authenticated user (from JWT).',
+      'Returns custody balance for the employee linked to the authenticated user (from JWT). Admins pass employeeId to read the balance of the employee they picked.',
   })
   @ApiResponse({ status: 200, description: 'Custody balance', type: EmployeeCustodyBalanceDTO })
   async getOfficeCustodyAmount(
     @AuthUser() user: { id: number; role: UserRole },
+    @Query('employeeId') employeeId?: string,
   ): Promise<EmployeeCustodyBalanceDTO> {
+    const pickedId = Number(employeeId);
+    const isAdmin = (String(user?.role ?? '').toUpperCase() as UserRole) === UserRole.ADMIN;
+
+    if (isAdmin && Number.isInteger(pickedId) && pickedId > 0) {
+      const picked = await this.employeeService.findByFields({
+        where: { id: pickedId },
+        relations: ['user'],
+      });
+      if (!picked) throw new NotFoundException(`Employee with id ${pickedId} not found`);
+      return this.accountService.getEmployeeCustodyBalance(picked);
+    }
+
     const employee = await this.employeeService.findByFields({
       where: { user: { id: user.id } },
       relations: ['user'],
