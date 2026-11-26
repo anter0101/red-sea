@@ -15,6 +15,7 @@ import {
 
 import type { VehicleMode } from '../enums/vehicle-mode';
 import type { OfficeJourneyFormValues } from '../types/office-journey-schema';
+
 import AssetSelectOrCreate from './inline-create/asset-select-or-create';
 
 interface OfficeJourneyStepVehicleProps {
@@ -75,8 +76,8 @@ export default function OfficeJourneyStepVehicle({
             name: `${c.carCode ?? ''} - ${c.model ?? ''}`.trim(),
           }))}
           createFields={[
-            { name: 'plateLetters', label: t('form.plateLetters') },
-            { name: 'plateNumber', label: t('form.plateNumber') },
+            { name: 'plateLetters', label: t('form.plateLetters'), type: 'plate-letters' },
+            { name: 'plateNumber', label: t('form.plateNumber'), type: 'plate-number' },
             { name: 'licenseNumber', label: t('form.licenseNumber') },
             { name: 'licenseExpiryDate', label: t('form.licenseExpiryDate'), type: 'date' },
           ]}
@@ -100,8 +101,8 @@ export default function OfficeJourneyStepVehicle({
             [tr.code, tr.plateLetters, tr.plateNumber].filter(Boolean).join(' - ') || String(tr.id),
         }))}
         createFields={[
-          { name: 'plateLetters', label: t('form.plateLetters') },
-          { name: 'plateNumber', label: t('form.plateNumber') },
+          { name: 'plateLetters', label: t('form.plateLetters'), type: 'plate-letters' },
+          { name: 'plateNumber', label: t('form.plateNumber'), type: 'plate-number' },
           { name: 'licenseNumber', label: t('form.licenseNumber') },
           { name: 'licenseExpiryDate', label: t('form.licenseExpiryDate'), type: 'date' },
         ]}

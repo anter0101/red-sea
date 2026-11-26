@@ -249,6 +249,9 @@
     "placeholders": {
       "serial-number": "Enter serial number",
       "pick-date": "Pick a date"
-    }
+    },
+    "save-and-next": "Save tire & go to next",
+    "save-tire": "Save tire",
+    "all-tires-done": "All tires are filled in. Press \"Next\" to save."
   }
 }

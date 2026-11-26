@@ -130,7 +130,10 @@ const SelectWithActions = ({
                       <CommandItem
                         key={item.id}
                         value={item.id}
-                        onSelect={() => handleSelect?.(item.id)}
+                        onSelect={() => {
+                          handleSelect?.(item.id);
+                          setOpen(false);
+                        }}
                         className="group"
                       >
                         <CheckIcon
@@ -143,7 +146,10 @@ const SelectWithActions = ({
                         {deletable && (
                           <button
                             type="button"
-                            onClick={() => handleDelete?.(item.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete?.(item.id);
+                            }}
                             className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
                           >
                             {isDeletePending ? (

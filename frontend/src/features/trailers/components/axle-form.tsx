@@ -1,18 +1,19 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { useForm, type Resolver } from 'react-hook-form';
+import { ArrowLeft, CalendarIcon, CheckCheck } from 'lucide-react';
+import { type Resolver, useForm } from 'react-hook-form';
 
 import { useCreateAxle } from '@/apis/axles/create';
 import { useUpdateAxle } from '@/apis/axles/update';
 import {
-  SelectedTirePanel,
-  VehicleChassisOverview,
+  getNextTire,
   type SelectedTire,
+  SelectedTirePanel,
   type TirePositionKey,
+  VehicleChassisOverview,
 } from '@/components/common/axle-overview';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -34,8 +35,8 @@ import {
   transformFormToApiPayload,
   transformFormToUpdatePayload,
 } from '@/features/trailers/utils/location-mapping';
-import type { ITrailer } from '@/types';
 import { cn } from '@/lib/utils';
+import type { ITrailer } from '@/types';
 import type { IAxleFormValues } from '@/types/axles';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
@@ -73,6 +74,11 @@ const AxleForm = ({ onNext, onPrevious, trailerId, trailer, isTrailerLoading }: 
     axleIndex: 0,
     positionKey: firstPosition,
   });
+
+  const [allTiresDone, setAllTiresDone] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const submitRef = useRef<HTMLButtonElement>(null);
+  const focusAfterMove = useRef(false);
 
   const schema = useMemo(() => TrailerAxleFormSchema(t), [t]);
 
@@ -154,150 +160,229 @@ const AxleForm = ({ onNext, onPrevious, trailerId, trailer, isTrailerLoading }: 
   const handleVisibleAxleChange = useCallback((axleIndex: number) => {
     const positions = getTirePositionsForAxle(axleIndex) as TirePositionKey[];
     setSelected((prev) => {
-      if (prev.axleIndex === axleIndex) return prev;
+      if (prev.axleIndex === axleIndex) {
+        return prev;
+      }
       const positionKey = positions.includes(prev.positionKey) ? prev.positionKey : positions[0];
       return { axleIndex, positionKey };
     });
   }, []);
 
   const { axleIndex, positionKey } = selected;
+  const nextTire = getNextTire(
+    selected,
+    axleCount,
+    (index) => getTirePositionsForAxle(index) as TirePositionKey[],
+  );
+
+  const handleSelectTire = (tire: SelectedTire) => {
+    setAllTiresDone(false);
+    setSelected(tire);
+  };
+
+  /** Validate the tire on screen, then move to the next one (saved to the server with «التالي»). */
+  const handleSaveTire = async () => {
+    const valid = await form.trigger([
+      `axles.${axleIndex}.thickness.${positionKey}`,
+      `axles.${axleIndex}.type.${positionKey}`,
+      `axles.${axleIndex}.serialNumber.${positionKey}`,
+      `axles.${axleIndex}.createdDate.${positionKey}`,
+    ]);
+    if (!valid) {
+      return;
+    }
+
+    if (nextTire) {
+      focusAfterMove.current = true;
+      handleSelectTire(nextTire);
+    } else {
+      setAllTiresDone(true);
+      submitRef.current?.focus();
+    }
+  };
+
+  useEffect(() => {
+    if (!focusAfterMove.current) {
+      return;
+    }
+    focusAfterMove.current = false;
+    panelRef.current
+      ?.querySelector<HTMLInputElement>(`input[name="axles.${axleIndex}.thickness.${positionKey}"]`)
+      ?.focus();
+  }, [axleIndex, positionKey]);
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 lg:h-[calc(100dvh-18rem)] lg:min-h-[22rem] lg:grid-cols-2">
           <div className="h-[min(42dvh,20rem)] min-h-0 lg:h-full">
-          <VehicleChassisOverview
-            variant="trailer"
-            axleCount={axleCount}
-            getPositionsForAxle={(index) => getTirePositionsForAxle(index) as TirePositionKey[]}
-            getAxleTitle={(index) => t('axles.axle-header', { number: index + 1 })}
-            selected={selected}
-            getSlotState={getSlotState}
-            getPositionLabel={(position) => t(POSITION_TRANSLATION_KEYS[position])}
-            onSelect={setSelected}
-            onVisibleAxleChange={handleVisibleAxleChange}
-            hint={t('axles.overview-hint')}
-          />
+            <VehicleChassisOverview
+              variant="trailer"
+              axleCount={axleCount}
+              getPositionsForAxle={(index) => getTirePositionsForAxle(index) as TirePositionKey[]}
+              getAxleTitle={(index) => t('axles.axle-header', { number: index + 1 })}
+              selected={selected}
+              getSlotState={getSlotState}
+              getPositionLabel={(position) => t(POSITION_TRANSLATION_KEYS[position])}
+              onSelect={handleSelectTire}
+              onVisibleAxleChange={handleVisibleAxleChange}
+              hint={t('axles.overview-hint')}
+            />
           </div>
 
-          <div className="h-[min(42dvh,20rem)] min-h-0 lg:h-full">
-          <SelectedTirePanel
-            title={`${t('axles.selected-tire')} · ${t('axles.axle-header', { number: axleIndex + 1 })}`}
-            positionLabel={t(POSITION_TRANSLATION_KEYS[positionKey])}
-          >
-            <FormField
-              control={form.control}
-              name={`axles.${axleIndex}.thickness.${positionKey}`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">{t('axles.fields.thickness')}</FormLabel>
-                  <div className="flex gap-2 items-center">
+          <div ref={panelRef} className="h-[min(42dvh,20rem)] min-h-0 lg:h-full">
+            <SelectedTirePanel
+              title={`${t('axles.selected-tire')} · ${t('axles.axle-header', { number: axleIndex + 1 })}`}
+              positionLabel={t(POSITION_TRANSLATION_KEYS[positionKey])}
+            >
+              <FormField
+                control={form.control}
+                name={`axles.${axleIndex}.thickness.${positionKey}`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm">{t('axles.fields.thickness')}</FormLabel>
+                    <div className="flex gap-2 items-center">
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          placeholder="0"
+                          className="bg-white"
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <span className="text-sm font-medium">%</span>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={`axles.${axleIndex}.type.${positionKey}`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm">{t('axles.fields.tire-type')}</FormLabel>
+                    <FormControl>
+                      <TireModelDropdown value={field.value} onChange={field.onChange} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={`axles.${axleIndex}.serialNumber.${positionKey}`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm">{t('axles.fields.serial-number')}</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        placeholder="0"
+                        type="text"
+                        placeholder={t('axles.placeholders.serial-number')}
                         className="bg-white"
                         {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        onKeyDown={(e) => {
+                          if (e.key !== 'Enter') {
+                            return;
+                          }
+                          e.preventDefault();
+                          void handleSaveTire();
+                        }}
                       />
                     </FormControl>
-                    <span className="text-sm font-medium">%</span>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name={`axles.${axleIndex}.type.${positionKey}`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">{t('axles.fields.tire-type')}</FormLabel>
-                  <FormControl>
-                    <TireModelDropdown value={field.value} onChange={field.onChange} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name={`axles.${axleIndex}.createdDate.${positionKey}`}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-sm">{t('axles.fields.installation-date')}</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              'w-full pl-3 text-left font-normal bg-white',
+                              !field.value && 'text-muted-foreground',
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, 'PPP')
+                            ) : (
+                              <span>{t('axles.placeholders.pick-date')}</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name={`axles.${axleIndex}.serialNumber.${positionKey}`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">{t('axles.fields.serial-number')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder={t('axles.placeholders.serial-number')}
-                      className="bg-white"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name={`axles.${axleIndex}.updatedDate.${positionKey}`}
+                render={({ field }) => (
+                  <>
+                    {field.value && (
+                      <FormItem className="flex items-center justify-between sm:col-span-2">
+                        <FormLabel className="text-sm">
+                          {t('axles.fields.last-update-date')}
+                        </FormLabel>
+                        <div>{format(field.value, 'PPP')}</div>
+                      </FormItem>
+                    )}
+                  </>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name={`axles.${axleIndex}.createdDate.${positionKey}`}
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel className="text-sm">{t('axles.fields.installation-date')}</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            'w-full pl-3 text-left font-normal bg-white',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>{t('axles.placeholders.pick-date')}</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name={`axles.${axleIndex}.updatedDate.${positionKey}`}
-              render={({ field }) => (
-                <>
-                  {field.value && (
-                    <FormItem className="flex items-center justify-between sm:col-span-2">
-                      <FormLabel className="text-sm">{t('axles.fields.last-update-date')}</FormLabel>
-                      <div>{format(field.value, 'PPP')}</div>
-                    </FormItem>
+              <div className="sticky bottom-0 flex flex-col gap-2 bg-white pt-2 sm:col-span-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-full"
+                  onClick={() => void handleSaveTire()}
+                  disabled={isPending || isTrailerLoading}
+                >
+                  {nextTire ? (
+                    <>
+                      {t('axles.save-and-next')}
+                      <ArrowLeft className="size-4" />
+                    </>
+                  ) : (
+                    <>
+                      {t('axles.save-tire')}
+                      <CheckCheck className="size-4" />
+                    </>
                   )}
-                </>
-              )}
-            />
-          </SelectedTirePanel>
+                </Button>
+                {allTiresDone && !nextTire && (
+                  <p className="text-center text-sm text-muted-foreground">
+                    {t('axles.all-tires-done')}
+                  </p>
+                )}
+              </div>
+            </SelectedTirePanel>
           </div>
         </div>
 
@@ -310,7 +395,7 @@ const AxleForm = ({ onNext, onPrevious, trailerId, trailer, isTrailerLoading }: 
           >
             {t('buttons.previous')}
           </Button>
-          <Button type="submit" disabled={isPending || isTrailerLoading}>
+          <Button ref={submitRef} type="submit" disabled={isPending || isTrailerLoading}>
             {isPending ? t('buttons.loading') : t('buttons.next')}
           </Button>
         </div>

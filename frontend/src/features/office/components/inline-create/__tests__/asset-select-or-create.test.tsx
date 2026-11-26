@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
+
+import { fireEvent, render, screen } from '@testing-library/react';
 
 jest.mock('next-intl', () => ({
   useTranslations: () => (k: string) => {
@@ -41,6 +42,8 @@ jest.mock('@/components/ui/label', () => ({
 }));
 
 import React from 'react';
+import type { UseFormReturn } from 'react-hook-form';
+
 import AssetSelectOrCreate from '../asset-select-or-create';
 
 function Harness({ isNolon }: { isNolon: boolean }) {
@@ -63,7 +66,40 @@ function Harness({ isNolon }: { isNolon: boolean }) {
   );
 }
 
+function PlateHarness({ onForm }: { onForm: (form: UseFormReturn) => void }) {
+  const form = useForm();
+  onForm(form);
+  return (
+    <AssetSelectOrCreate
+      form={form}
+      label="Trailer"
+      isNolon
+      idField="trailerId"
+      inlineField="trailerInline"
+      items={[]}
+      createFields={[
+        { name: 'plateLetters', label: 'Plate Letters', type: 'plate-letters' },
+        { name: 'plateNumber', label: 'Plate Number', type: 'plate-number' },
+      ]}
+    />
+  );
+}
+
 describe('AssetSelectOrCreate', () => {
+  it('renders plate fields as RTL boxes and stores letters spaced for the API', () => {
+    let form!: UseFormReturn;
+    render(<PlateHarness onForm={(f) => (form = f)} />);
+    const boxes = screen.getAllByRole('textbox');
+    expect(boxes).toHaveLength(7);
+    expect(boxes[0].parentElement).toHaveAttribute('dir', 'rtl');
+
+    fireEvent.change(boxes[0], { target: { value: 'ن' } });
+    fireEvent.change(boxes[1], { target: { value: 'ل' } });
+    fireEvent.change(boxes[3], { target: { value: '9' } });
+    expect(form.getValues('trailerInline.plateLetters')).toBe('ن ل');
+    expect(form.getValues('trailerInline.plateNumber')).toBe('9');
+  });
+
   it('shows the Select and Create tabs in NOLON mode', () => {
     render(<Harness isNolon />);
     expect(screen.getByRole('tab', { name: 'Select' })).toBeInTheDocument();

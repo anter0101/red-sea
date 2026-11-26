@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useEffect, KeyboardEvent } from 'react';
+import { useEffect, useRef } from 'react';
+import type { KeyboardEvent } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -16,6 +17,22 @@ interface PlateInputProps {
   dir?: 'ltr' | 'rtl';
 }
 
+const ARABIC_INDIC_ZERO = 0x0660;
+const ARABIC_INDIC_NINE = 0x0669;
+
+/** Arabic-Indic digits (٠-٩) become 0-9 so an Arabic keyboard works too. */
+const normalizeChar = (char: string): string => {
+  const code = char.charCodeAt(0);
+  if (code >= ARABIC_INDIC_ZERO && code <= ARABIC_INDIC_NINE) {
+    return String(code - ARABIC_INDIC_ZERO);
+  }
+  return char;
+};
+
+/**
+ * One box per character. The value is always compact ("1234", "نلن") and
+ * fills from the first box, which sits on the right when dir is rtl.
+ */
 export default function PlateInput({
   value = '',
   onChange,
@@ -27,9 +44,14 @@ export default function PlateInput({
   dir = 'rtl',
 }: PlateInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  // Set while we move focus ourselves, so handleFocus does not redirect it
+  // before the new value has rendered.
+  const programmaticFocus = useRef<number | null>(null);
 
-  const compactValue = value.replace(/\s+/g, '');
-  const values = compactValue.split('').concat(Array(length).fill('')).slice(0, length);
+  const compactValue = value.replace(/\s+/g, '').slice(0, length);
+  const chars = compactValue.split('');
+  const values = Array.from({ length }, (_, i) => chars[i] ?? '');
+  const firstEmpty = Math.min(chars.length, length - 1);
 
   useEffect(() => {
     inputRefs.current = inputRefs.current.slice(0, length);
@@ -38,80 +60,89 @@ export default function PlateInput({
   const isValidChar = (char: string): boolean => {
     if (type === 'numbers') {
       return /^[0-9]$/.test(char);
-    } else {
-      // Arabic letters
-      return /^[\u0621-\u064A]$/.test(char);
     }
+    return /^[ء-ي]$/.test(char);
+  };
+
+  const focusBox = (index: number) => {
+    programmaticFocus.current = index;
+    inputRefs.current[index]?.focus();
+    programmaticFocus.current = null;
+  };
+
+  const removeAt = (index: number) => {
+    const next = [...chars];
+    next.splice(index, 1);
+    onChange(next.join(''));
   };
 
   const handleChange = (index: number, newValue: string) => {
     if (!newValue) {
-      // Handle deletion
-      const newValues = [...values];
-      newValues[index] = '';
-      onChange(newValues.join('').trim());
+      if (index < chars.length) {
+        removeAt(index);
+      }
       return;
     }
 
-    // Get the last character entered
-    const char = newValue.slice(-1);
-
+    const char = normalizeChar(newValue.slice(-1));
     if (!isValidChar(char)) {
       return;
     }
 
-    const newValues = [...values];
-    newValues[index] = char;
-    onChange(newValues.join('').trim());
+    // Never leave a gap: a box past the typed text writes into the first empty box.
+    const target = Math.min(index, chars.length);
+    const next = [...chars];
+    next[target] = char;
+    onChange(next.join(''));
 
-    // Move to next input
-    if (index < length - 1) {
-      inputRefs.current[index + 1]?.focus();
+    if (target < length - 1) {
+      focusBox(target + 1);
     }
   };
 
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    const towardStart = dir === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+    const towardEnd = dir === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+
     if (e.key === 'Backspace') {
-      if (!values[index] && index > 0) {
-        // If current input is empty, move to previous input
-        inputRefs.current[index - 1]?.focus();
-      } else {
-        // Clear current input
-        const newValues = [...values];
-        newValues[index] = '';
-        onChange(newValues.join('').trim());
+      e.preventDefault();
+      if (values[index]) {
+        removeAt(index);
+      } else if (index > 0) {
+        removeAt(index - 1);
+        focusBox(index - 1);
       }
-    } else if (e.key === 'ArrowLeft') {
+    } else if (e.key === towardStart) {
+      e.preventDefault();
       if (index > 0) {
-        inputRefs.current[index - 1]?.focus();
+        focusBox(index - 1);
       }
-    } else if (e.key === 'ArrowRight') {
-      if (index < length - 1) {
-        inputRefs.current[index + 1]?.focus();
+    } else if (e.key === towardEnd) {
+      e.preventDefault();
+      if (index < firstEmpty) {
+        focusBox(index + 1);
       }
     }
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, length);
-    const chars = pastedData.split('').filter(isValidChar);
+    const pasted = e.clipboardData
+      .getData('text')
+      .split('')
+      .map(normalizeChar)
+      .filter(isValidChar)
+      .slice(0, length);
 
-    const newValues = [...values];
-    chars.forEach((char, i) => {
-      if (i < length) {
-        newValues[i] = char;
-      }
-    });
-
-    onChange(newValues.join('').trim());
-
-    // Focus the next empty input or the last one
-    const nextEmptyIndex = chars.length < length ? chars.length : length - 1;
-    inputRefs.current[nextEmptyIndex]?.focus();
+    onChange(pasted.join(''));
+    focusBox(Math.min(pasted.length, length - 1));
   };
 
   const handleFocus = (index: number) => {
+    if (programmaticFocus.current !== index && index > firstEmpty) {
+      focusBox(firstEmpty);
+      return;
+    }
     inputRefs.current[index]?.select();
   };
 
@@ -124,19 +155,21 @@ export default function PlateInput({
             inputRefs.current[index] = el;
           }}
           type="text"
+          dir={dir}
           inputMode={type === 'numbers' ? 'numeric' : 'text'}
-          value={values[index] || ''}
+          value={values[index]}
           onChange={(e) => handleChange(index, e.target.value)}
           onKeyDown={(e) => handleKeyDown(index, e)}
           onPaste={handlePaste}
           onFocus={() => handleFocus(index)}
           disabled={disabled}
           placeholder={placeholder}
+          aria-label={`${index + 1}`}
           className={cn(
             'w-12 h-12 text-center text-lg font-semibold',
             error && 'border-red-500 focus-visible:ring-red-500',
           )}
-          maxLength={1}
+          maxLength={2}
         />
       ))}
     </div>
