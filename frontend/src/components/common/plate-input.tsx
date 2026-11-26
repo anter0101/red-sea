@@ -84,20 +84,28 @@ export default function PlateInput({
       return;
     }
 
-    const char = normalizeChar(newValue.slice(-1));
-    if (!isValidChar(char)) {
+    // Keyboards insert one character, but autofill and some phone keyboards insert
+    // several at once. Drop the box's old character if the new text just appends to it.
+    const current = values[index];
+    const typed =
+      current && newValue.length > 1 && newValue.startsWith(current)
+        ? newValue.slice(current.length)
+        : newValue;
+    const incoming = typed.split('').map(normalizeChar).filter(isValidChar);
+    if (incoming.length === 0) {
       return;
     }
 
     // Never leave a gap: a box past the typed text writes into the first empty box.
     const target = Math.min(index, chars.length);
     const next = [...chars];
-    next[target] = char;
+    const written = incoming.slice(0, length - target);
+    written.forEach((char, i) => {
+      next[target + i] = char;
+    });
     onChange(next.join(''));
 
-    if (target < length - 1) {
-      focusBox(target + 1);
-    }
+    focusBox(Math.min(target + written.length, length - 1));
   };
 
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
@@ -169,7 +177,7 @@ export default function PlateInput({
             'w-12 h-12 text-center text-lg font-semibold',
             error && 'border-red-500 focus-visible:ring-red-500',
           )}
-          maxLength={2}
+          maxLength={length + 1}
         />
       ))}
     </div>

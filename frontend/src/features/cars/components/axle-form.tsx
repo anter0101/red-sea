@@ -231,7 +231,9 @@ const AxleForm = ({ onNext, onPrevious, carId, car, isCarLoading }: AxleFormProp
           </div>
 
           <div ref={panelRef} className="h-[min(42dvh,20rem)] min-h-0 lg:h-full">
+            {/* key: remount the fields per tire so none shows the previous tire's value */}
             <SelectedTirePanel
+              key={`${axleIndex}.${positionKey}`}
               title={`${t('axles.selected-tire')} · ${t('axles.axle-header', { number: axleIndex + 1 })}`}
               positionLabel={t(POSITION_TRANSLATION_KEYS[positionKey])}
             >

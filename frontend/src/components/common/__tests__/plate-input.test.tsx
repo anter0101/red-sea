@@ -82,6 +82,21 @@ describe('PlateInput', () => {
     expect(boxes()[1]).toHaveFocus();
   });
 
+  it('spreads several characters inserted at once across the boxes', () => {
+    render(<Harness />);
+    fireEvent.change(boxes()[0], { target: { value: '56' } });
+    expect(value()).toBe('56');
+    expect(boxes()[2]).toHaveFocus();
+    fireEvent.change(boxes()[2], { target: { value: '789' } });
+    expect(value()).toBe('5678');
+  });
+
+  it('replaces a filled box when a character is typed after it', () => {
+    render(<Harness initial="1" />);
+    fireEvent.change(boxes()[0], { target: { value: '12' } });
+    expect(value()).toBe('2');
+  });
+
   it('pastes a whole plate', () => {
     render(<Harness />);
     fireEvent.paste(boxes()[0], { clipboardData: { getData: () => '98x76' } });
